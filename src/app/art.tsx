@@ -1,4 +1,5 @@
-import type { Listing } from "./products";
+import Image from "next/image";
+import type { Product } from "./products";
 
 export function Wordmark() {
   return <span className="wordmark">Vapology<i>X</i></span>;
@@ -68,10 +69,17 @@ export function BottleArt({ color }: { color: string }) {
   </svg>;
 }
 
-export function ProductArt({ item }: { item: Listing }) {
-  if ("kind" in item) return <DeviceArt kind={item.kind} color={item.color} />;
-  if ("fits" in item) return <CoilArt color={item.color} />;
-  if ("family" in item) return <BottleArt color={item.color} />;
+type ArtProduct = Pick<Product, "name" | "category" | "type" | "color" | "image_url">;
+
+// Shows the real photo when there is one, and a drawing until then.
+export function ProductArt({ item, sizes = "(max-width: 768px) 50vw, 25vw", alt = "" }: { item: ArtProduct; sizes?: string; alt?: string }) {
+  if (item.image_url) return <Image className="art art-photo" src={item.image_url} alt={alt} width={800} height={800} sizes={sizes} />;
+  if (item.category === "device") {
+    const kind = item.type.toLowerCase();
+    return <DeviceArt kind={kind === "box" || kind === "pen" ? kind : "pod"} color={item.color} />;
+  }
+  if (item.category === "coil") return <CoilArt color={item.color} />;
+  if (item.category === "bottle") return <BottleArt color={item.color} />;
   return <DisposableArt color={item.color} />;
 }
 

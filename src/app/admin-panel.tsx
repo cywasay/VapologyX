@@ -2,32 +2,16 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { ProductForm } from "./admin-product-form";
+import { AdminProducts, type ProductCounts, type ShelfFilter } from "./admin-products";
 import { AdminSettings, Avatar, type Account } from "./admin-settings";
-import { BottleArt, ProductArt } from "./art";
-import { LIME, MINIMUM_AGE, catalog, money, productHref, shelves, shelfOf } from "./products";
+import { Icon, Pills } from "./admin-ui";
+import { BottleArt } from "./art";
+import { LIME, MINIMUM_AGE, money, shelves, type Product } from "./products";
 import { categories } from "./site-blocks";
 import { createClient } from "../utils/supabase/client";
 
-const icons = {
-  overview: "M4 11.5 12 5l8 6.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1Z",
-  orders: "M4 8l8-4 8 4v8l-8 4-8-4ZM4 8l8 4 8-4M12 12v8",
-  products: "M4 4h7v7H4ZM13 4h7v7h-7ZM4 13h7v7H4ZM13 13h7v7h-7Z",
-  customers: "M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM3 20c0-3.5 2.7-6 6-6s6 2.5 6 6M16 4.5a3.5 3.5 0 0 1 0 6.5M18 14.5c1.9.8 3 2.8 3 5.5",
-  messages: "M4 5h16v11H9l-5 4Z",
-  settings: "M4 7h9M18 7h2M4 17h2M11 17h9M15.5 4.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM8.5 14.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5Z",
-  store: "M4 9l1.5-5h13L20 9M4 9v11h16V9M4 9c0 4 5.3 4 5.3 0 0 4 5.4 4 5.4 0 0 4 5.3 4 5.3 0M10 20v-5h4v5",
-  logout: "M10 4H5v16h5M15 8l4 4-4 4M9 12h10",
-  chevron: "m14 6-6 6 6 6",
-  menu: "M4 7h16M4 12h16M4 17h16",
-  close: "m6 6 12 12M18 6 6 18",
-  arrow: "M7 17 17 7M9 7h8v8",
-  revenue: "M4 17l5-5 4 4 7-8M15 8h5v5",
-  spark: "M12 4l1.8 6.2L20 12l-6.2 1.8L12 20l-1.8-6.2L4 12l6.2-1.8Z",
-};
-
-function Icon({ name }: { name: keyof typeof icons }) {
-  return <svg className="admin-icon" viewBox="0 0 24 24" aria-hidden="true"><path d={icons[name]} /></svg>;
-}
+type IconName = Parameters<typeof Icon>[0]["name"];
 
 const views = [
   { name: "Overview", icon: "overview" },
@@ -42,21 +26,26 @@ type View = typeof views[number]["name"];
 const orderStatuses = ["All orders", "New", "Packed", "Delivered"];
 const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-function Pills({ label, options, value, onChange, count }: { label: string; options: string[]; value: string; onChange: (option: string) => void; count: (option: string) => number }) {
-  return <div className="admin-pills" role="group" aria-label={label}>
-    {options.map(option => <button key={option} className={value === option ? "is-active" : ""} aria-pressed={value === option} onClick={() => onChange(option)}>{option} <span>{count(option)}</span></button>)}
-  </div>;
+const orderOptions = orderStatuses.map(status => ({ value: status, label: status }));
+
+async function loadProductCounts(): Promise<ProductCounts> {
+  const supabase = createClient();
+  const results = await Promise.all(shelves.map(shelf => supabase.from("products").select("id", { count: "exact", head: true }).eq("category", shelf.category)));
+  const counts: ProductCounts = {};
+  shelves.forEach((shelf, index) => { counts[shelf.category] = results[index].count ?? 0; });
+  counts.all = results.reduce((sum, result) => sum + (result.count ?? 0), 0);
+  return counts;
 }
 
 function EmptyMeter({ cells }: { cells: number }) {
   return <div className="admin-meter" aria-hidden="true">{Array.from({ length: cells }, (_, index) => <i key={index} />)}</div>;
 }
 
-function CardHead({ icon, title }: { icon: keyof typeof icons; title: string }) {
+function CardHead({ icon, title }: { icon: IconName; title: string }) {
   return <div className="admin-card-head"><span className="admin-chip"><Icon name={icon} /></span><h2>{title}</h2></div>;
 }
 
-function EmptyState({ icon, title, children }: { icon: keyof typeof icons; title: string; children: ReactNode }) {
+function EmptyState({ icon, title, children }: { icon: IconName; title: string; children: ReactNode }) {
   return <div className="admin-empty"><span className="admin-chip"><Icon name={icon} /></span><strong>{title}</strong><p>{children}</p></div>;
 }
 
@@ -66,7 +55,11 @@ export function AdminPanel() {
   const [minimized, setMinimized] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [orderStatus, setOrderStatus] = useState(orderStatuses[0]);
-  const [shelf, setShelf] = useState("All products");
+  const [shelf, setShelf] = useState<ShelfFilter>("all");
+  const [counts, setCounts] = useState<ProductCounts>({});
+  const [editing, setEditing] = useState<Product | "new" | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [notice, setNotice] = useState("");
   const [account, setAccount] = useState<Account | null | undefined>(undefined);
   const [loggingOut, setLoggingOut] = useState(false);
   const [logoutError, setLogoutError] = useState("");
@@ -78,9 +71,9 @@ export function AdminPanel() {
     });
   }, []);
 
-  const shelfOptions = ["All products", ...shelves.map(item => item.name)];
-  const shelfCount = (name: string) => name === "All products" ? catalog.length : shelves.find(item => item.name === name)?.items.length ?? 0;
-  const shownProducts = shelf === "All products" ? catalog : shelves.find(item => item.name === shelf)?.items ?? [];
+  useEffect(() => {
+    loadProductCounts().then(setCounts);
+  }, []);
 
   const viewIndex = (name: View) => views.findIndex(item => item.name === name);
 
@@ -90,9 +83,26 @@ export function AdminPanel() {
     setDrawerOpen(false);
   }
 
-  function openShelf(name: string) {
-    setShelf(name);
+  function openShelf(next: ShelfFilter) {
+    setShelf(next);
     open("Products");
+  }
+
+  function openEditor(product: Product | "new") {
+    setNotice("");
+    setEditing(product);
+  }
+
+  function addProduct() {
+    open("Products");
+    openEditor("new");
+  }
+
+  function productSaved(message: string) {
+    setEditing(null);
+    setNotice(message);
+    setRefreshKey(key => key + 1);
+    loadProductCounts().then(setCounts);
   }
 
   function openOrders(status: string) {
@@ -140,7 +150,7 @@ export function AdminPanel() {
 
       {view === "Overview" && <>
         <h1 className="admin-title">Managing your <span className="admin-title-chip"><Icon name="store" /></span> shop and <span className="admin-title-chip is-lime"><Icon name="spark" /></span> orders</h1>
-        <Pills label="Order status" options={orderStatuses} value="" onChange={openOrders} count={() => 0} />
+        <Pills label="Order status" options={orderOptions} value="" onChange={openOrders} count={() => 0} />
         <div className="admin-overview">
           <div className="admin-overview-main">
             <div className="admin-cards">
@@ -157,9 +167,9 @@ export function AdminPanel() {
                 <EmptyMeter cells={7} />
               </section>
               <section className="admin-card is-black">
-                <h2>Add your real products.</h2>
-                <p>The {catalog.length} products in the shop are still placeholders.</p>
-                <button className="button button-white" onClick={() => openShelf("All products")}>Manage products</button>
+                <h2>Add a new product.</h2>
+                <p>Photo, price and options, all in one place.</p>
+                <button className="button button-white" onClick={addProduct}>Add product</button>
                 <div className="admin-card-art" aria-hidden="true"><BottleArt color={LIME} /></div>
               </section>
             </div>
@@ -176,9 +186,9 @@ export function AdminPanel() {
               <button className="admin-mini" onClick={() => open("Customers")}><span className="admin-chip"><Icon name="customers" /></span>Customers</button>
               <button className="admin-mini" onClick={() => open("Messages")}><span className="admin-chip"><Icon name="messages" /></span>Messages</button>
             </div>
-            {categories.map(item => <button key={item.name} className="admin-shelf" onClick={() => openShelf(item.name)}>
-              <span className="admin-chip is-art">{item.art}</span>
-              <span><strong>{item.name}</strong><small>{shelfCount(item.name)} products</small></span>
+            {shelves.map(item => <button key={item.category} className="admin-shelf" onClick={() => openShelf(item.category)}>
+              <span className="admin-chip is-art">{categories.find(category => category.name === item.name)?.art}</span>
+              <span><strong>{item.name}</strong><small>{counts[item.category] ?? "…"} products</small></span>
               <Icon name="arrow" />
             </button>)}
           </div>
@@ -187,26 +197,11 @@ export function AdminPanel() {
 
       {view === "Orders" && <>
         <h1 className="admin-title is-small">Orders</h1>
-        <Pills label="Filter orders" options={orderStatuses} value={orderStatus} onChange={setOrderStatus} count={() => 0} />
+        <Pills label="Filter orders" options={orderOptions} value={orderStatus} onChange={setOrderStatus} count={() => 0} />
         <EmptyState icon="orders" title={orderStatus === "All orders" ? "No orders yet" : `No ${orderStatus.toLowerCase()} orders`}>Orders will appear here once checkout is connected.</EmptyState>
       </>}
 
-      {view === "Products" && <>
-        <h1 className="admin-title is-small">Products</h1>
-        <Pills label="Filter products" options={shelfOptions} value={shelf} onChange={setShelf} count={shelfCount} />
-        <p className="admin-note">These are the placeholder products currently shown in the shop.</p>
-        <div className="admin-table">
-          <table>
-            <thead><tr><th>Product</th><th>Category</th><th>Price</th><th><span className="sr-only">Open</span></th></tr></thead>
-            <tbody>{shownProducts.map(item => <tr key={item.id}>
-              <td><div className="admin-product"><div className="cart-thumb"><ProductArt item={item} /></div>{item.name}</div></td>
-              <td>{shelfOf(item)?.name}</td>
-              <td>{money(item.price)}</td>
-              <td><Link href={productHref(item)} aria-label={`View ${item.name} in the shop`} className="admin-row-link"><Icon name="arrow" /></Link></td>
-            </tr>)}</tbody>
-          </table>
-        </div>
-      </>}
+      {view === "Products" && <AdminProducts shelf={shelf} onShelfChange={setShelf} counts={counts} refreshKey={refreshKey} notice={notice} onAdd={() => openEditor("new")} onEdit={openEditor} />}
 
       {view === "Customers" && <>
         <h1 className="admin-title is-small">Customers</h1>
@@ -223,6 +218,8 @@ export function AdminPanel() {
         <AdminSettings account={account} onAvatarChange={avatarUrl => setAccount(current => current && { ...current, avatarUrl })} />
       </>}
     </main>
+
+    {editing && <ProductForm product={editing === "new" ? null : editing} defaultCategory={shelf === "all" ? "device" : shelf} onClose={() => setEditing(null)} onSaved={productSaved} />}
 
     <dialog ref={logoutDialog} className="confirm-dialog" aria-labelledby="logout-title" aria-describedby="logout-text" onClick={event => { if (event.target === event.currentTarget && !loggingOut) logoutDialog.current?.close(); }}>
       <div className="confirm-inner">

@@ -4,10 +4,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { ProductArt, Wordmark } from "./art";
-import { BRAND, MINIMUM_AGE, catalog, money, productHref } from "./products";
+import { BRAND, MINIMUM_AGE, money, productHref, varietyPrice, type Product, type Variety } from "./products";
 import { categories } from "./site-blocks";
 
-type Store = { cart: Record<string, number>; add: (id: string) => void; fit: string; setFit: (id: string) => void };
+type CartLine = { key: string; product: Product; variety: Variety | null; quantity: number };
+type Store = {
+  quantityOf: (productId: string) => number;
+  add: (product: Product, variety?: Variety | null) => void;
+  fit: string;
+  setFit: (id: string) => void;
+};
 const StoreContext = createContext<Store | null>(null);
 
 export function useStore() {
@@ -16,12 +22,14 @@ export function useStore() {
   return store;
 }
 
+const lineName = (line: CartLine) => line.variety ? `${line.product.name} (${line.variety.name})` : line.product.name;
+
 export function StoreShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const [cart, setCart] = useState<Record<string, number>>({});
+  const [cart, setCart] = useState<Record<string, CartLine>>({});
   const [fit, setFit] = useState("All");
   const [openMenu, setOpenMenu] = useState<"shop" | "mobile" | null>(null);
-  const [added, setAdded] = useState<{ id: string } | null>(null);
+  const [added, setAdded] = useState<{ key: string } | null>(null);
   const cartDialog = useRef<HTMLDialogElement>(null);
   const header = useRef<HTMLElement>(null);
 
@@ -43,21 +51,28 @@ export function StoreShell({ children }: { children: ReactNode }) {
     return () => clearTimeout(timer);
   }, [added]);
 
-  const increase = (id: string) => setCart(current => ({ ...current, [id]: (current[id] ?? 0) + 1 }));
-  const add = (id: string) => { increase(id); setAdded({ id }); };
-  const remove = (id: string) => setCart(current => {
-    const { [id]: quantity, ...rest } = current;
-    return quantity > 1 ? { ...rest, [id]: quantity - 1 } : rest;
+  const changeQuantity = (key: string, change: number) => setCart(current => {
+    const line = current[key];
+    if (!line) return current;
+    if (line.quantity + change > 0) return { ...current, [key]: { ...line, quantity: line.quantity + change } };
+    return Object.fromEntries(Object.entries(current).filter(([other]) => other !== key));
   });
+  const add = (product: Product, variety: Variety | null = null) => {
+    const key = variety ? `${product.id}:${variety.name}` : product.id;
+    setCart(current => ({ ...current, [key]: { key, product, variety, quantity: (current[key]?.quantity ?? 0) + 1 } }));
+    setAdded({ key });
+  };
   const openCart = () => { setOpenMenu(null); setAdded(null); cartDialog.current?.showModal(); };
-  const lines = catalog.filter(product => cart[product.id]);
-  const count = lines.reduce((sum, product) => sum + cart[product.id], 0);
-  const subtotal = lines.reduce((sum, product) => sum + product.price * cart[product.id], 0);
-  const addedItem = added && catalog.find(product => product.id === added.id);
+
+  const lines = Object.values(cart);
+  const count = lines.reduce((sum, line) => sum + line.quantity, 0);
+  const subtotal = lines.reduce((sum, line) => sum + varietyPrice(line.product, line.variety) * line.quantity, 0);
+  const quantityOf = (productId: string) => lines.filter(line => line.product.id === productId).reduce((sum, line) => sum + line.quantity, 0);
+  const addedLine = added && cart[added.key];
   const inShop = categories.some(item => item.href === pathname);
   const navLink = (href: string, label: string) => <Link href={href} className={pathname === href ? "is-current" : ""} aria-current={pathname === href ? "page" : undefined}>{label}</Link>;
 
-  return <StoreContext.Provider value={{ cart, add, fit, setFit }}>
+  return <StoreContext.Provider value={{ quantityOf, add, fit, setFit }}>
     <div className="notice-bar">Adults {MINIMUM_AGE}+ only. Demo storefront: products and prices are placeholders.</div>
     <header ref={header} className="site-header" onClick={event => { if ((event.target as Element).closest("a")) setOpenMenu(null); }}>
       <div className="shell header-inner">
@@ -105,9 +120,9 @@ export function StoreShell({ children }: { children: ReactNode }) {
     </div></footer>
 
     <div className="cart-toast-region" role="status">
-      {addedItem && <div className="cart-toast">
-        <div className="cart-thumb"><ProductArt item={addedItem} /></div>
-        <div><strong>Added to cart</strong><span>{addedItem.name}</span></div>
+      {addedLine && <div className="cart-toast">
+        <div className="cart-thumb"><ProductArt item={addedLine.product} sizes="48px" /></div>
+        <div><strong>Added to cart</strong><span>{lineName(addedLine)}</span></div>
         <button className="button button-primary" onClick={openCart}>View cart</button>
       </div>}
     </div>
@@ -117,13 +132,13 @@ export function StoreShell({ children }: { children: ReactNode }) {
         <div className="cart-top"><h2 id="cart-title">Your cart</h2><button className="cart-close" onClick={() => cartDialog.current?.close()} aria-label="Close cart">×</button></div>
         {lines.length === 0 && <p className="cart-empty">Your cart is empty.</p>}
         <ul>
-          {lines.map(item => <li key={item.id}>
-            <div className="cart-thumb"><ProductArt item={item} /></div>
-            <div className="cart-line"><Link href={productHref(item)} onClick={() => cartDialog.current?.close()}><strong>{item.name}</strong></Link><span>{money(item.price)}</span></div>
+          {lines.map(line => <li key={line.key}>
+            <div className="cart-thumb"><ProductArt item={line.product} sizes="48px" /></div>
+            <div className="cart-line"><Link href={productHref(line.product)} onClick={() => cartDialog.current?.close()}><strong>{lineName(line)}</strong></Link><span>{money(varietyPrice(line.product, line.variety))}</span></div>
             <div className="stepper">
-              <button onClick={() => remove(item.id)} aria-label={`Remove one ${item.name}`}>−</button>
-              <b>{cart[item.id]}</b>
-              <button onClick={() => increase(item.id)} aria-label={`Add one ${item.name}`}>+</button>
+              <button onClick={() => changeQuantity(line.key, -1)} aria-label={`Remove one ${lineName(line)}`}>−</button>
+              <b>{line.quantity}</b>
+              <button onClick={() => changeQuantity(line.key, 1)} aria-label={`Add one ${lineName(line)}`}>+</button>
             </div>
           </li>)}
         </ul>

@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { BottleArt, DeviceArt } from "../../art";
-import { BottleList, DeviceList } from "../../product-lists";
+import { getProducts } from "../../product-data";
+import { ProductGrid } from "../../product-lists";
 import { BRAND, GRAPHITE, SILVER, LIME } from "../../products";
 import { categories, VisitBlock } from "../../site-blocks";
 import { Ticker } from "../../ticker";
 
-export default function Home() {
+export default async function Home() {
+  const [devices, bottles] = await Promise.all([getProducts("device", 4), getProducts("bottle", 4)]);
   return <>
     <section className="shell bento" aria-labelledby="hero-title">
       <div className="tile hero-copy">
@@ -33,13 +35,13 @@ export default function Home() {
 
     <section className="shell section" aria-labelledby="featured-devices">
       <div className="section-heading"><h2 id="featured-devices">Featured devices</h2><Link className="view-all" href="/devices">View all devices <i aria-hidden="true">→</i></Link></div>
-      <DeviceList limit={4} />
+      <ProductGrid items={devices.items} />
     </section>
 
     <section className="sheet" aria-labelledby="featured-bottles">
       <div className="shell">
         <div className="section-heading"><h2 id="featured-bottles">Popular bottles</h2><Link className="view-all" href="/bottles">View all bottles <i aria-hidden="true">→</i></Link></div>
-        <BottleList limit={4} />
+        <ProductGrid items={bottles.items} />
       </div>
     </section>
 

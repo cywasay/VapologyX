@@ -2,32 +2,35 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ProductDetail } from "../../../../product-detail";
+import { getCoilsFor, getProductBySlug, getProducts, getProductsByIds, getStaticSlugs } from "../../../../product-data";
 import { ProductGrid } from "../../../../product-lists";
-import { catalog, coils, devices, productSlug, shelfOf } from "../../../../products";
+import { shelfOf } from "../../../../products";
 
 // Waits for the product lookup so that an unknown product returns a real 404.
 export const instant = false;
 
-const findProduct = (slug: string) => catalog.find(item => productSlug(item) === slug);
-
-export function generateStaticParams() {
-  return catalog.map(item => ({ slug: productSlug(item) }));
+// Pre-builds a sample of pages. Every other product page is built the first time it's opened.
+export async function generateStaticParams() {
+  const slugs = await getStaticSlugs(48);
+  return (slugs.length ? slugs : ["no-products-yet"]).map(slug => ({ slug }));
 }
 
 export async function generateMetadata(props: PageProps<"/products/[slug]">): Promise<Metadata> {
-  const item = findProduct((await props.params).slug);
+  const item = await getProductBySlug((await props.params).slug);
   return { title: item?.name ?? "Product not found" };
 }
 
 export default async function ProductPage(props: PageProps<"/products/[slug]">) {
   const { slug } = await props.params;
-  const item = findProduct(slug);
-  const shelf = item && shelfOf(item);
-  if (!item || !shelf) notFound();
+  const item = await getProductBySlug(slug);
+  if (!item) notFound();
 
-  const fittingCoils = "kind" in item ? coils.filter(coil => coil.fits.includes(item.id)) : [];
-  const fittingDevices = "fits" in item ? devices.filter(device => item.fits.includes(device.id)) : [];
-  const more = shelf.items.filter(other => other.id !== item.id).slice(0, 4);
+  const shelf = shelfOf(item.category);
+  const [fittingCoils, fittingDevices, more] = await Promise.all([
+    item.category === "device" ? getCoilsFor(item.id) : [],
+    item.category === "coil" ? getProductsByIds(item.fits) : [],
+    getProducts(item.category, 5),
+  ]);
 
   return <>
     <nav className="shell breadcrumb" aria-label="Breadcrumb">
@@ -35,7 +38,7 @@ export default async function ProductPage(props: PageProps<"/products/[slug]">) 
       <Link href={shelf.href}>{shelf.name}</Link><span aria-hidden="true">/</span>
       <span aria-current="page">{item.name}</span>
     </nav>
-    <ProductDetail item={item} />
+    <ProductDetail item={item} fitDevices={fittingDevices} coilCount={fittingCoils.length} />
     {fittingCoils.length > 0 && <section className="shell section" id={`${slug}-coils`} aria-labelledby={`${slug}-coils-title`}>
       <div className="section-heading"><h2 id={`${slug}-coils-title`}>Compatible coils</h2></div>
       <ProductGrid items={fittingCoils} />
@@ -46,7 +49,7 @@ export default async function ProductPage(props: PageProps<"/products/[slug]">) 
     </section>}
     <section className="shell section detail-last" aria-labelledby={`${slug}-more-title`}>
       <div className="section-heading"><h2 id={`${slug}-more-title`}>More {shelf.name.toLowerCase()}</h2><Link className="view-all" href={shelf.href}>View all <i aria-hidden="true">→</i></Link></div>
-      <ProductGrid items={more} />
+      <ProductGrid items={more.items.filter(other => other.id !== item.id).slice(0, 4)} />
     </section>
   </>;
 }
