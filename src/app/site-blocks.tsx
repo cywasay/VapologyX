@@ -1,13 +1,13 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { BottleArt, CoilArt, DeviceArt, DisposableArt } from "./art";
-import { BRAND, RED, YELLOW } from "./products";
+import { BRAND, GRAPHITE, LIME } from "./products";
 
 export const categories = [
-  { href: "/devices", name: "Devices", tone: "tone-light", art: <DeviceArt kind="box" color={YELLOW} /> },
-  { href: "/disposables", name: "Disposables", tone: "tone-dark", art: <DisposableArt color={RED} /> },
-  { href: "/bottles", name: "Bottles", tone: "tone-yellow", art: <BottleArt color={RED} /> },
-  { href: "/coils", name: "Coils", tone: "tone-dark", art: <CoilArt color={YELLOW} /> },
+  { href: "/devices", name: "Devices", tone: "tone-light", art: <DeviceArt kind="box" color={LIME} /> },
+  { href: "/disposables", name: "Disposables", tone: "tone-gray", art: <DisposableArt color={GRAPHITE} /> },
+  { href: "/bottles", name: "Bottles", tone: "tone-lime", art: <BottleArt color={GRAPHITE} /> },
+  { href: "/coils", name: "Coils", tone: "tone-dark", art: <CoilArt color={LIME} /> },
 ];
 
 export function PageHead({ eyebrow, title, text, art, children }: { eyebrow: string; title: string; text: string; art?: ReactNode; children?: ReactNode }) {

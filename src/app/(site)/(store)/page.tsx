@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { BottleArt, DeviceArt } from "../../art";
 import { BottleList, DeviceList } from "../../product-lists";
-import { BRAND, RED, WHITE, YELLOW } from "../../products";
+import { BRAND, GRAPHITE, SILVER, LIME } from "../../products";
 import { categories, VisitBlock } from "../../site-blocks";
 import { Ticker } from "../../ticker";
 
@@ -19,9 +19,9 @@ export default function Home() {
       </div>
       <Link href="/devices" className="tile hero-display">
         <span className="hero-label">New arrivals <i aria-hidden="true">→</i></span>
-        <div className="hero-item-side"><DeviceArt kind="pod" color={WHITE} /></div>
-        <div className="hero-item-main"><DeviceArt kind="box" color={YELLOW} /></div>
-        <div className="hero-item-side"><BottleArt color={RED} /></div>
+        <div className="hero-item-side"><DeviceArt kind="pod" color={SILVER} /></div>
+        <div className="hero-item-main"><DeviceArt kind="box" color={LIME} /></div>
+        <div className="hero-item-side"><BottleArt color={GRAPHITE} /></div>
       </Link>
       {categories.map(item => <Link key={item.href} href={item.href} className={`tile category ${item.tone}`}>
         <div><h2>{item.name}</h2><span>Shop now <i aria-hidden="true">→</i></span></div>

@@ -2,9 +2,9 @@
 export const BRAND = "VapologyX";
 export const MINIMUM_AGE = 18;
 
-export const YELLOW = "#ffc933";
-export const RED = "#e0352b";
-export const WHITE = "#8b8c92";
+export const LIME = "#e8f78b";
+export const GRAPHITE = "#6f7176";
+export const SILVER = "#c7cac5";
 
 export const money = (value: number) => `Rs ${value.toLocaleString("en-US")}`;
 
@@ -16,39 +16,39 @@ export type Coil = Product & { fits: string[] };
 export type Listing = Device | Disposable | Bottle | Coil;
 
 export const devices: Device[] = [
-  { id: "d1", name: "Device 01", kind: "pod", type: "Pod", price: 5000, color: YELLOW },
-  { id: "d2", name: "Device 02", kind: "box", type: "Box", price: 10000, color: YELLOW, badge: "New" },
-  { id: "d3", name: "Device 03", kind: "pen", type: "Pen", price: 5000, color: RED },
-  { id: "d4", name: "Device 04", kind: "pod", type: "Pod", price: 5000, color: WHITE },
+  { id: "d1", name: "Device 01", kind: "pod", type: "Pod", price: 5000, color: LIME },
+  { id: "d2", name: "Device 02", kind: "box", type: "Box", price: 10000, color: LIME, badge: "New" },
+  { id: "d3", name: "Device 03", kind: "pen", type: "Pen", price: 5000, color: GRAPHITE },
+  { id: "d4", name: "Device 04", kind: "pod", type: "Pod", price: 5000, color: SILVER },
 ];
 
 export const disposables: Disposable[] = [
-  { id: "s1", name: "Disposable 01", price: 1500, color: YELLOW, badge: "New" },
-  { id: "s2", name: "Disposable 02", price: 1500, color: RED },
-  { id: "s3", name: "Disposable 03", price: 1500, color: WHITE },
-  { id: "s4", name: "Disposable 04", price: 1500, color: YELLOW },
-  { id: "s5", name: "Disposable 05", price: 1500, color: RED },
-  { id: "s6", name: "Disposable 06", price: 1500, color: WHITE },
-  { id: "s7", name: "Disposable 07", price: 1500, color: YELLOW },
-  { id: "s8", name: "Disposable 08", price: 1500, color: RED },
+  { id: "s1", name: "Disposable 01", price: 1500, color: LIME, badge: "New" },
+  { id: "s2", name: "Disposable 02", price: 1500, color: GRAPHITE },
+  { id: "s3", name: "Disposable 03", price: 1500, color: SILVER },
+  { id: "s4", name: "Disposable 04", price: 1500, color: LIME },
+  { id: "s5", name: "Disposable 05", price: 1500, color: GRAPHITE },
+  { id: "s6", name: "Disposable 06", price: 1500, color: SILVER },
+  { id: "s7", name: "Disposable 07", price: 1500, color: LIME },
+  { id: "s8", name: "Disposable 08", price: 1500, color: GRAPHITE },
 ];
 
 export const bottles: Bottle[] = [
-  { id: "f1", name: "Bottle 01", family: "Category A", price: 1000, color: YELLOW, badge: "New" },
-  { id: "f2", name: "Bottle 02", family: "Category A", price: 1000, color: WHITE },
-  { id: "f3", name: "Bottle 03", family: "Category B", price: 1000, color: RED },
-  { id: "f4", name: "Bottle 04", family: "Category B", price: 1000, color: YELLOW },
-  { id: "f5", name: "Bottle 05", family: "Category B", price: 1000, color: WHITE },
-  { id: "f6", name: "Bottle 06", family: "Category C", price: 1000, color: RED },
-  { id: "f7", name: "Bottle 07", family: "Category C", price: 1000, color: YELLOW },
-  { id: "f8", name: "Bottle 08", family: "Category D", price: 1000, color: WHITE },
+  { id: "f1", name: "Bottle 01", family: "Category A", price: 1000, color: LIME, badge: "New" },
+  { id: "f2", name: "Bottle 02", family: "Category A", price: 1000, color: SILVER },
+  { id: "f3", name: "Bottle 03", family: "Category B", price: 1000, color: GRAPHITE },
+  { id: "f4", name: "Bottle 04", family: "Category B", price: 1000, color: LIME },
+  { id: "f5", name: "Bottle 05", family: "Category B", price: 1000, color: SILVER },
+  { id: "f6", name: "Bottle 06", family: "Category C", price: 1000, color: GRAPHITE },
+  { id: "f7", name: "Bottle 07", family: "Category C", price: 1000, color: LIME },
+  { id: "f8", name: "Bottle 08", family: "Category D", price: 1000, color: SILVER },
 ];
 
 export const coils: Coil[] = [
-  { id: "c1", name: "Coil 01", price: 2000, color: YELLOW, fits: ["d1"] },
-  { id: "c2", name: "Coil 02", price: 2000, color: WHITE, fits: ["d1", "d4"] },
-  { id: "c3", name: "Coil 03", price: 2000, color: RED, fits: ["d2"] },
-  { id: "c4", name: "Coil 04", price: 2000, color: YELLOW, fits: ["d2", "d3"] },
+  { id: "c1", name: "Coil 01", price: 2000, color: LIME, fits: ["d1"] },
+  { id: "c2", name: "Coil 02", price: 2000, color: SILVER, fits: ["d1", "d4"] },
+  { id: "c3", name: "Coil 03", price: 2000, color: GRAPHITE, fits: ["d2"] },
+  { id: "c4", name: "Coil 04", price: 2000, color: LIME, fits: ["d2", "d3"] },
 ];
 
 export const shelves = [

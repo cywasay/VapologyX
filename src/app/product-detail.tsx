@@ -4,12 +4,12 @@ import Link from "next/link";
 import { useState } from "react";
 import { ProductArt } from "./art";
 import { AddToCart } from "./product-lists";
-import { RED, WHITE, YELLOW, coils, deviceName, devices, money, productHref, productSlug, type Listing } from "./products";
+import { GRAPHITE, SILVER, LIME, coils, deviceName, devices, money, productHref, productSlug, type Listing } from "./products";
 
 const styles = [
-  { name: "Style 01", color: YELLOW },
-  { name: "Style 02", color: RED },
-  { name: "Style 03", color: WHITE },
+  { name: "Style 01", color: LIME },
+  { name: "Style 02", color: GRAPHITE },
+  { name: "Style 03", color: SILVER },
 ];
 
 function highlights(item: Listing) {

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { BottleArt, DeviceArt, Wordmark } from "./art";
-import { RED, WHITE, YELLOW } from "./products";
+import { GRAPHITE, SILVER, LIME } from "./products";
 import { createClient } from "../utils/supabase/client";
 
 type Status = { kind: "error" | "info"; text: string };
@@ -68,9 +68,9 @@ export function LoginForm() {
       <Link href="/" aria-label="Back to the store"><Wordmark /></Link>
       <h1>{registering ? "Create your account." : "Welcome back."}</h1>
       <div className="auth-art" aria-hidden="true">
-        <div className="hero-item-side"><DeviceArt kind="pod" color={WHITE} /></div>
-        <div className="hero-item-main"><DeviceArt kind="box" color={YELLOW} /></div>
-        <div className="hero-item-side"><BottleArt color={RED} /></div>
+        <div className="hero-item-side"><DeviceArt kind="pod" color={SILVER} /></div>
+        <div className="hero-item-main"><DeviceArt kind="box" color={LIME} /></div>
+        <div className="hero-item-side"><BottleArt color={GRAPHITE} /></div>
       </div>
     </div>
     <div className="auth-main">
