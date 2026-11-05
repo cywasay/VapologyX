@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Wordmark } from "./art";
 import { bottles, catalog, coils, devices, disposables, money } from "./products";
+import { createClient } from "../utils/supabase/client";
 
 const views = ["Overview", "Orders", "Products"] as const;
 type View = typeof views[number];
@@ -57,6 +58,12 @@ function ProductsTable() {
 
 export function AdminPanel() {
   const [view, setView] = useState<View>("Overview");
+
+  async function logOut() {
+    await createClient().auth.signOut();
+    window.location.replace("/login");
+  }
+
   return <div className="admin">
     <aside className="tile admin-side">
       <Link href="/" aria-label="Go to the store"><Wordmark /></Link>
@@ -65,7 +72,7 @@ export function AdminPanel() {
       </nav>
       <div className="admin-side-links">
         <Link href="/">View store</Link>
-        <Link href="/login">Log out</Link>
+        <button onClick={logOut}>Log out</button>
       </div>
     </aside>
     <main className="admin-main">

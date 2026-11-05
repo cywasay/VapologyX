@@ -257,8 +257,16 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--yellow); outlin
 .field { display: grid; gap: 8px; font-size: 13px; font-weight: 500; color: var(--muted-ink); }
 .field input, .field textarea { width: 100%; padding: 12px 14px; font-size: 16px; color: var(--ink); background: #fff; border: 1.5px solid #a3a39e; border-radius: var(--radius-input); transition: border-color var(--motion), box-shadow var(--motion); }
 .field textarea { resize: vertical; }
+.password-field { position: relative; }
+.password-field input { padding-right: 48px; }
+.password-field input::-ms-reveal { display: none; }
+.password-field button { position: absolute; top: 50%; right: 4px; display: grid; place-items: center; width: 40px; height: 40px; color: var(--muted-ink); border-radius: var(--radius-input); transform: translateY(-50%); transition: color var(--motion); }
+.password-field button:hover { color: var(--ink); }
+.password-field button:focus-visible { outline-offset: -2px; }
+.password-field svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .field input:focus, .field textarea:focus { border-color: var(--ink); outline: none; box-shadow: 0 0 0 3px var(--yellow); }
 .form-status { min-height: 20px; font-size: 13px; line-height: 1.5; color: var(--muted-ink); }
+.form-status.is-error { font-weight: 600; color: #a81d17; }
 .contact-grid { display: grid; grid-template-columns: 7fr 5fr; gap: var(--space-inner); align-items: start; }
 .contact-details { padding: var(--space-group); color: var(--ink); background: var(--yellow); }
 .contact-details h2 { margin-bottom: var(--space-related); font-size: 28px; }
@@ -289,7 +297,8 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--yellow); outlin
 .admin-side nav button:hover { background: var(--line); }
 .admin-side nav .is-current, .admin-side nav .is-current:hover { color: var(--ink); background: var(--yellow); }
 .admin-side-links { display: grid; gap: 8px; margin-top: auto; font-size: 14px; color: var(--muted); }
-.admin-side-links a:hover { color: var(--yellow); }
+.admin-side-links button { padding: 0; text-align: left; color: inherit; }
+.admin-side-links a:hover, .admin-side-links button:hover { color: var(--yellow); }
 .admin-main { display: flex; flex-direction: column; gap: var(--space-inner); padding: var(--space-inner); }
 .admin-main h2 { margin-top: var(--space-inner); font-size: 22px; }
 .admin-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-inner); }
