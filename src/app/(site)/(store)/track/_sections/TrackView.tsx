@@ -2,12 +2,11 @@
 
 import { useSearchParams } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { DemoNote } from "@/components/flow/DemoNote";
 import { findOrder, normalizePhone, type Order } from "@/lib/orders";
 import { TrackForm, type TrackErrors } from "./TrackForm";
 import { TrackResult } from "./TrackResult";
 
-type Result = { state: "idle" } | { state: "looking" } | { state: "missing" } | { state: "found"; order: Order };
+type Result = { state: "idle" } | { state: "looking" } | { state: "missing" } | { state: "failed" } | { state: "found"; order: Order };
 
 // "Track my order": the order number and the mobile number it was placed with.
 export function TrackView() {
@@ -39,8 +38,12 @@ export function TrackView() {
       return;
     }
     setResult({ state: "looking" });
-    const order = await findOrder(number, phone);
-    setResult(order ? { state: "found", order } : { state: "missing" });
+    try {
+      const order = await findOrder(number, phone);
+      setResult(order ? { state: "found", order } : { state: "missing" });
+    } catch {
+      setResult({ state: "failed" });
+    }
   }
 
   return <section className="shell flow" aria-labelledby="track-title">
@@ -55,8 +58,7 @@ export function TrackView() {
       onSubmit={submit} />
 
     {result.state === "missing" && <p className="flow-error track-missing" role="alert">We couldn&apos;t find an order with that number and mobile number. Check them and try again.</p>}
+    {result.state === "failed" && <p className="flow-error track-missing" role="alert">We couldn&apos;t look up your order just now. Please try again.</p>}
     {result.state === "found" && <TrackResult order={result.order} />}
-
-    <DemoNote>Demo tracking. Only orders placed in this browser can be found for now.</DemoNote>
   </section>;
 }

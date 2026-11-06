@@ -1,6 +1,7 @@
+import { publicClient } from "@/utils/supabase/public";
 import type { Category } from "./products";
 
-// Placeholder shop rules. The client's answers will replace these, and later a Store settings page in the admin will hold them.
+// Placeholder shop rules. The same numbers are in the place_order database function, so change both. A Store settings page will replace them later.
 export const DELIVERY_FEE = 250;
 export const FREE_DELIVERY_FROM = 10000;
 
@@ -78,14 +79,8 @@ export function normalizePhone(input: string): string | null {
   return match ? `0${match[1]}` : null;
 }
 
-// No 0, O, 1 or I, so an order number is easy to read out over the phone.
-const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-function makeOrderNumber() {
-  return `VX-${Array.from(crypto.getRandomValues(new Uint8Array(6)), byte => ALPHABET[byte % ALPHABET.length]).join("")}`;
-}
 
-// The two functions below keep orders in this browser, for the demo. When the back end exists, replace
-// their bodies with database calls: the cart, checkout, confirmation and tracking pages only use these two.
+// Orders placed in this browser are also kept here, so the confirmation page can show one without asking for a mobile number.
 const ORDERS_KEY = "vx-orders-v1";
 const KEEP_ORDERS = 25;
 
@@ -99,18 +94,37 @@ function readOrders(): Order[] {
   }
 }
 
+function remember(order: Order) {
+  try {
+    localStorage.setItem(ORDERS_KEY, JSON.stringify({ v: 1, orders: [order, ...readOrders().filter(entry => entry.number !== order.number)].slice(0, KEEP_ORDERS) }));
+  } catch {}
+}
+
+// True when an order failed because something in the cart sold out or was taken off the shop in the meantime.
+export const isStockProblem = (error: unknown) => /out_of_stock|unavailable/.test(String((error as { message?: unknown } | null)?.message ?? ""));
+
+// Sends the order to the database. The server works out the prices, delivery fee and stock itself; only what was bought is sent.
 export async function placeOrder(draft: OrderDraft): Promise<Order> {
-  const subtotal = draft.lines.reduce((sum, line) => sum + line.unitPrice * line.quantity, 0);
-  const order: Order = { ...draft, number: makeOrderNumber(), createdAt: new Date().toISOString(), status: "placed", ...orderTotals(subtotal, draft.delivery.method) };
-  localStorage.setItem(ORDERS_KEY, JSON.stringify({ v: 1, orders: [order, ...readOrders()].slice(0, KEEP_ORDERS) }));
+  const { data, error } = await publicClient().rpc("place_order", {
+    draft: {
+      customer: draft.customer,
+      delivery: draft.delivery,
+      payment: draft.payment,
+      lines: draft.lines.map(line => ({ productId: line.productId, variety: line.variety, quantity: line.quantity })),
+    },
+  });
+  if (error) throw error;
+  const order = data as Order;
+  remember(order);
   return order;
 }
 
-// With a phone number the order is only returned when it matches, like the "track my order" page asks.
+// With a mobile number the order is looked up in the database, and only returned when both match.
+// Without one, only orders placed in this browser can be found.
 export async function findOrder(number: string, phone?: string): Promise<Order | null> {
   const wanted = number.trim().toUpperCase();
-  const order = readOrders().find(entry => entry.number === wanted);
-  if (!order) return null;
-  if (phone !== undefined && normalizePhone(phone) !== normalizePhone(order.customer.phone)) return null;
-  return order;
+  if (phone === undefined) return readOrders().find(entry => entry.number === wanted) ?? null;
+  const { data, error } = await publicClient().rpc("find_order", { p_number: wanted, p_phone: phone });
+  if (error) throw error;
+  return (data as Order | null) ?? null;
 }

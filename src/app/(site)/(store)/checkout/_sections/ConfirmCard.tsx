@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { DemoNote } from "@/components/flow/DemoNote";
 import { MINIMUM_AGE, money } from "@/lib/products";
 import type { Errors, SetValue, Values } from "./checkoutDraft";
 
@@ -12,6 +11,5 @@ export function ConfirmCard({ values, errors, set, pickup, total, busy }: { valu
     {errors.age && <span className="field-error" id="checkout-age-error">{errors.age}</span>}
     <p className="checkout-terms">By placing your order you agree to our <Link href="/terms">terms &amp; conditions</Link>.</p>
     <button className="button button-primary" type="submit" disabled={busy}>{busy ? "Placing your order…" : `Place order · ${money(total)}`}</button>
-    <DemoNote>Demo checkout. Your order is saved in this browser only, and nothing is sent to the shop yet.</DemoNote>
   </section>;
 }

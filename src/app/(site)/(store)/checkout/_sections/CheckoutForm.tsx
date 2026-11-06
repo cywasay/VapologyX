@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useStore } from "@/components/store/store-context";
 import { lineUnitPrice, type CartLine } from "@/lib/cart-store";
-import { FREE_DELIVERY_FROM, normalizePhone, orderTotals, placeOrder, type DeliveryMethod } from "@/lib/orders";
+import { FREE_DELIVERY_FROM, isStockProblem, normalizePhone, orderTotals, placeOrder, type DeliveryMethod } from "@/lib/orders";
 import { CheckoutSummary } from "./CheckoutSummary";
 import { DRAFT_KEY, FIELD_ORDER, readDraft, toOrderLine, validate, without, type Errors, type Field, type SetValue, type Values } from "./checkoutDraft";
 import { ConfirmCard } from "./ConfirmCard";
@@ -68,8 +68,8 @@ export function CheckoutForm({ lines, locked, onPlaced }: { lines: CartLine[]; l
       onPlaced(lines);
       clear();
       router.push(`/order/${order.number}`);
-    } catch {
-      setFormError("We couldn't place your order. Please try again.");
+    } catch (error) {
+      setFormError(isStockProblem(error) ? "Something in your cart just sold out or changed. Please check your cart and try again." : "We couldn't place your order. Please try again.");
       sending.current = false;
       setBusy(false);
     }

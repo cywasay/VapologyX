@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { DemoNote } from "@/components/flow/DemoNote";
 import { FlowSkeleton } from "@/components/flow/FlowSkeleton";
 import { FlowSteps } from "@/components/flow/FlowSteps";
 import { OrderDetails } from "@/components/flow/OrderDetails";
@@ -46,7 +45,6 @@ export function OrderView({ number }: { number: string }) {
           <Link className="button button-primary" href={`/track?number=${encodeURIComponent(order.number)}`}>Track this order</Link>
           <Link className="button button-outline" href="/devices">Keep shopping</Link>
         </div>
-        <DemoNote>This is a demo order. It is saved in this browser only, and nothing has been sent to the shop.</DemoNote>
       </div>
       <OrderSummary order={order} />
     </div>
