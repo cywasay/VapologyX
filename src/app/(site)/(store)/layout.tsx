@@ -1,6 +1,23 @@
 import type { ReactNode } from "react";
-import { StoreShell } from "../../store-shell";
+import { StoreProvider } from "@/components/store/store-context";
+import { CartDrawer } from "./_shell/CartDrawer";
+import { CartToast } from "./_shell/CartToast";
+import { Footer } from "./_shell/Footer";
+import { Header } from "./_shell/Header";
+import { NoticeBar } from "./_shell/NoticeBar";
+import { SearchDialog } from "./_shell/SearchDialog";
 
+// The frame shared by every shop page: header, footer, and the cart and search windows.
 export default function StoreLayout({ children }: { children: ReactNode }) {
-  return <StoreShell>{children}</StoreShell>;
+  return <StoreProvider>
+    <div className="store-frame">
+      <NoticeBar />
+      <Header />
+      <main className="store-main">{children}</main>
+      <Footer />
+    </div>
+    <CartToast />
+    <CartDrawer />
+    <SearchDialog />
+  </StoreProvider>;
 }

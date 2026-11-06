@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
-import { ProductArt } from "@/app/art";
-import { PHOTO_PICK_MAX_BYTES, PHOTO_TYPES, PHOTO_UPLOAD_MAX_BYTES, shrinkPhoto } from "@/app/image-compress";
-import { MAX_PHOTOS, type Category } from "@/app/products";
+import { ProductArt } from "@/components/art";
+import { PHOTO_PICK_MAX_BYTES, PHOTO_TYPES, PHOTO_UPLOAD_MAX_BYTES, shrinkPhoto } from "@/lib/image-compress";
+import { MAX_PHOTOS, type Category } from "@/lib/products";
 import { Icon } from "../../../_shared/Icon";
 import type { Photo } from "./productFormHelpers";
 

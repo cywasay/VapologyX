@@ -1,4 +1,4 @@
-import { photosOf, type Category, type Product, type Spec, type Variety } from "@/app/products";
+import { photosOf, type Category, type Product, type Spec, type Variety } from "@/lib/products";
 import { createClient } from "@/utils/supabase/client";
 import { BUCKET, randomSuffix, slugify, storagePaths, type Photo } from "./productFormHelpers";
 

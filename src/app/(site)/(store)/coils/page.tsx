@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { getDeviceOptions, getProducts } from "../../../product-data";
-import { ShelfBrowser, ShelfFallback } from "../../../shelf-browser";
-import { ShopHead } from "../../../site-blocks";
+import { getDeviceOptions, getProducts } from "@/lib/product-data";
+import { ShelfBrowser } from "@/components/shelf/ShelfBrowser";
+import { ShelfFallback } from "@/components/shelf/ShelfFallback";
+import { ShopHead } from "@/components/ShopHead";
 
 export const metadata: Metadata = { title: "Coils" };
 

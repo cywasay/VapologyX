@@ -1,4 +1,4 @@
-import { money } from "@/app/products";
+import { money } from "@/lib/products";
 import { CardHead } from "../../_shared/CardHead";
 import { EmptyMeter } from "./EmptyMeter";
 

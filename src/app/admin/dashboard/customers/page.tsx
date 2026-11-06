@@ -1,4 +1,4 @@
-import { MINIMUM_AGE } from "@/app/products";
+import { MINIMUM_AGE } from "@/lib/products";
 import { EmptyState } from "../../_shared/EmptyState";
 
 export default function CustomersPage() {

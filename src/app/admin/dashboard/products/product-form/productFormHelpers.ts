@@ -1,4 +1,4 @@
-import type { Category, Spec } from "@/app/products";
+import type { Category, Spec } from "@/lib/products";
 
 export const BUCKET = "product-images";
 export const MAX_PRICE = 2147483647;

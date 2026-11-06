@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { FlowSkeleton } from "../../../../flow-ui";
-import { OrderView } from "../../../../order-view";
+import { FlowSkeleton } from "@/components/flow/FlowSkeleton";
+import { OrderView } from "./_sections/OrderView";
 
 export const metadata: Metadata = { title: "Your order", robots: { index: false, follow: false } };
 

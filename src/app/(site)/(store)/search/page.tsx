@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { ShelfBrowser, ShelfFallback } from "../../../shelf-browser";
-import { PageHead } from "../../../site-blocks";
+import { ShelfBrowser } from "@/components/shelf/ShelfBrowser";
+import { ShelfFallback } from "@/components/shelf/ShelfFallback";
+import { PageHead } from "@/components/PageHead";
 
 // Search results change with every word, so they are not worth showing in a search engine.
 export const metadata: Metadata = { title: "Search", robots: { index: false, follow: true } };

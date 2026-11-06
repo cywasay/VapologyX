@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { shelves } from "@/app/products";
-import { categories } from "@/app/site-blocks";
+import { shelves } from "@/lib/products";
+import { categories } from "@/components/categories";
 import { Icon } from "../../_shared/Icon";
 import { useProductCounts } from "../_data/useProductCounts";
 import { DASHBOARD } from "../_shell/navItems";

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { BottleArt, DeviceArt, Wordmark } from "@/app/art";
-import { GRAPHITE, LIME, SILVER } from "@/app/products";
+import { BottleArt, DeviceArt, Wordmark } from "@/components/art";
+import { GRAPHITE, LIME, SILVER } from "@/lib/products";
 
 // The frame of every admin sign-in page: a lime side panel with the brand, and the form beside it.
 export function AdminAuthPage({ title, children }: { title: string; children: ReactNode }) {

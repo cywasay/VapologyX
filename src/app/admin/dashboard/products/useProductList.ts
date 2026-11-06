@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { PRODUCT_COLUMNS, type Product } from "@/app/products";
+import { PRODUCT_COLUMNS, type Product } from "@/lib/products";
 import { createClient } from "@/utils/supabase/client";
 import type { ShelfFilter } from "../_data/useProductCounts";
 

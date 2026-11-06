@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, Instrument_Sans } from "next/font/google";
-import { BRAND, MINIMUM_AGE } from "./products";
+import { BRAND, MINIMUM_AGE } from "@/lib/products";
 import "./globals.css";
 
 const instrumentSans = Instrument_Sans({

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { MINIMUM_AGE } from "../products";
+import { MINIMUM_AGE } from "@/lib/products";
 
 export const metadata: Metadata = { title: "Access denied" };
 

@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { ComboInput, Select } from "@/app/dropdown";
-import { refreshShop } from "@/app/product-actions";
-import { photosOf, shelfOf, shelves, type Category, type Product, type Spec } from "@/app/products";
+import { ComboInput, Select } from "@/components/dropdown";
+import { refreshShop } from "@/lib/product-actions";
+import { photosOf, shelfOf, shelves, type Category, type Product, type Spec } from "@/lib/products";
 import { DeleteProductDialog } from "./DeleteProductDialog";
 import { FitsField } from "./FitsField";
 import { OptionsField, type OptionRow } from "./OptionsField";

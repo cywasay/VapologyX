@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { shelves, type Product } from "@/app/products";
+import { shelves, type Product } from "@/lib/products";
 import { EmptyState } from "../../_shared/EmptyState";
 import { Icon } from "../../_shared/Icon";
 import { Pills } from "../../_shared/Pills";

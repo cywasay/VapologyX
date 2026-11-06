@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { shelves, type Category } from "@/app/products";
+import { shelves, type Category } from "@/lib/products";
 import { createClient } from "@/utils/supabase/client";
 
 export type ShelfFilter = Category | "all";

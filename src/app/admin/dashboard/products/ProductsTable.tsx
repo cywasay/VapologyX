@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { ProductArt } from "@/app/art";
-import { money, productHref, shelfOf, type Product } from "@/app/products";
+import { ProductArt } from "@/components/art";
+import { money, productHref, shelfOf, type Product } from "@/lib/products";
 import { Icon } from "../../_shared/Icon";
 
 function ProductRow({ item, onEdit }: { item: Product; onEdit: (product: Product) => void }) {

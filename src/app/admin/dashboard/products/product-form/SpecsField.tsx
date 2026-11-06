@@ -1,4 +1,4 @@
-import type { Spec } from "@/app/products";
+import type { Spec } from "@/lib/products";
 import { Icon } from "../../../_shared/Icon";
 
 export function SpecsField({ specs, onChange }: { specs: Spec[]; onChange: (specs: Spec[]) => void }) {

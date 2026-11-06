@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { BottleArt } from "@/app/art";
-import { LIME } from "@/app/products";
+import { BottleArt } from "@/components/art";
+import { LIME } from "@/lib/products";
 import { DASHBOARD } from "../_shell/navItems";
 
 export function AddProductCard() {
