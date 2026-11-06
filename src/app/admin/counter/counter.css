@@ -71,16 +71,16 @@
 .ct-open-controls .dd-button { min-height: 52px; font-size: 16px; }
 .ct-section-title { display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px; font-size: 22px; }
 .ct-section-title small { font-family: var(--font-sans); font-size: 14px; font-weight: 500; letter-spacing: 0; color: var(--muted); }
-.ct-bottles { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
-.ct-bottle { display: grid; gap: 12px; padding: var(--space-related); background: var(--white); border-radius: var(--radius-panel); }
+.ct-bottles { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+.ct-bottle { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; padding: var(--space-related); background: var(--white); border-radius: var(--radius-panel); }
 .ct-bottle header { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
 .ct-bottle h3 { font-size: 22px; }
 .ct-bottle header span { font-size: 13px; color: var(--muted); }
 .ct-earned { display: grid; margin: 0; }
 .ct-earned strong { font-family: var(--font-display); font-size: 40px; letter-spacing: -.03em; line-height: 1.05; }
 .ct-earned span { font-size: 13px; color: var(--muted); }
-.ct-quick { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-.ct-quick button { min-height: 56px; font-size: 18px; font-weight: 700; background: var(--surface); border-radius: var(--radius-input); }
+.ct-quick { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.ct-quick button { min-width: 0; padding-inline: 4px; min-height: 56px; font-size: 18px; font-weight: 700; background: var(--surface); border-radius: var(--radius-input); }
 .ct-quick button:hover { background: var(--accent); }
 .ct-quick button:active { transform: scale(.96); }
 .ct-custom { display: flex; gap: 6px; }
