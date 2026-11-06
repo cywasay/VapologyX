@@ -1,20 +1,38 @@
+"use client";
+
+import { useState } from "react";
 import { ProductArt } from "@/components/art";
-import { money, shelves } from "@/lib/products";
-import { LIME } from "@/lib/products";
+import { LIME, money, shelves } from "@/lib/products";
 import type { Counter } from "../useCounter";
-import type { CounterItem, Shelf } from "../types";
+import type { Shelf } from "../types";
 
 const tabs: { id: Shelf | "all"; label: string }[] = [{ id: "all", label: "All" }, ...shelves.map(shelf => ({ id: shelf.category, label: shelf.name }))];
 
-// The shelf tabs, the search box and one big tile per item. Tapping a tile adds it to the sale.
+// The shelf tabs, the search box and one tile per item. Tapping a tile adds it to the sale.
+// A barcode scanner types its code into the search box and presses Enter, which adds that item.
 export function ItemGrid({ counter, shelf, onShelf, search, onSearch }: { counter: Counter; shelf: Shelf | "all"; onShelf: (shelf: Shelf | "all") => void; search: string; onSearch: (text: string) => void }) {
-  const shown = counter.items.filter((item: CounterItem) => (shelf === "all" || item.shelf === shelf) && item.name.toLowerCase().includes(search.trim().toLowerCase()));
+  const [scanned, setScanned] = useState("");
+  const text = search.trim().toLowerCase();
+  const shown = counter.items.filter(item => (shelf === "all" || item.shelf === shelf) && (item.name.toLowerCase().includes(text) || item.code.includes(text)));
   const inSale = (id: string) => counter.lines.find(line => line.item.id === id)?.quantity ?? 0;
+
+  function enter() {
+    if (!text) return;
+    const result = counter.scan(text);
+    if (result === null) {
+      if (/^\d{5,}$/.test(text)) setScanned(`No item has the code ${text}.`);
+      return;
+    }
+    setScanned(result);
+    onSearch("");
+  }
+
   return <div className="ct-items">
     <div className="ct-tabs" role="group" aria-label="Shelf">
       {tabs.map(tab => <button key={tab.id} className={shelf === tab.id ? "is-current" : ""} aria-pressed={shelf === tab.id} onClick={() => onShelf(tab.id)}>{tab.label}</button>)}
     </div>
-    <input className="ct-search" type="search" placeholder="Search or scan an item" aria-label="Search items" value={search} onChange={event => onSearch(event.target.value)} />
+    <input className="ct-search" type="search" placeholder="Search, or scan a barcode" aria-label="Search items or scan a barcode" value={search} onChange={event => { onSearch(event.target.value); setScanned(""); }} onKeyDown={event => { if (event.key === "Enter") enter(); }} />
+    {scanned && <p className="ct-note" role="status">{scanned}</p>}
     <div className="ct-grid">
       {shown.map(item => {
         const left = item.stock - inSale(item.id);

@@ -7,6 +7,8 @@ import type { Mode } from "../types";
 const modes: { id: Mode; label: string }[] = [
   { id: "sell", label: "Sell" },
   { id: "refill", label: "Refill" },
+  { id: "sales", label: "Sales" },
+  { id: "closing", label: "Closing" },
   { id: "restock", label: "Restock" },
 ];
 

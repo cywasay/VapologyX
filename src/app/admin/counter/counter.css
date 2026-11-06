@@ -113,3 +113,61 @@
   .ct-modes { width: 100%; }
   .ct-modes button { flex: 1; padding-inline: 8px; }
 }
+
+/* Cash given, receipt, sales list and closing */
+.ct-cash { display: grid; gap: 4px; }
+.ct-cash-row { display: flex; gap: 4px; }
+.ct-cash-row input { flex: 1; min-width: 0; min-height: 36px; padding: 0 14px; font-size: 14px; color: var(--ink); background: var(--surface); border: 0; border-radius: var(--radius-pill); }
+.ct-cash-row input:focus-visible, .ct-field input:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.ct-cash-row button { min-height: 36px; padding-inline: 10px; font-size: 13px; font-weight: 600; background: var(--surface); border-radius: var(--radius-pill); }
+.ct-cash-row button:hover { background: var(--accent); }
+.ct-change { margin: 0; padding: 6px 12px; font-size: 14px; font-weight: 700; background: var(--accent); border-radius: 10px; }
+.ct-change.is-short { color: var(--on-dark); background: var(--ink); }
+
+.ct-receipt { width: min(100%, 340px); padding: 16px; color: var(--ink); background: var(--white); border: 0; border-radius: 18px; box-shadow: 0 30px 80px #14151866; }
+.ct-receipt::backdrop { background: #14151880; }
+.ct-slip { padding-bottom: 10px; font-size: 13px; border-bottom: 1px dashed var(--line); }
+.ct-slip h2 { font-size: 20px; text-align: center; }
+.ct-slip ul { display: grid; gap: 4px; margin: 10px 0; padding: 0; list-style: none; }
+.ct-slip li, .ct-slip-total { display: flex; justify-content: space-between; gap: 8px; }
+.ct-slip-total { padding-top: 6px; font-size: 16px; border-top: 1px solid var(--line); }
+.ct-slip-sub { margin: 6px 0 0; font-size: 12px; text-align: center; color: var(--muted); }
+.ct-receipt-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.ct-receipt-actions button { min-height: 38px; padding-inline: 14px; font-size: 13px; font-weight: 600; background: var(--surface); border-radius: var(--radius-pill); }
+.ct-receipt-actions button:hover { background: var(--accent); }
+.ct-receipt-actions .ct-primary { color: var(--on-dark); background: var(--ink); }
+
+.ct-sales, .ct-card { padding: 16px; background: var(--white); border-radius: 22px; }
+.ct-sales-list { display: grid; margin: 0; padding: 0; list-style: none; }
+.ct-sales-list li { display: grid; grid-template-columns: 70px minmax(0, 1fr) 70px 90px auto; align-items: center; gap: 10px; padding-block: 10px; font-size: 13px; border-bottom: 1px solid var(--line); }
+.ct-sales-list li:last-child { border-bottom: 0; }
+.ct-sale-num { display: grid; font-weight: 700; }
+.ct-sale-num small, .ct-sale-pay { font-size: 12px; font-weight: 400; color: var(--muted); }
+.ct-sale-actions { display: flex; align-items: center; gap: 12px; justify-content: flex-end; }
+.ct-sale-actions em { font-size: 12px; font-style: normal; font-weight: 600; }
+.ct-sales-list .is-voided { opacity: .5; }
+.ct-sales-list .is-voided strong { text-decoration: line-through; }
+
+.ct-closing { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; align-items: start; }
+.ct-card { display: grid; gap: 10px; }
+.ct-card .ct-section-title { margin-bottom: 0; }
+.ct-subtitle { font-family: var(--font-display); font-size: 14px; }
+.ct-money { display: grid; gap: 4px; margin: 0; }
+.ct-money > div { display: flex; justify-content: space-between; font-size: 14px; }
+.ct-money dd { margin: 0; font-weight: 700; }
+.ct-money .is-total { padding-top: 8px; font-size: 16px; border-top: 1px solid var(--line); }
+.ct-field { display: grid; gap: 4px; font-size: 13px; font-weight: 600; }
+.ct-field input { min-height: 40px; padding: 0 14px; font-size: 14px; color: var(--ink); background: var(--surface); border: 0; border-radius: var(--radius-pill); }
+.ct-outs { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.ct-outs li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; font-size: 13px; }
+.ct-card .ct-custom input:first-child { flex: 0 0 90px; }
+.ct-diff { margin: 0; padding: 8px 12px; font-size: 15px; font-weight: 700; border-radius: 10px; }
+.ct-diff.is-ok { background: var(--accent); }
+.ct-diff.is-off { color: var(--on-dark); background: var(--ink); }
+.ct-closed { margin: 0; padding: 12px; font-weight: 600; text-align: center; background: var(--surface); border-radius: 12px; }
+.ct-confirm-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; }
+
+@media (max-width: 760px) {
+  .ct-sales-list li { grid-template-columns: minmax(0, 1fr) auto; }
+  .ct-sale-items, .ct-sale-pay { grid-column: 1 / -1; }
+}

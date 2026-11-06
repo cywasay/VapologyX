@@ -1,6 +1,7 @@
 import { money } from "@/lib/products";
 import type { Counter } from "../useCounter";
 import type { Pay } from "../types";
+import { CashGiven } from "./CashGiven";
 
 const payments: Pay[] = ["Cash", "Card", "Wallet"];
 
@@ -18,13 +19,14 @@ export function SalePanel({ counter }: { counter: Counter }) {
         </span>
         <strong>{money(item.price * quantity)}</strong>
       </li>)}
-      {counter.lines.length === 0 && <li className="ct-hint">Tap an item to start a sale.</li>}
+      {counter.lines.length === 0 && <li className="ct-hint">Tap an item or scan a barcode to start a sale.</li>}
     </ul>
     <div className="ct-total"><span>Total</span><strong>{money(counter.total)}</strong></div>
     <div className="ct-pay" role="group" aria-label="Payment">
       {payments.map(method => <button key={method} className={counter.pay === method ? "is-current" : ""} aria-pressed={counter.pay === method} onClick={() => counter.setPay(method)}>{method}</button>)}
     </div>
-    <button className="ct-complete" onClick={counter.completeSale}>Complete sale</button>
+    {counter.pay === "Cash" && <CashGiven counter={counter} />}
+    <button className="ct-complete" onClick={counter.completeSale} disabled={counter.closed}>{counter.closed ? "Day is closed" : "Complete sale"}</button>
     <p className="ct-note" role="status">{counter.note}</p>
   </aside>;
 }
