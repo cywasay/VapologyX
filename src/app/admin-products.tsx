@@ -87,11 +87,12 @@ export function AdminProducts({ shelf, onShelfChange, counts, refreshKey, notice
     {results && results.items.length > 0 && <>
       <div className="admin-table">
         <table>
-          <thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Options</th><th><span className="sr-only">Actions</span></th></tr></thead>
+          <thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Options</th><th><span className="sr-only">Actions</span></th></tr></thead>
           <tbody>{results.items.map(item => <tr key={item.id}>
-            <td><div className="admin-product"><div className="cart-thumb"><ProductArt item={item} sizes="48px" /></div><span>{item.name}{!item.is_published && <small className="admin-hidden-tag">Hidden</small>}</span></div></td>
+            <td><div className="admin-product"><div className="cart-thumb"><ProductArt item={item} sizes="48px" /></div><span>{item.name}{!item.is_published && <small className="admin-hidden-tag">Hidden</small>}{item.stock === 0 && <small className="admin-hidden-tag is-sold">Sold out</small>}</span></div></td>
             <td>{shelfOf(item.category).singular}</td>
             <td>{money(item.price)}</td>
+            <td>{item.stock ?? "—"}</td>
             <td>{item.variants.length || "—"}</td>
             <td><div className="admin-row-actions">
               <button className="admin-row-link" onClick={() => onEdit(item)} aria-label={`Edit ${item.name}`} title="Edit"><Icon name="edit" /></button>

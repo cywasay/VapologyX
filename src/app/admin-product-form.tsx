@@ -12,6 +12,7 @@ const BUCKET = "product-images";
 const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const IMAGE_MAX_BYTES = 5 * 1024 * 1024;
 const MAX_PRICE = 2147483647;
+const MAX_STOCK = 100000;
 
 const specTemplates: Record<Category, string[]> = {
   device: ["Battery", "Max output", "Capacity", "Charging", "In the box"],
@@ -42,6 +43,7 @@ export function ProductForm({ product, defaultCategory, onClose, onSaved }: {
   const [category, setCategory] = useState<Category>(product?.category ?? defaultCategory);
   const [type, setType] = useState(product?.type ?? "");
   const [price, setPrice] = useState(product ? String(product.price) : "");
+  const [stock, setStock] = useState(product?.stock == null ? "" : String(product.stock));
   const [description, setDescription] = useState(product?.description ?? "");
   const [specs, setSpecs] = useState<Spec[]>(product?.specs ?? templateFor(defaultCategory));
   const [options, setOptions] = useState(product?.variants.map(option => ({ name: option.name, price: option.price === null ? "" : String(option.price) })) ?? []);
@@ -98,6 +100,7 @@ export function ProductForm({ product, defaultCategory, onClose, onSaved }: {
     if (!name.trim()) return "Please enter a product name.";
     const amount = Number(price);
     if (price.trim() === "" || !Number.isInteger(amount) || amount < 0 || amount > MAX_PRICE) return "Please enter the price in whole rupees.";
+    if (stock.trim() !== "" && (!Number.isInteger(Number(stock)) || Number(stock) < 0 || Number(stock) > MAX_STOCK)) return "Stock must be a whole number, or empty if you don't count it.";
     const named = options.filter(option => option.name.trim() || option.price.trim());
     if (named.some(option => !option.name.trim())) return "Every option needs a name.";
     if (new Set(named.map(option => option.name.trim().toLowerCase())).size !== named.length) return "Each option needs a different name.";
@@ -133,6 +136,7 @@ export function ProductForm({ product, defaultCategory, onClose, onSaved }: {
       category,
       type: category === "device" || category === "bottle" ? type.trim() : shelfOf(category).singular,
       price: Number(price),
+      stock: stock.trim() === "" ? null : Number(stock),
       description: description.trim(),
       specs: specs.map(spec => ({ label: spec.label.trim(), value: spec.value.trim() })).filter(spec => spec.label && spec.value),
       variants: options.filter(option => option.name.trim()).map(option => ({ name: option.name.trim(), price: option.price.trim() === "" ? null : Number(option.price) })),
@@ -224,6 +228,11 @@ export function ProductForm({ product, defaultCategory, onClose, onSaved }: {
           </label>
           <label className="field">Price (Rs)<input type="number" inputMode="numeric" min="0" step="1" value={price} onChange={event => setPrice(event.target.value)} /></label>
         </div>
+
+        <label className="field">Stock (optional)
+          <input type="number" inputMode="numeric" min="0" step="1" value={stock} placeholder="Not counted" onChange={event => setStock(event.target.value)} />
+          <small className="field-hint">Leave it empty if you don&apos;t count stock. Enter 0 to mark the product as sold out.</small>
+        </label>
 
         {showType && <label className="field">{category === "device" ? "Type" : "Flavor group"}
           <input value={type} list={category === "device" ? "device-types" : undefined} placeholder={category === "device" ? "Pod, Box or Pen" : "For example, Menthol"} onChange={event => setType(event.target.value)} />

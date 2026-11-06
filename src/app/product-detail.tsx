@@ -4,13 +4,15 @@ import Link from "next/link";
 import { useState } from "react";
 import { ProductArt } from "./art";
 import { AddToCart } from "./product-lists";
-import { money, productHref, shelfOf, varietyPrice, type Product } from "./products";
+import { fewLeft, isSoldOut, money, productHref, shelfOf, varietyPrice, type Product } from "./products";
 
 export function ProductDetail({ item, fitDevices, coilCount }: { item: Product; fitDevices: Product[]; coilCount: number }) {
   const [variety, setVariety] = useState(item.variants[0] ?? null);
   const highlights = item.specs.slice(0, 3);
   const hasSpecs = item.specs.length > 0 || fitDevices.length > 0;
   const price = varietyPrice(item, variety);
+  const soldOut = isSoldOut(item);
+  const few = fewLeft(item);
   // Ids include the slug because recently visited pages stay mounted but hidden.
   const slug = item.slug;
 
@@ -28,7 +30,7 @@ export function ProductDetail({ item, fitDevices, coilCount }: { item: Product; 
 
     <section className="shell detail-grid" id={`${slug}-overview`} aria-label={`${item.name} overview`}>
       <div className="tile detail-image">
-        {item.badge && <span className="badge">{item.badge}</span>}
+        {soldOut ? <span className="badge is-sold">Sold out</span> : item.badge && <span className="badge">{item.badge}</span>}
         <ProductArt item={item} alt={item.name} sizes="(max-width: 768px) 100vw, 60vw" />
       </div>
       <div className="tile detail-info">
@@ -45,6 +47,9 @@ export function ProductDetail({ item, fitDevices, coilCount }: { item: Product; 
           </div>
         </fieldset>}
         <div className="detail-buy">
+          {soldOut
+            ? <p className="stock-note is-sold">Sold out right now. <Link href="/contact">Ask the store</Link> when it&apos;s back.</p>
+            : few && <p className="stock-note">Only {few} left in stock</p>}
           <strong>{money(price)}</strong>
           <AddToCart item={item} variety={variety} />
         </div>

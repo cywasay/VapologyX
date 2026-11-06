@@ -4,15 +4,21 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { ProductArt, Wordmark } from "./art";
-import { BRAND, MINIMUM_AGE, money, productHref, varietyPrice, type Product, type Variety } from "./products";
+import { cart, cartCount, cartKey, cartSubtotal, lineLimit, lineName, lineUnitPrice, useCartLines, type AddResult, type CartLine } from "./cart-store";
+import { BRAND, MAX_LINE_QUANTITY, MINIMUM_AGE, money, productHref, type Product, type Variety } from "./products";
 import { categories } from "./site-blocks";
 
-type CartLine = { key: string; product: Product; variety: Variety | null; quantity: number };
 type Store = {
   quantityOf: (productId: string) => number;
-  add: (product: Product, variety?: Variety | null) => void;
+  add: (product: Product, variety?: Variety | null) => AddResult;
   fit: string;
   setFit: (id: string) => void;
+  lines: CartLine[];
+  count: number;
+  subtotal: number;
+  setQuantity: (key: string, quantity: number) => void;
+  remove: (key: string) => void;
+  clear: () => void;
 };
 const StoreContext = createContext<Store | null>(null);
 
@@ -22,14 +28,14 @@ export function useStore() {
   return store;
 }
 
-const lineName = (line: CartLine) => line.variety ? `${line.product.name} (${line.variety.name})` : line.product.name;
+type Toast = { kind: "added"; key: string } | { kind: "message"; text: string };
 
 export function StoreShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const [cart, setCart] = useState<Record<string, CartLine>>({});
+  const lines = useCartLines();
   const [fit, setFit] = useState("All");
   const [openMenu, setOpenMenu] = useState<"shop" | "mobile" | null>(null);
-  const [added, setAdded] = useState<{ key: string } | null>(null);
+  const [toast, setToast] = useState<Toast | null>(null);
   const cartDialog = useRef<HTMLDialogElement>(null);
   const header = useRef<HTMLElement>(null);
   const isHome = pathname === "/";
@@ -63,33 +69,29 @@ export function StoreShell({ children }: { children: ReactNode }) {
   }, [openMenu]);
 
   useEffect(() => {
-    if (!added) return;
-    const timer = setTimeout(() => setAdded(null), 4000);
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 4000);
     return () => clearTimeout(timer);
-  }, [added]);
+  }, [toast]);
 
-  const changeQuantity = (key: string, change: number) => setCart(current => {
-    const line = current[key];
-    if (!line) return current;
-    if (line.quantity + change > 0) return { ...current, [key]: { ...line, quantity: line.quantity + change } };
-    return Object.fromEntries(Object.entries(current).filter(([other]) => other !== key));
-  });
   const add = (product: Product, variety: Variety | null = null) => {
-    const key = variety ? `${product.id}:${variety.name}` : product.id;
-    setCart(current => ({ ...current, [key]: { key, product, variety, quantity: (current[key]?.quantity ?? 0) + 1 } }));
-    setAdded({ key });
+    const result = cart.add(product, variety);
+    if (result === "added") setToast({ kind: "added", key: cartKey(product.id, variety) });
+    else if (result === "sold-out") setToast({ kind: "message", text: `${product.name} is sold out.` });
+    else setToast({ kind: "message", text: product.stock !== null && product.stock < MAX_LINE_QUANTITY ? `All ${product.stock} we have of ${product.name} are in your cart.` : `You can order up to ${MAX_LINE_QUANTITY} of ${product.name} at a time.` });
+    return result;
   };
-  const openCart = () => { setOpenMenu(null); setAdded(null); cartDialog.current?.showModal(); };
+  const openCart = () => { setOpenMenu(null); setToast(null); cartDialog.current?.showModal(); };
+  const closeCart = () => cartDialog.current?.close();
 
-  const lines = Object.values(cart);
-  const count = lines.reduce((sum, line) => sum + line.quantity, 0);
-  const subtotal = lines.reduce((sum, line) => sum + varietyPrice(line.product, line.variety) * line.quantity, 0);
-  const quantityOf = (productId: string) => lines.filter(line => line.product.id === productId).reduce((sum, line) => sum + line.quantity, 0);
-  const addedLine = added && cart[added.key];
+  const count = cartCount(lines);
+  const subtotal = cartSubtotal(lines);
+  const quantityOf = (productId: string) => lines.filter(line => line.item.id === productId).reduce((sum, line) => sum + line.quantity, 0);
+  const addedLine = toast?.kind === "added" ? lines.find(line => line.key === toast.key) : undefined;
   const inShop = categories.some(item => item.href === pathname);
   const navLink = (href: string, label: string) => <Link href={href} className={pathname === href ? "is-current" : ""} aria-current={pathname === href ? "page" : undefined}>{label}</Link>;
 
-  return <StoreContext.Provider value={{ quantityOf, add, fit, setFit }}>
+  return <StoreContext.Provider value={{ quantityOf, add, fit, setFit, lines, count, subtotal, setQuantity: cart.setQuantity, remove: cart.remove, clear: cart.clear }}>
     <div className="store-frame">
     <div className="notice-bar">Adults {MINIMUM_AGE}+ only. Demo storefront: products and prices are placeholders.</div>
     <header ref={header} className={`site-header motion ${isHome && scrolled ? "is-floating" : ""}`} onClick={event => { if ((event.target as Element).closest("a")) setOpenMenu(null); }}>
@@ -120,6 +122,7 @@ export function StoreShell({ children }: { children: ReactNode }) {
         <nav aria-label="More pages">
           {navLink("/about", "About")}
           {navLink("/contact", "Contact")}
+          {navLink("/track", "Track order")}
           {navLink("/login", "Log in")}
         </nav>
       </div>}
@@ -134,6 +137,7 @@ export function StoreShell({ children }: { children: ReactNode }) {
           {categories.map(item => <Link key={item.href} href={item.href}>{item.name}</Link>)}
           <Link href="/about">About</Link>
           <Link href="/contact">Contact</Link>
+          <Link href="/track">Track order</Link>
           <Link href="/terms">Terms &amp; conditions</Link>
         </nav>
         <span className="footer-age">{MINIMUM_AGE}+ only</span>
@@ -147,29 +151,34 @@ export function StoreShell({ children }: { children: ReactNode }) {
 
     <div className="cart-toast-region" role="status">
       {addedLine && <div className="cart-toast">
-        <div className="cart-thumb"><ProductArt item={addedLine.product} sizes="48px" /></div>
+        <div className="cart-thumb"><ProductArt item={addedLine.item} sizes="48px" /></div>
         <div><strong>Added to cart</strong><span>{lineName(addedLine)}</span></div>
         <button className="button button-primary" onClick={openCart}>View cart</button>
       </div>}
+      {toast?.kind === "message" && <div className="cart-toast is-message"><strong>{toast.text}</strong></div>}
     </div>
 
-    <dialog ref={cartDialog} className="cart panel-light" aria-labelledby="cart-title" onClick={event => { if (event.target === event.currentTarget) cartDialog.current?.close(); }}>
+    <dialog ref={cartDialog} className="cart panel-light" aria-labelledby="cart-title" onClick={event => { if (event.target === event.currentTarget) closeCart(); }}>
       <div className="cart-inner">
-        <div className="cart-top"><h2 id="cart-title">Your cart</h2><button className="cart-close" onClick={() => cartDialog.current?.close()} aria-label="Close cart">×</button></div>
+        <div className="cart-top"><h2 id="cart-title">Your cart</h2><button className="cart-close" onClick={closeCart} aria-label="Close cart">×</button></div>
         {lines.length === 0 && <p className="cart-empty">Your cart is empty.</p>}
         <ul>
           {lines.map(line => <li key={line.key}>
-            <div className="cart-thumb"><ProductArt item={line.product} sizes="48px" /></div>
-            <div className="cart-line"><Link href={productHref(line.product)} onClick={() => cartDialog.current?.close()}><strong>{lineName(line)}</strong></Link><span>{money(varietyPrice(line.product, line.variety))}</span></div>
+            <div className="cart-thumb"><ProductArt item={line.item} sizes="48px" /></div>
+            <div className="cart-line"><Link href={productHref(line.item)} onClick={closeCart}><strong>{lineName(line)}</strong></Link><span>{money(lineUnitPrice(line))}</span></div>
             <div className="stepper">
-              <button onClick={() => changeQuantity(line.key, -1)} aria-label={`Remove one ${lineName(line)}`}>−</button>
+              <button onClick={() => cart.setQuantity(line.key, line.quantity - 1)} aria-label={`Remove one ${lineName(line)}`}>−</button>
               <b>{line.quantity}</b>
-              <button onClick={() => changeQuantity(line.key, 1)} aria-label={`Add one ${lineName(line)}`}>+</button>
+              <button onClick={() => cart.setQuantity(line.key, line.quantity + 1)} disabled={line.quantity >= lineLimit(lines, line)} aria-label={`Add one ${lineName(line)}`}>+</button>
             </div>
           </li>)}
         </ul>
         <div className="cart-total"><span>Subtotal</span><strong>{money(subtotal)}</strong></div>
-        <button className="button button-primary cart-checkout" disabled>Checkout disabled in demo</button>
+        <p className="cart-note">Delivery is worked out at checkout.</p>
+        {lines.length > 0
+          ? <Link className="button button-primary cart-checkout" href="/checkout" onClick={closeCart}>Checkout</Link>
+          : <button className="button button-primary cart-checkout" disabled>Checkout</button>}
+        <Link className="text-link cart-full" href="/cart" onClick={closeCart}>View full cart</Link>
       </div>
     </dialog>
   </StoreContext.Provider>;
