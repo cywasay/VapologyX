@@ -42,7 +42,7 @@ export const updateSession = async (request: NextRequest) => {
   };
 
   // The dashboard is for admins only. Admin log in, register and forgot password stay open, but an admin who is already in goes straight to the dashboard.
-  const inDashboard = pathname === "/admin/dashboard" || pathname.startsWith("/admin/dashboard/");
+  const inDashboard = ["/admin/dashboard", "/admin/counter"].some(base => pathname === base || pathname.startsWith(`${base}/`));
   if (pathname === "/admin" || pathname === "/admin/") return redirectTo(isAdmin ? "/admin/dashboard" : "/admin/login");
   if (inDashboard && !isAdmin) return redirectTo(claims ? "/" : "/admin/login");
   if (isAdmin && (pathname === "/login" || (pathname.startsWith("/admin/") && !inDashboard))) return redirectTo("/admin/dashboard");

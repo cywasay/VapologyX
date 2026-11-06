@@ -8,6 +8,7 @@ export function Sidebar({ minimized, onToggle, onNavigate, onLogout }: { minimiz
     <Link href="/" className="admin-brand" aria-label="VapologyX store"><span className="admin-logo">X</span><span className="admin-label">VapologyX</span></Link>
     <SidebarNav minimized={minimized} onNavigate={onNavigate} />
     <div className="admin-nav admin-nav-bottom">
+      <Link href="/admin/counter" title={minimized ? "Counter" : undefined}><Icon name="orders" /><span className="admin-label">Counter</span></Link>
       <Link href="/" title={minimized ? "View store" : undefined}><Icon name="store" /><span className="admin-label">View store</span></Link>
       <button className="admin-logout" title={minimized ? "Log out" : undefined} onClick={onLogout}><Icon name="logout" /><span className="admin-label">Log out</span></button>
     </div>
