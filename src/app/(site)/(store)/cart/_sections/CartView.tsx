@@ -2,6 +2,7 @@
 
 import { FlowNotices } from "@/components/flow/FlowNotices";
 import { FlowSteps } from "@/components/flow/FlowSteps";
+import { Loader } from "@/components/loader/Loader";
 import { useStore } from "@/components/store/store-context";
 import { useCartSync, useHydrated } from "@/lib/cart-store";
 import { CartEmpty } from "./CartEmpty";
@@ -23,7 +24,7 @@ export function CartView() {
 
     <FlowNotices sync={sync} />
 
-    {!hydrated && <div className="skeleton skeleton-panel" aria-hidden="true" />}
+    {!hydrated && <Loader label="Loading your cart" />}
     {hydrated && lines.length === 0 && <CartEmpty />}
     {hydrated && lines.length > 0 && <div className="cart-layout">
       <ul className="cart-list panel-light">

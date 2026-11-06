@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { ProductArt, SearchGlyph } from "@/components/art";
 import { useStore } from "@/components/store/store-context";
+import { Loader } from "@/components/loader/Loader";
 import { searchProducts } from "@/lib/product-query";
 import { money, productHref, shelfOf, type Product } from "@/lib/products";
 import { categories } from "@/components/categories";
@@ -64,7 +65,7 @@ export function SearchDialog() {
           {categories.map(item => <Link key={item.href} href={item.href} onClick={close}>{item.art}<span>{item.name}</span></Link>)}
         </div>
       </>}
-      {ready && !current && <p className="search-hint" role="status">Searching…</p>}
+      {ready && !current && <Loader size="small" label="Searching" />}
       {current && "failed" in current && <p className="search-hint" role="alert">Search isn&apos;t working right now. Please try again.</p>}
       {current && !("failed" in current) && (current.items.length === 0
         ? <p className="search-hint">Nothing matches “{term}”. Try another word.</p>

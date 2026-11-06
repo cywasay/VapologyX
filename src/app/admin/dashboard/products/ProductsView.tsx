@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { Loader } from "@/components/loader/Loader";
 import { shelves, type Product } from "@/lib/products";
 import { EmptyState } from "../../_shared/EmptyState";
 import { Icon } from "../../_shared/Icon";
@@ -56,7 +57,7 @@ export function ProductsView() {
     <ProductSearch value={list.search} onChange={list.setSearch} />
     {notice && <p className="admin-notice" role="status">{notice}</p>}
     {list.failed && <p className="form-status is-error" role="alert">We couldn&apos;t load your products. Please refresh the page.</p>}
-    {!list.failed && !results && <p className="admin-note" role="status">Loading products…</p>}
+    {!list.failed && !results && <Loader label="Loading products" />}
     {results && results.items.length === 0 && <EmptyState icon="products" title={list.query ? "No products match your search" : "No products here yet"}>{list.query ? "Try a different name, or check another category." : "Add your first product and it will appear in the shop."}</EmptyState>}
     {results && results.items.length > 0 && <>
       <ProductsTable items={results.items} onEdit={product => { setNotice(""); setEditing(product); }} />

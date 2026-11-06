@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useLayoutEffect, useRef, useState } from "react";
 import { FlowNotices } from "@/components/flow/FlowNotices";
 import { FlowSteps } from "@/components/flow/FlowSteps";
+import { Loader } from "@/components/loader/Loader";
 import { useStore } from "@/components/store/store-context";
 import { useCartSync, useHydrated, type CartLine } from "@/lib/cart-store";
 import { CheckoutForm } from "./CheckoutForm";
@@ -32,7 +33,7 @@ export function CheckoutView() {
 
     <FlowNotices sync={sync} warnWhenFailed />
 
-    {!hydrated && <div className="skeleton skeleton-panel" aria-hidden="true" />}
+    {!hydrated && <Loader label="Loading checkout" />}
 
     {hydrated && shown.length === 0 && <div className="flow-empty panel-light">
       <h2>There&apos;s nothing to check out.</h2>

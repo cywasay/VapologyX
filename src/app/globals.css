@@ -722,7 +722,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   /* The admin sidebar and the home page motion (with the header and footer) stay on: the user asked for them. */
-  *:not(.admin-side, .admin-main, .admin-highlight, .admin-label, .admin-nav > button, .admin-nav > a, .admin-collapse .admin-icon, .motion, .motion *), *:not(.motion *)::before, *:not(.motion *)::after { animation: none !important; transition: none !important; }
+  *:not(.loader, .loader *, .skeleton, .admin-side, .admin-main, .admin-highlight, .admin-label, .admin-nav > button, .admin-nav > a, .admin-collapse .admin-icon, .motion, .motion *), *:not(.motion *, .loader *)::before, *:not(.motion *, .loader *)::after { animation: none !important; transition: none !important; }
 }
 @media (max-width: 1240px) {
   .finder { grid-template-columns: minmax(0, 1fr); }
@@ -925,3 +925,31 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
 .dd-option.is-active { background: var(--accent); }
 .dd-option[aria-selected="true"] { font-weight: 700; }
 .dd-check { flex-shrink: 0; width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* The loading animation. It runs even with reduced motion on, like the other motion of the site, because it is the only sign that something is happening. */
+.loader { display: grid; justify-items: center; gap: 10px; padding: 56px 0; font-size: 14px; font-weight: 500; color: var(--muted); }
+.loader.is-small { padding: 16px 0; gap: 4px; font-size: 13px; }
+.loader-stage { position: relative; width: 80px; height: 104px; }
+.is-small .loader-stage { transform: scale(.6); transform-origin: center bottom; height: 88px; margin-bottom: -28px; }
+.loader-tile { position: absolute; bottom: 0; left: 50%; display: grid; place-items: center; width: 46px; height: 46px; margin-left: -23px; color: var(--ink); background: var(--accent); border-radius: 12px; animation: loader-morph 2s cubic-bezier(.6, 0, .2, 1) infinite; }
+.loader-tile b { font-family: var(--font-display); font-size: 24px; font-weight: 800; line-height: 1; animation: loader-upright 2s cubic-bezier(.6, 0, .2, 1) infinite; }
+.loader-puff { position: absolute; bottom: 52px; left: 50%; width: 22px; height: 12px; margin-left: -11px; border: 2px solid var(--ink); border-radius: 50%; opacity: 0; animation: loader-puff 2s ease-out infinite; }
+.loader-puff:nth-child(2) { animation-delay: .66s; }
+.loader-puff:nth-child(3) { animation-delay: 1.32s; }
+.loader-dots i { font-style: normal; animation: loader-dot 1.2s infinite; }
+.loader-dots i:nth-child(2) { animation-delay: .2s; }
+.loader-dots i:nth-child(3) { animation-delay: .4s; }
+@keyframes loader-morph {
+  0% { border-radius: 12px; rotate: 0deg; scale: 1; }
+  25% { border-radius: 50%; rotate: 90deg; scale: .88; }
+  50% { border-radius: 24px 6px 24px 6px; rotate: 180deg; scale: 1.08; }
+  75% { border-radius: 50% 50% 8px 8px; rotate: 270deg; scale: .92; }
+  100% { border-radius: 12px; rotate: 360deg; scale: 1; }
+}
+@keyframes loader-upright { to { rotate: -360deg; } }
+@keyframes loader-puff {
+  0% { opacity: 0; translate: 0 0; scale: .4; }
+  20% { opacity: .75; }
+  100% { opacity: 0; translate: 0 -46px; scale: 1.7; }
+}
+@keyframes loader-dot { 0%, 60%, 100% { opacity: .2; } 30% { opacity: 1; } }
