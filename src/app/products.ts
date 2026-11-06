@@ -7,7 +7,9 @@ export const GRAPHITE = "#6f7176";
 export const SILVER = "#c7cac5";
 
 export const PAGE_SIZE = 24;
-export const PRODUCT_COLUMNS = "id,slug,name,category,type,price,description,specs,fits,variants,image_url,color,badge,is_published,stock";
+export const PRODUCT_COLUMNS = "id,slug,name,category,type,price,description,specs,fits,variants,image_url,images,color,badge,is_published,stock";
+// Most photos one product can have. The database enforces the same limit.
+export const MAX_PHOTOS = 8;
 // A product with this many left or fewer gets an "Only N left" label.
 export const LOW_STOCK = 5;
 // Most of one product a customer can put in a single cart line.
@@ -27,7 +29,10 @@ export type Product = {
   specs: Spec[];
   fits: string[];
   variants: Variety[];
+  // The main photo. It is always the first of images.
   image_url: string | null;
+  // Every photo, in the order they are shown.
+  images: string[];
   color: string;
   badge: string | null;
   is_published: boolean;
@@ -47,6 +52,8 @@ export const shelfOf = (category: Category) => shelves.find(shelf => shelf.categ
 export const money = (value: number) => `Rs ${value.toLocaleString("en-US")}`;
 export const productHref = (product: Pick<Product, "slug">) => `/products/${product.slug}`;
 export const varietyPrice = (product: Pick<Product, "price">, variety: Variety | null) => variety?.price ?? product.price;
+// Products made before the photo list existed only have image_url.
+export const photosOf = (product: Pick<Product, "image_url" | "images">) => product.images.length > 0 ? product.images : product.image_url ? [product.image_url] : [];
 export const isSoldOut = (product: Pick<Product, "stock">) => product.stock === 0;
 // The number left, but only once it's low enough to be worth telling the customer.
 export const fewLeft = (product: Pick<Product, "stock">) => product.stock != null && product.stock > 0 && product.stock <= LOW_STOCK ? product.stock : null;

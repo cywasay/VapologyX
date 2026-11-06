@@ -3,16 +3,15 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
-import { ProductArt, Wordmark } from "./art";
+import { ProductArt, SearchGlyph, Wordmark } from "./art";
 import { cart, cartCount, cartKey, cartSubtotal, lineLimit, lineName, lineUnitPrice, useCartLines, type AddResult, type CartLine } from "./cart-store";
 import { BRAND, MAX_LINE_QUANTITY, MINIMUM_AGE, money, productHref, type Product, type Variety } from "./products";
+import { SearchDialog } from "./search-dialog";
 import { categories } from "./site-blocks";
 
 type Store = {
   quantityOf: (productId: string) => number;
   add: (product: Product, variety?: Variety | null) => AddResult;
-  fit: string;
-  setFit: (id: string) => void;
   lines: CartLine[];
   count: number;
   subtotal: number;
@@ -33,10 +32,10 @@ type Toast = { kind: "added"; key: string } | { kind: "message"; text: string };
 export function StoreShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const lines = useCartLines();
-  const [fit, setFit] = useState("All");
   const [openMenu, setOpenMenu] = useState<"shop" | "mobile" | null>(null);
   const [toast, setToast] = useState<Toast | null>(null);
   const cartDialog = useRef<HTMLDialogElement>(null);
+  const searchDialog = useRef<HTMLDialogElement>(null);
   const header = useRef<HTMLElement>(null);
   const isHome = pathname === "/";
   const [scrolled, setScrolled] = useState(false);
@@ -83,6 +82,7 @@ export function StoreShell({ children }: { children: ReactNode }) {
   };
   const openCart = () => { setOpenMenu(null); setToast(null); cartDialog.current?.showModal(); };
   const closeCart = () => cartDialog.current?.close();
+  const openSearch = () => { setOpenMenu(null); setToast(null); searchDialog.current?.showModal(); };
 
   const count = cartCount(lines);
   const subtotal = cartSubtotal(lines);
@@ -91,7 +91,7 @@ export function StoreShell({ children }: { children: ReactNode }) {
   const inShop = categories.some(item => item.href === pathname);
   const navLink = (href: string, label: string) => <Link href={href} className={pathname === href ? "is-current" : ""} aria-current={pathname === href ? "page" : undefined}>{label}</Link>;
 
-  return <StoreContext.Provider value={{ quantityOf, add, fit, setFit, lines, count, subtotal, setQuantity: cart.setQuantity, remove: cart.remove, clear: cart.clear }}>
+  return <StoreContext.Provider value={{ quantityOf, add, lines, count, subtotal, setQuantity: cart.setQuantity, remove: cart.remove, clear: cart.clear }}>
     <div className="store-frame">
     <div className="notice-bar">Adults {MINIMUM_AGE}+ only. Demo storefront: products and prices are placeholders.</div>
     <header ref={header} className={`site-header motion ${isHome && scrolled ? "is-floating" : ""}`} onClick={event => { if ((event.target as Element).closest("a")) setOpenMenu(null); }}>
@@ -108,6 +108,7 @@ export function StoreShell({ children }: { children: ReactNode }) {
           </div>}
         </nav>
         <div className="header-actions">
+          <button className="search-button" onClick={openSearch} aria-label="Search products"><SearchGlyph /></button>
           <Link href="/login" className="login-link">Log in</Link>
           <button className="cart-button" onClick={openCart} aria-label={`Open cart, ${count} items`}>Cart <b>{count}</b></button>
           <button className="menu-toggle" aria-expanded={openMenu === "mobile"} aria-controls="mobile-menu" aria-label={openMenu === "mobile" ? "Close menu" : "Open menu"} onClick={() => setOpenMenu(openMenu === "mobile" ? null : "mobile")}>
@@ -181,5 +182,7 @@ export function StoreShell({ children }: { children: ReactNode }) {
         <Link className="text-link cart-full" href="/cart" onClick={closeCart}>View full cart</Link>
       </div>
     </dialog>
+
+    <SearchDialog dialog={searchDialog} />
   </StoreContext.Provider>;
 }

@@ -4,13 +4,12 @@ import Image from "next/image";
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { Icon } from "./admin-ui";
 import { ProductArt } from "./art";
+import { PHOTO_PICK_MAX_BYTES, PHOTO_TYPES, PHOTO_UPLOAD_MAX_BYTES, shrinkPhoto } from "./image-compress";
 import { refreshShop } from "./product-actions";
-import { shelfOf, shelves, type Category, type Product, type Spec } from "./products";
+import { MAX_PHOTOS, photosOf, shelfOf, shelves, type Category, type Product, type Spec } from "./products";
 import { createClient } from "../utils/supabase/client";
 
 const BUCKET = "product-images";
-const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
-const IMAGE_MAX_BYTES = 5 * 1024 * 1024;
 const MAX_PRICE = 2147483647;
 const MAX_STOCK = 100000;
 
@@ -28,6 +27,11 @@ function slugify(name: string) {
 
 const randomSuffix = () => crypto.randomUUID().slice(0, 6);
 const storagePath = (url: string | null) => url?.split(`/${BUCKET}/`)[1]?.split("?")[0] ?? null;
+const storagePaths = (urls: string[]) => urls.flatMap(url => storagePath(url) ?? []);
+
+// A photo in the form. One that is already in the shop has no file, and its src is its public address.
+// A new one holds the shrunk file, and its src is a temporary address for the preview.
+type Photo = { key: string; src: string; file: File | null };
 
 export function ProductForm({ product, defaultCategory, onClose, onSaved }: {
   product: Product | null;
@@ -50,14 +54,20 @@ export function ProductForm({ product, defaultCategory, onClose, onSaved }: {
   const [fits, setFits] = useState<string[]>(product?.fits ?? []);
   const [isNew, setIsNew] = useState(Boolean(product?.badge));
   const [isPublished, setIsPublished] = useState(product?.is_published ?? true);
-  const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [imageUrl, setImageUrl] = useState(product?.image_url ?? null);
+  const [photos, setPhotos] = useState<Photo[]>(() => product ? photosOf(product).map(url => ({ key: url, src: url, file: null })) : []);
+  const [preparing, setPreparing] = useState(false);
   const [devices, setDevices] = useState<{ id: string; name: string }[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => { dialog.current?.showModal(); }, []);
+
+  // Temporary preview addresses are let go when the form closes.
+  const latestPhotos = useRef(photos);
+  useEffect(() => { latestPhotos.current = photos; });
+  useEffect(() => () => {
+    latestPhotos.current.forEach(photo => { if (photo.file) URL.revokeObjectURL(photo.src); });
+  }, []);
 
   useEffect(() => {
     if (category !== "coil") return;
@@ -71,29 +81,55 @@ export function ProductForm({ product, defaultCategory, onClose, onSaved }: {
     if (specs.every(spec => !spec.value.trim())) setSpecs(templateFor(next));
   }
 
-  function chooseImage(event: ChangeEvent<HTMLInputElement>) {
-    const chosen = event.target.files?.[0];
+  // Every photo is shrunk here, before anything is uploaded. Phone photos of several MB end up around 100 to 250 KB.
+  async function choosePhotos(event: ChangeEvent<HTMLInputElement>) {
+    const chosen = Array.from(event.target.files ?? []);
     event.target.value = "";
-    if (!chosen) return;
-    if (!IMAGE_TYPES.includes(chosen.type)) {
-      setError("Please choose a JPG, PNG or WebP image.");
-      return;
-    }
-    if (chosen.size > IMAGE_MAX_BYTES) {
-      setError("That photo is too large. The limit is 5 MB.");
-      return;
-    }
+    if (chosen.length === 0) return;
     setError("");
-    setFile(chosen);
-    if (preview) URL.revokeObjectURL(preview);
-    setPreview(URL.createObjectURL(chosen));
+    setPreparing(true);
+    const room = MAX_PHOTOS - photos.length;
+    const added: Photo[] = [];
+    let problem = chosen.length > room ? `A product can have up to ${MAX_PHOTOS} photos, so ${chosen.length - room} ${chosen.length - room === 1 ? "was" : "were"} left out.` : "";
+    for (const file of chosen.slice(0, room)) {
+      if (!PHOTO_TYPES.includes(file.type)) {
+        problem = "Please choose JPG, PNG or WebP photos.";
+        continue;
+      }
+      if (file.size > PHOTO_PICK_MAX_BYTES) {
+        problem = "That photo is too large. The limit is 25 MB.";
+        continue;
+      }
+      try {
+        const small = await shrinkPhoto(file);
+        if (small.size > PHOTO_UPLOAD_MAX_BYTES) {
+          problem = "That photo is still too large after shrinking. Please choose a smaller one.";
+          continue;
+        }
+        added.push({ key: crypto.randomUUID(), src: URL.createObjectURL(small), file: small });
+      } catch {
+        problem = "A photo couldn't be read. Please try a different one.";
+      }
+    }
+    setPhotos(current => [...current, ...added]);
+    setPreparing(false);
+    setError(problem);
   }
 
-  function removeImage() {
-    setFile(null);
-    if (preview) URL.revokeObjectURL(preview);
-    setPreview(null);
-    setImageUrl(null);
+  function movePhoto(from: number, to: number) {
+    setPhotos(current => {
+      if (to < 0 || to >= current.length) return current;
+      const next = [...current];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
+  }
+
+  function removePhoto(index: number) {
+    const gone = photos[index];
+    if (gone?.file) URL.revokeObjectURL(gone.src);
+    setPhotos(photos.filter((_, position) => position !== index));
   }
 
   function validate() {
@@ -110,6 +146,7 @@ export function ProductForm({ product, defaultCategory, onClose, onSaved }: {
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (preparing) return;
     const problem = validate();
     if (problem) {
       setError(problem);
@@ -119,16 +156,25 @@ export function ProductForm({ product, defaultCategory, onClose, onSaved }: {
     setError("");
     const supabase = createClient();
 
-    let newImageUrl = imageUrl;
-    if (file) {
-      const path = `${crypto.randomUUID()}.${file.type.split("/")[1]}`;
-      const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, file, { contentType: file.type, cacheControl: "31536000" });
+    // New photos go up first, in the order shown. If anything fails after that, they are taken down again.
+    const uploaded: string[] = [];
+    const urls: string[] = [];
+    const takeDown = async () => { if (uploaded.length > 0) await supabase.storage.from(BUCKET).remove(uploaded); };
+    for (const photo of photos) {
+      if (!photo.file) {
+        urls.push(photo.src);
+        continue;
+      }
+      const path = `${crypto.randomUUID()}.${photo.file.type === "image/jpeg" ? "jpg" : photo.file.type.split("/")[1]}`;
+      const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, photo.file, { contentType: photo.file.type, cacheControl: "31536000" });
       if (uploadError) {
-        setError(/row-level security|unauthorized/i.test(uploadError.message) ? "Your account doesn't have permission to upload photos." : "The photo couldn't be uploaded. Please try again.");
+        await takeDown();
+        setError(/row-level security|unauthorized/i.test(uploadError.message) ? "Your account doesn't have permission to upload photos." : "A photo couldn't be uploaded. Please try again.");
         setBusy(false);
         return;
       }
-      newImageUrl = supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+      uploaded.push(path);
+      urls.push(supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl);
     }
 
     const fields = {
@@ -143,7 +189,8 @@ export function ProductForm({ product, defaultCategory, onClose, onSaved }: {
       fits: category === "coil" ? fits : [],
       badge: isNew ? "New" : null,
       is_published: isPublished,
-      image_url: newImageUrl,
+      images: urls,
+      image_url: urls[0] ?? null,
     };
 
     let saveError: { code?: string } | null = null;
@@ -163,13 +210,16 @@ export function ProductForm({ product, defaultCategory, onClose, onSaved }: {
     }
 
     if (saveError || savedRows === 0) {
+      await takeDown();
       setError(saveError?.code === "42501" || (!saveError && savedRows === 0) ? "Your account doesn't have permission to change products." : "The product couldn't be saved. Please try again.");
       setBusy(false);
       return;
     }
 
-    const oldPath = storagePath(product?.image_url ?? null);
-    if (oldPath && product?.image_url !== newImageUrl) await supabase.storage.from(BUCKET).remove([oldPath]);
+    // Photos that were taken off the product are removed from storage too.
+    const kept = new Set(urls);
+    const unused = storagePaths((product ? photosOf(product) : []).filter(url => !kept.has(url)));
+    if (unused.length > 0) await supabase.storage.from(BUCKET).remove(unused);
     const refreshed = await refreshShop().catch(() => ({ ok: false }));
     onSaved(refreshed.ok ? `${fields.name} saved. The shop is up to date.` : `${fields.name} saved. The shop may take up to an hour to show it.`);
   }
@@ -186,8 +236,8 @@ export function ProductForm({ product, defaultCategory, onClose, onSaved }: {
       confirmDialog.current?.close();
       return;
     }
-    const path = storagePath(product.image_url);
-    if (path) await supabase.storage.from(BUCKET).remove([path]);
+    const paths = storagePaths(photosOf(product));
+    if (paths.length > 0) await supabase.storage.from(BUCKET).remove(paths);
     const refreshed = await refreshShop().catch(() => ({ ok: false }));
     onSaved(refreshed.ok ? `${product.name} deleted.` : `${product.name} deleted. The shop may take up to an hour to update.`);
   }
@@ -202,21 +252,28 @@ export function ProductForm({ product, defaultCategory, onClose, onSaved }: {
       </div>
 
       <div className="product-form-body">
-        <div className="product-form-photo">
-          <div className="product-form-preview">
-            {preview ? <Image className="art art-photo" src={preview} alt="" width={120} height={120} unoptimized />
-              : <ProductArt item={{ name, category, type, color: product?.color ?? "#e8f78b", image_url: imageUrl }} sizes="120px" />}
-          </div>
-          <div>
-            <strong>Photo</strong>
-            <p>JPG, PNG or WebP, up to 5 MB.</p>
-            <input ref={fileInput} className="sr-only" type="file" accept={IMAGE_TYPES.join(",")} tabIndex={-1} aria-label="Choose a product photo" onChange={chooseImage} />
-            <div className="product-form-photo-actions">
-              <button type="button" className="button button-outline" onClick={() => fileInput.current?.click()}>{preview || imageUrl ? "Change photo" : "Upload photo"}</button>
-              {(preview || imageUrl) && <button type="button" className="text-link" onClick={removeImage}>Remove</button>}
+        <fieldset className="product-form-group">
+          <legend>Photos</legend>
+          <p>Up to {MAX_PHOTOS}. The first one is the main photo. JPG, PNG or WebP; big photos are shrunk for you.</p>
+          {photos.length === 0
+            ? <div className="photo-empty">
+              <div className="product-form-preview"><ProductArt item={{ name, category, type, color: product?.color ?? "#e8f78b", image_url: null }} sizes="112px" /></div>
+              <p>No photo yet. The shop shows a drawing until you add one.</p>
             </div>
-          </div>
-        </div>
+            : <ul className="photo-list">
+              {photos.map((photo, index) => <li key={photo.key}>
+                <div className="photo-thumb"><Image className="art art-photo" src={photo.src} alt="" width={112} height={112} sizes="112px" unoptimized={photo.file !== null} /></div>
+                {index === 0 && <span className="photo-main">Main</span>}
+                <div className="photo-actions">
+                  <button type="button" aria-label={`Move photo ${index + 1} earlier`} disabled={busy || index === 0} onClick={() => movePhoto(index, index - 1)}>‹</button>
+                  <button type="button" aria-label={`Move photo ${index + 1} later`} disabled={busy || index === photos.length - 1} onClick={() => movePhoto(index, index + 1)}>›</button>
+                  <button type="button" className="is-remove" aria-label={`Remove photo ${index + 1}`} disabled={busy} onClick={() => removePhoto(index)}>×</button>
+                </div>
+              </li>)}
+            </ul>}
+          <input ref={fileInput} className="sr-only" type="file" accept={PHOTO_TYPES.join(",")} multiple tabIndex={-1} aria-label="Choose product photos" onChange={choosePhotos} />
+          <button type="button" className="product-form-add" disabled={busy || preparing || photos.length >= MAX_PHOTOS} onClick={() => fileInput.current?.click()}><Icon name="plus" />{preparing ? "Preparing photos…" : photos.length > 0 ? "Add more photos" : "Add photos"}</button>
+        </fieldset>
 
         <label className="field">Product name<input value={name} maxLength={120} onChange={event => setName(event.target.value)} autoFocus /></label>
 
@@ -282,7 +339,7 @@ export function ProductForm({ product, defaultCategory, onClose, onSaved }: {
         <div>
           {product && <button type="button" className="button button-outline product-form-delete" disabled={busy} onClick={() => confirmDialog.current?.showModal()}>Delete</button>}
           <button type="button" className="button button-outline" disabled={busy} onClick={() => dialog.current?.close()}>Cancel</button>
-          <button type="submit" className="button button-primary" disabled={busy}>{busy ? "Saving…" : product ? "Save changes" : "Add product"}</button>
+          <button type="submit" className="button button-primary" disabled={busy || preparing}>{busy ? "Saving…" : product ? "Save changes" : "Add product"}</button>
         </div>
       </div>
     </form>

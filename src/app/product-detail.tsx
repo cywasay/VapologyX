@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ProductArt } from "./art";
+import { ProductGallery } from "./product-gallery";
 import { AddToCart } from "./product-lists";
 import { fewLeft, isSoldOut, money, productHref, shelfOf, varietyPrice, type Product } from "./products";
 
@@ -29,10 +29,7 @@ export function ProductDetail({ item, fitDevices, coilCount }: { item: Product; 
     </div>
 
     <section className="shell detail-grid" id={`${slug}-overview`} aria-label={`${item.name} overview`}>
-      <div className="tile detail-image">
-        {soldOut ? <span className="badge is-sold">Sold out</span> : item.badge && <span className="badge">{item.badge}</span>}
-        <ProductArt item={item} alt={item.name} sizes="(max-width: 768px) 100vw, 60vw" />
-      </div>
+      <ProductGallery item={item} soldOut={soldOut} />
       <div className="tile detail-info">
         <h1>{item.name}</h1>
         <p className="detail-tagline">{item.type || shelfOf(item.category).singular}</p>

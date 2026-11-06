@@ -7,7 +7,6 @@ import { BottleArt, CoilArt, DeviceArt, DisposableArt, ProductArt } from "./art"
 import { LIME, productHref, type Category, type Product } from "./products";
 import { ProductCard } from "./product-lists";
 import { categories } from "./site-blocks";
-import { useStore } from "./store-shell";
 
 export type ShelfCounts = Record<Category, number>;
 type Phase = "waiting" | "intro" | "settled";
@@ -134,7 +133,6 @@ const SWAP_TIME = 440;
 // Pick a device and its coils slide out from underneath the device tile, like drawers.
 // Changing device pulls the old coils back in first, then deals the new ones.
 export function CoilFinder({ devices, coils }: { devices: Product[]; coils: Record<string, Product[]> }) {
-  const { setFit } = useStore();
   const [ref, seen] = useSeen<HTMLDivElement>();
   const [selected, setSelected] = useState(0);
   const [shown, setShown] = useState(0);
@@ -191,7 +189,7 @@ export function CoilFinder({ devices, coils }: { devices: Product[]; coils: Reco
         {fitting.map((coil, index) => <ProductCard key={`${device.id}-${round}-${coil.id}`} item={coil} meta={`Fits ${device.name}`} style={{ "--k": index + 1 } as CSSProperties} />)}
         {fitting.length === 0 && <p key={`${device.id}-${round}`} className="finder-empty">No coils are listed for {device.name} yet.</p>}
       </div>
-      <Link className="finder-all" href="/coils" onClick={() => setFit(device.id)}>See every coil for {device.name} <i aria-hidden="true">→</i></Link>
+      <Link className="finder-all" href={`/coils?fits=${device.id}`} prefetch={false}>See every coil for {device.name} <i aria-hidden="true">→</i></Link>
     </div>
   </div>;
 }

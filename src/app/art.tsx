@@ -5,6 +5,10 @@ export function Wordmark() {
   return <span className="wordmark">Vapology<i>X</i></span>;
 }
 
+export function SearchGlyph() {
+  return <svg className="search-glyph" viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="5.5" /><path d="m13.2 13.2 3.8 3.8" /></svg>;
+}
+
 // Shared gradients for the product drawings. Render once on any page that uses them.
 export function ArtDefs() {
   const stops = (colors: [number, string][]) => colors.map(([offset, color]) => <stop key={offset} offset={offset} stopColor={color} />);
