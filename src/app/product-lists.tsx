@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { ProductArt } from "./art";
 import { PAGE_SIZE, PRODUCT_COLUMNS, money, productHref, shelfOf, varietyPrice, type Category, type Product, type ProductPage, type Variety } from "./products";
 import { useStore } from "./store-shell";
@@ -63,12 +63,12 @@ function cardSummary(item: Product) {
   return item.description;
 }
 
-function ProductCard({ item, meta }: { item: Product; meta?: string }) {
+export function ProductCard({ item, meta, style }: { item: Product; meta?: string; style?: CSSProperties }) {
   const { quantityOf, add, setFit } = useStore();
   const href = productHref(item);
   const quantity = quantityOf(item.id);
   const hasVarieties = item.variants.length > 0;
-  return <article className="product">
+  return <article className="product" style={style}>
     <Link href={href} className="product-image" aria-label={`View ${item.name}`} tabIndex={-1}>
       {item.badge && <span className="badge">{item.badge}</span>}
       <ProductArt item={item} />

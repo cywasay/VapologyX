@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { createContext, useContext, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { ProductArt, Wordmark } from "./art";
 import { BRAND, MINIMUM_AGE, money, productHref, varietyPrice, type Product, type Variety } from "./products";
-import { categories, StoreDetails } from "./site-blocks";
+import { categories } from "./site-blocks";
 
 type CartLine = { key: string; product: Product; variety: Variety | null; quantity: number };
 type Store = {
@@ -90,6 +90,7 @@ export function StoreShell({ children }: { children: ReactNode }) {
   const navLink = (href: string, label: string) => <Link href={href} className={pathname === href ? "is-current" : ""} aria-current={pathname === href ? "page" : undefined}>{label}</Link>;
 
   return <StoreContext.Provider value={{ quantityOf, add, fit, setFit }}>
+    <div className="store-frame">
     <div className="notice-bar">Adults {MINIMUM_AGE}+ only. Demo storefront: products and prices are placeholders.</div>
     <header ref={header} className={`site-header motion ${isHome && scrolled ? "is-floating" : ""}`} onClick={event => { if ((event.target as Element).closest("a")) setOpenMenu(null); }}>
       <div className="shell header-inner">
@@ -124,43 +125,25 @@ export function StoreShell({ children }: { children: ReactNode }) {
       </div>}
     </header>
 
-    <main>{children}</main>
+    <main className="store-main">{children}</main>
 
-    <footer className="site-footer motion"><div className="shell footer-panel">
-      <div className="footer-top">
-        <div className="footer-brand">
-          <Wordmark />
-          <p>The {BRAND} flagship store. Devices, disposables, bottles and coils under one roof.</p>
-          <span className="footer-age">{MINIMUM_AGE}+ only</span>
-          <p className="footer-note">Social links go here</p>
-        </div>
-        <nav className="footer-col" aria-labelledby="footer-shop">
-          <h2 id="footer-shop">Shop</h2>
-          <ul>{categories.map(item => <li key={item.href}><Link href={item.href}>{item.name}</Link></li>)}</ul>
+    <footer className="site-footer motion">
+      <div className="shell footer-row">
+        <Link href="/" className="footer-brand" aria-label={`${BRAND} home`}><Wordmark /></Link>
+        <nav className="footer-links" aria-label="Footer">
+          {categories.map(item => <Link key={item.href} href={item.href}>{item.name}</Link>)}
+          <Link href="/about">About</Link>
+          <Link href="/contact">Contact</Link>
+          <Link href="/terms">Terms &amp; conditions</Link>
         </nav>
-        <nav className="footer-col" aria-labelledby="footer-help">
-          <h2 id="footer-help">Help</h2>
-          <ul>
-            <li><Link href="/about">About us</Link></li>
-            <li><Link href="/contact">Contact</Link></li>
-            <li><Link href="/terms">Terms &amp; conditions</Link></li>
-            <li><Link href="/login">Log in</Link></li>
-          </ul>
-        </nav>
-        <div className="footer-col footer-visit">
-          <h2>Visit</h2>
-          <StoreDetails />
-        </div>
+        <span className="footer-age">{MINIMUM_AGE}+ only</span>
       </div>
-      <div className="footer-giant" aria-hidden="true">
-        {[...BRAND.slice(0, -1)].map((letter, index) => <span key={index} style={{ "--i": index } as CSSProperties}>{letter}</span>)}
-        <i style={{ "--i": BRAND.length - 1 } as CSSProperties}>{BRAND.slice(-1)}</i>
-      </div>
-      <div className="footer-bottom">
+      <div className="shell footer-legal">
         <p>© {BRAND}. For adults {MINIMUM_AGE} and over. This is a demo: products, specs and prices are placeholders, and nothing here is for sale.</p>
         <button className="footer-up" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>Back to top <i aria-hidden="true">↑</i></button>
       </div>
-    </div></footer>
+    </footer>
+    </div>
 
     <div className="cart-toast-region" role="status">
       {addedLine && <div className="cart-toast">

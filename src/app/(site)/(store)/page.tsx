@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { CategoryRail, CoilFinder, CountUp, HeroStage, HomeMotion, type ShelfCounts } from "../../home-motion";
+import { CategoryRail, CoilFinder, CountUp, HeroStage, HomeMotion, VisitPanel, type ShelfCounts } from "../../home-motion";
 import { getCoilsFor, getProducts } from "../../product-data";
 import { ProductGrid } from "../../product-lists";
 import { BRAND, MINIMUM_AGE, shelves } from "../../products";
 import { StoreDetails } from "../../site-blocks";
-import { Ticker } from "../../ticker";
+
+const STREETS = ["M-10 70 330 40", "M-10 170 330 150", "M90-10 120 250", "M230-10 210 250", "M-10 120 120 110"];
 
 export default async function Home() {
   const [devices, disposables, bottles, coils] = await Promise.all([getProducts("device", 8), getProducts("disposable", 1), getProducts("bottle", 4), getProducts("coil", 1)]);
@@ -34,8 +35,6 @@ export default async function Home() {
       </div>
     </section>
 
-    <Ticker />
-
     <section className="shell section" aria-labelledby="shelves-title">
       <div className="section-heading home-reveal"><h2 id="shelves-title">Pick a shelf.</h2><p>Everything in the store sits on one of these four.</p></div>
       <CategoryRail counts={counts} />
@@ -47,7 +46,7 @@ export default async function Home() {
     </section>
 
     {devices.items.length > 0 && <section className="shell section" aria-labelledby="finder-title">
-      <CoilFinder devices={devices.items.map(device => ({ id: device.id, name: device.name }))} coils={coilsByDevice} />
+      <CoilFinder devices={devices.items} coils={coilsByDevice} />
     </section>}
 
     <section className="sheet home-sheet home-featured" aria-labelledby="featured-bottles">
@@ -58,7 +57,7 @@ export default async function Home() {
     </section>
 
     <section className="shell home-visit" aria-labelledby="visit-title">
-      <div className="home-visit-panel">
+      <VisitPanel>
         <div className="home-visit-copy">
           <span className="home-chip is-light">Flagship store</span>
           <h2 id="visit-title">Come see every shelf in person.</h2>
@@ -67,13 +66,20 @@ export default async function Home() {
         </div>
         <div className="home-map" aria-hidden="true">
           <svg viewBox="0 0 320 240" preserveAspectRatio="xMidYMid slice">
-            <path d="M-10 70 330 40M-10 170 330 150M90-10 120 250M230-10 210 250M-10 120 120 110" />
-            <path className="home-map-route" d="M40 214 112 160 168 168 218 112" />
+            <g className="home-map-streets">{STREETS.map(path => <path key={path} pathLength="100" d={path} />)}</g>
+            <path className="home-map-route" pathLength="100" d="M40 214 112 160 168 168 218 112" />
+            <g className="home-pin" transform="translate(218 112)">
+              <ellipse className="home-pin-ripple" rx="7" ry="2.6" />
+              <ellipse className="home-pin-ripple" rx="7" ry="2.6" />
+              <g className="home-pin-drop">
+                <path className="home-pin-shape" d="M0 0C-4-7-12-13-12-22a12 12 0 1 1 24 0C12-13 4-7 0 0Z" />
+                <circle className="home-pin-hole" cy="-22" r="4.6" />
+              </g>
+            </g>
           </svg>
-          <span className="home-pin"><i /><i /><b /></span>
         </div>
         <StoreDetails />
-      </div>
+      </VisitPanel>
     </section>
   </HomeMotion>;
 }
