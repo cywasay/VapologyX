@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { SearchGlyph } from "./art";
+import { Select } from "./dropdown";
 import { ProductGrid } from "./product-lists";
 import { DEFAULT_QUERY, SORTS, fetchProducts, limitQuery, readQuery, whole, writeQuery, type Query } from "./product-query";
 import { shelves, type Category, type Product, type ProductPage } from "./products";
@@ -86,11 +87,7 @@ function useResults(scope: Category | null, key: string, initial: ProductPage | 
 
 function Choice({ label, options, value, onChange }: { label: string; options: Option[]; value: string; onChange: (value: string) => void }) {
   if (options.length > 8) {
-    return <label className="shelf-control">{label}
-      <select value={value} onChange={event => onChange(event.target.value)}>
-        {options.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
-      </select>
-    </label>;
+    return <label className="shelf-control">{label}<Select variant="pill" value={value} options={options} onChange={onChange} /></label>;
   }
   return <div className="tabs" role="group" aria-label={label}>
     {options.map(option => <button key={option.value} type="button" className={value === option.value ? "is-active" : ""} aria-pressed={value === option.value} onClick={() => onChange(option.value)}>{option.label}</button>)}
@@ -243,9 +240,7 @@ export function ShelfBrowser({ category, initial, types = [], typeLabel = "Type"
           <div className="shelf-tools-side">
             <button type="button" className="shelf-filter-toggle" aria-expanded={extrasOpen} aria-controls={extraId} onClick={() => setExtrasOpen(open => !open)}>Filters{extraCount > 0 && <b>{extraCount}</b>}</button>
             <label className="shelf-control">Sort by
-              <select value={query.sort} onChange={event => update({ sort: event.target.value as Query["sort"] })}>
-                {SORTS.map(item => <option key={item.value} value={item.value}>{item.label}</option>)}
-              </select>
+              <Select variant="pill" value={query.sort} options={SORTS.map(item => ({ value: item.value, label: item.label }))} onChange={next => update({ sort: next as Query["sort"] })} />
             </label>
           </div>
         </div>

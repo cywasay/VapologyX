@@ -18,12 +18,8 @@ const icons = {
   edit: "M4 20h4L19 9l-4-4L4 16ZM13.5 6.5l4 4",
 };
 
-export function Icon({ name }: { name: keyof typeof icons }) {
-  return <svg className="admin-icon" viewBox="0 0 24 24" aria-hidden="true"><path d={icons[name]} /></svg>;
-}
+export type IconName = keyof typeof icons;
 
-export function Pills({ label, options, value, onChange, count }: { label: string; options: { value: string; label: string }[]; value: string; onChange: (option: string) => void; count: (option: string) => number | string }) {
-  return <div className="admin-pills" role="group" aria-label={label}>
-    {options.map(option => <button key={option.value} className={value === option.value ? "is-active" : ""} aria-pressed={value === option.value} onClick={() => onChange(option.value)}>{option.label} <span>{count(option.value)}</span></button>)}
-  </div>;
+export function Icon({ name }: { name: IconName }) {
+  return <svg className="admin-icon" viewBox="0 0 24 24" aria-hidden="true"><path d={icons[name]} /></svg>;
 }

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState, type FormEvent, type InputHTMLAttributes } from "react";
 import { lineUnitPrice, useCartSync, useHydrated, type CartLine } from "./cart-store";
+import { ComboInput } from "./dropdown";
 import { DemoNote, FlowSteps, FreeDeliveryBar, SummaryLine } from "./flow-ui";
 import { CITIES, DELIVERY_FEE, DELIVERY_METHODS, FREE_DELIVERY_FROM, PAYMENT_METHODS, normalizePhone, orderTotals, paymentNote, placeOrder, type DeliveryMethod, type OrderLine, type PaymentId } from "./orders";
 import { MINIMUM_AGE, money } from "./products";
@@ -68,13 +69,16 @@ const toOrderLine = (line: CartLine): OrderLine => ({
   image_url: line.item.image_url,
 });
 
-type TextFieldProps = { id: Field | "notes"; label: string; error?: string; hint?: string; optional?: boolean; onValue: (value: string) => void } & Omit<InputHTMLAttributes<HTMLInputElement>, "id" | "onChange">;
+type TextFieldProps = { id: Field | "notes"; label: string; error?: string; hint?: string; optional?: boolean; suggestions?: string[]; onValue: (value: string) => void } & Omit<InputHTMLAttributes<HTMLInputElement>, "id" | "onChange" | "list">;
 
-function TextField({ id, label, error, hint, optional, onValue, ...input }: TextFieldProps) {
+function TextField({ id, label, error, hint, optional, suggestions, onValue, ...input }: TextFieldProps) {
   const describedBy = error ? `checkout-${id}-error` : hint ? `checkout-${id}-hint` : undefined;
+  const shared = { id: `checkout-${id}`, name: id, "aria-invalid": error ? true : undefined, "aria-describedby": describedBy } as const;
   return <div className="field">
     <label htmlFor={`checkout-${id}`}>{label}{optional && <span> (optional)</span>}</label>
-    <input {...input} id={`checkout-${id}`} name={id} aria-invalid={error ? true : undefined} aria-describedby={describedBy} onChange={event => onValue(event.target.value)} />
+    {suggestions
+      ? <ComboInput {...input} {...shared} value={String(input.value ?? "")} suggestions={suggestions} onValue={onValue} />
+      : <input {...input} {...shared} onChange={event => onValue(event.target.value)} />}
     {error ? <span className="field-error" id={`checkout-${id}-error`}>{error}</span> : hint && <span className="field-hint" id={`checkout-${id}-hint`}>{hint}</span>}
   </div>;
 }
@@ -168,8 +172,7 @@ function CheckoutForm({ lines, locked, onPlaced }: { lines: CartLine[]; locked: 
         ? <div className="checkout-pickup"><strong>Collect your order here</strong><StoreDetails /></div>
         : <>
           <TextField id="address" label="Address" value={values.address} error={errors.address} hint="House or flat number, street and area." autoComplete="street-address" onValue={value => set("address", value)} />
-          <TextField id="city" label="City" value={values.city} error={errors.city} list="checkout-cities" autoComplete="address-level2" onValue={value => set("city", value)} />
-          <datalist id="checkout-cities">{CITIES.map(city => <option key={city} value={city} />)}</datalist>
+          <TextField id="city" label="City" value={values.city} error={errors.city} suggestions={[...CITIES]} onValue={value => set("city", value)} />
         </>}
       <div className="field">
         <label htmlFor="checkout-notes">{pickup ? "Note for the store" : "Delivery note"}<span> (optional)</span></label>

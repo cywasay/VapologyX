@@ -41,8 +41,11 @@ export const updateSession = async (request: NextRequest) => {
     return response;
   };
 
-  if (pathname.startsWith("/admin") && !isAdmin) return redirectTo(claims ? "/" : "/login");
-  if (pathname === "/login" && isAdmin) return redirectTo("/admin");
+  // The dashboard is for admins only. Admin log in, register and forgot password stay open, but an admin who is already in goes straight to the dashboard.
+  const inDashboard = pathname === "/admin/dashboard" || pathname.startsWith("/admin/dashboard/");
+  if (pathname === "/admin" || pathname === "/admin/") return redirectTo(isAdmin ? "/admin/dashboard" : "/admin/login");
+  if (inDashboard && !isAdmin) return redirectTo(claims ? "/" : "/admin/login");
+  if (isAdmin && (pathname === "/login" || (pathname.startsWith("/admin/") && !inDashboard))) return redirectTo("/admin/dashboard");
 
   return supabaseResponse;
 };

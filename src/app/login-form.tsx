@@ -46,7 +46,7 @@ export function LoginForm() {
     }
     form.reset();
     // A full page load so the server sees the new login straight away.
-    window.location.replace(data.user.app_metadata.role === "admin" ? "/admin" : "/");
+    window.location.replace(data.user.app_metadata.role === "admin" ? "/admin/dashboard" : "/");
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
