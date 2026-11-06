@@ -35,9 +35,14 @@ function subscribe(listener: () => void) {
   return () => { listeners.delete(listener); };
 }
 
+// "pending" on the server keeps the store covered until the browser has checked.
+const useStatus = () => useSyncExternalStore(subscribe, readStatus, () => "pending" as Status);
+
+// True once the visitor is through the gate, so intro animations can wait for them.
+export const useAgeVerified = () => useStatus() === "verified";
+
 export function AgeGate({ children }: { children: ReactNode }) {
-  // "pending" on the server keeps the store covered until the browser has checked.
-  const status = useSyncExternalStore(subscribe, readStatus, () => "pending" as Status);
+  const status = useStatus();
 
   useEffect(() => {
     if (status === "denied") window.location.replace("/denied");

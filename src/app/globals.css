@@ -50,7 +50,7 @@ button:disabled { cursor: not-allowed; }
 h1, h2, h3, p, ul, dl, dd { margin: 0; padding: 0; }
 h1, h2, h3 { font-family: var(--font-display); font-weight: 700; letter-spacing: -.03em; }
 button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-.hero-copy :focus-visible, .page-head-copy :focus-visible, .tone-dark:focus-visible, .cart-button:focus-visible, .admin-side :focus-visible, .admin-card.is-black :focus-visible { outline-color: var(--accent); }
+.home-hero-panel :focus-visible, .page-head-copy :focus-visible, .tone-dark:focus-visible, .cart-button:focus-visible, .admin-side :focus-visible, .admin-card.is-black :focus-visible, .finder-pills :focus-visible, .finder-all:focus-visible, .footer-panel :focus-visible, .site-header.is-floating .header-inner :focus-visible { outline-color: var(--accent); }
 ::selection { color: var(--ink); background: var(--accent); }
 .shell { width: calc(100% - 48px); max-width: var(--page-width); margin-inline: auto; }
 
@@ -64,8 +64,8 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
 .button-primary { color: var(--on-dark); background: var(--ink); }
 .button-primary:hover { background: var(--ink-raised); }
 .button-primary:disabled { color: var(--muted); background: var(--surface); }
-.hero-copy .button-primary, .cart-toast .button-primary { color: var(--ink); background: var(--accent); }
-.hero-copy .button-primary:hover, .cart-toast .button-primary:hover { background: var(--accent-hover); }
+.cart-toast .button-primary { color: var(--ink); background: var(--accent); }
+.cart-toast .button-primary:hover { background: var(--accent-hover); }
 .button-outline { border: 1.5px solid currentColor; }
 .button-outline:hover { color: var(--ink); background: var(--accent); border-color: var(--accent); }
 .button-add { min-height: 40px; padding: 8px 16px; font-size: 14px; white-space: nowrap; color: var(--on-dark); background: var(--ink); }
@@ -74,6 +74,8 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
 .button-dark:hover, .button-black:hover { background: var(--ink-raised); }
 .button-white { color: var(--ink); background: var(--white); }
 .button-white:hover { background: var(--accent); }
+.button-lime { color: var(--ink); background: var(--accent); }
+.button-lime:hover { background: var(--accent-hover); }
 .text-link { display: inline-block; margin-top: 8px; font-size: 14px; font-weight: 500; text-decoration: underline; text-underline-offset: 3px; transition: color var(--motion); }
 
 .notice-bar { padding: 8px var(--space-inner); text-align: center; font-size: 12px; font-weight: 500; color: var(--on-dark); background: var(--ink); }
@@ -99,32 +101,29 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
 .cart-button { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 8px 8px 8px var(--space-inner); font-size: 14px; font-weight: 600; color: var(--on-dark); background: var(--ink); border-radius: var(--radius-pill); }
 .cart-button b { display: inline-grid; place-items: center; min-width: 32px; height: 32px; padding-inline: 8px; font-size: 13px; font-weight: 700; color: var(--ink); background: var(--accent); border-radius: var(--radius-pill); }
 
-/* Bento layout: colored tiles of different sizes instead of stacked plain sections. */
+/* Home page only: once the hero scrolls away, the header bar shrinks into a floating black pill.
+   Its height stays the same, so the page below never jumps. */
+.site-header { display: flow-root; transition: background var(--morph); }
+.header-inner { transition: max-width var(--morph), min-height var(--morph), margin-top var(--morph), margin-bottom var(--morph), padding var(--morph), color var(--morph), background var(--morph), border-radius var(--morph), box-shadow var(--morph); }
+.site-nav, .cart-button, .cart-button b, .menu-toggle { transition: color var(--morph), background var(--morph); }
+.site-header.is-floating { background: transparent; backdrop-filter: none; pointer-events: none; }
+.site-header.is-floating .header-inner, .site-header.is-floating .mobile-menu { pointer-events: auto; }
+.site-header.is-floating .header-inner { max-width: 880px; min-height: 56px; margin-top: 8px; margin-bottom: 8px; padding: 5px 6px 5px 22px; color: var(--on-dark); background: #141518f0; border-radius: var(--radius-pill); box-shadow: 0 18px 44px #14151840; }
+.site-header.is-floating .site-nav { background: var(--ink-raised); }
+.site-header.is-floating .site-nav .is-current { color: var(--ink); background: var(--accent); }
+.site-header.is-floating .login-link, .site-header.is-floating .cart-button { min-height: 44px; }
+.site-header.is-floating .cart-button { padding-block: 6px; color: var(--ink); background: var(--accent); }
+.site-header.is-floating .cart-button b { color: var(--accent); background: var(--ink); }
+.site-header.is-floating .menu-toggle { color: var(--on-dark); background: var(--ink-raised); }
+
 .tile { border-radius: var(--radius-panel); }
-.bento { display: grid; grid-template-columns: repeat(12, 1fr); gap: var(--space-inner); padding-top: 8px; }
-.hero-copy { grid-column: span 7; display: flex; flex-direction: column; justify-content: center; padding: 48px; color: var(--on-dark); background: var(--ink); }
-.hero-copy h1 { margin: var(--space-inner) 0 var(--space-related); font-size: clamp(46px, 5.9vw, 84px); line-height: .98; letter-spacing: -.045em; }
-.hero-copy h1 em { font-style: normal; color: var(--accent); }
-.hero-copy > p { max-width: 30rem; font-size: 17px; line-height: 1.5; color: var(--muted-on-dark); }
 .hero-actions { display: flex; flex-wrap: wrap; gap: var(--space-inner); margin-top: var(--space-group); }
-.hero-display { position: relative; grid-column: span 5; display: flex; align-items: flex-end; justify-content: center; padding: 80px 2% var(--space-inner); color: var(--ink); background: var(--accent); }
-.hero-label { position: absolute; top: var(--space-related); left: var(--space-group); font-family: var(--font-display); font-size: 24px; font-weight: 700; letter-spacing: -.03em; }
-.hero-label i { display: inline-block; font-style: normal; transition: transform var(--motion); }
-.hero-display:hover .hero-label i { transform: translateX(4px); }
-.hero-display .art { height: auto; }
 .hero-item-main { flex: 1.7 1 0; min-width: 0; z-index: 1; margin-inline: -10%; }
 .hero-item-side { flex: 1 1 0; min-width: 0; }
 
 .art { display: block; width: 100%; height: 100%; }
 .art-photo { object-fit: contain; }
 
-.category { grid-column: span 3; display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; height: 176px; padding: var(--space-related) 8px 0 var(--space-related); overflow: hidden; }
-.category > div { align-self: stretch; display: flex; flex-direction: column; justify-content: space-between; padding-bottom: var(--space-related); }
-.category h2 { font-size: 24px; line-height: 1; }
-.category span { font-size: 14px; font-weight: 500; }
-.category i { font-style: normal; }
-.category .art { width: 92px; height: 148px; flex-shrink: 0; transform: translateY(8px); transition: transform var(--motion); }
-.category:hover .art { transform: translateY(0); }
 .tone-light { background: var(--white); }
 .tone-gray { background: var(--surface); }
 .tone-lime { background: var(--accent); }
@@ -165,7 +164,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
 .store-error { display: grid; justify-items: start; gap: var(--space-inner); padding-block: var(--space-section); }
 .store-error h1 { font-size: clamp(32px, 3.4vw, 44px); line-height: 1.05; }
 .store-error p { color: var(--muted); }
-.product { display: flex; flex-direction: column; padding: var(--space-inner); background: var(--white); border-radius: var(--radius-card); transition: transform var(--motion), box-shadow var(--motion); }
+.product { display: flex; flex-direction: column; padding: var(--space-inner); color: var(--ink); background: var(--white); border-radius: var(--radius-card); transition: transform var(--motion), box-shadow var(--motion); }
 .product:hover { transform: translateY(-4px); box-shadow: 0 16px 32px #1415181f; }
 .product-image { position: relative; display: block; aspect-ratio: 1; padding: 4% 12% 2%; margin-bottom: var(--space-inner); }
 .badge { position: absolute; top: 0; left: 0; z-index: 1; padding: 4px 12px; font-size: 12px; font-weight: 600; color: var(--ink); background: var(--accent); border-radius: var(--radius-pill); }
@@ -187,11 +186,173 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
 .store-details dt { font-size: 14px; font-weight: 700; }
 .store-details dd { font-size: 16px; }
 
-.site-footer { padding-block: var(--space-group); }
-.footer-inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-inner) var(--space-group); }
-.footer-inner p { flex-basis: 100%; font-size: 13px; line-height: 1.5; color: var(--muted); }
-.footer-links { display: flex; flex-wrap: wrap; gap: 8px var(--space-related); font-size: 14px; font-weight: 500; }
-.footer-links a:hover { text-decoration: underline; text-underline-offset: 3px; }
+/* Home: the hero grows out of a pill, a stage shape-shifts between shelves, and sections open as they scroll in. */
+.home-chip { display: inline-flex; align-items: center; align-self: flex-start; gap: 10px; padding: 8px 14px; font-size: 13px; font-weight: 600; color: var(--accent); background: var(--ink-raised); border-radius: var(--radius-pill); }
+.home-chip i { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; animation: ping 2.4s ease-out infinite; }
+.home-chip.is-light { color: var(--ink); background: #14151814; }
+.home-hero { padding-top: 8px; }
+.home-hero-panel { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: var(--space-group); min-height: clamp(560px, calc(100dvh - 140px), 760px); padding: 48px 48px 40px 56px; color: var(--on-dark); background: var(--ink); border-radius: var(--radius-panel); }
+.home-hero-copy { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+.home-title { margin: var(--space-related) 0; font-size: clamp(46px, 6vw, 92px); line-height: .96; letter-spacing: -.05em; }
+/* Each line slides up from behind its own edge. The padding keeps descenders from being cut. */
+.home-title > span { display: block; overflow: hidden; padding-bottom: .16em; margin-bottom: -.16em; }
+.home-title > span > span { display: inline-block; }
+.home-title em { position: relative; z-index: 0; display: inline-block; padding-inline: .16em; font-style: normal; color: var(--ink); }
+.home-title em::before { content: ""; position: absolute; inset: .1em 0 .02em; z-index: -1; background: var(--accent); border-radius: var(--radius-pill); }
+.home-hero-copy > p { max-width: 30rem; font-size: 17px; line-height: 1.5; color: var(--muted-on-dark); }
+.home-stats { display: flex; flex-wrap: wrap; gap: var(--space-inner) 48px; margin-top: 48px; padding-top: var(--space-related); border-top: 1px solid var(--line-dark); }
+.home-stats div { display: grid; gap: 4px; }
+.home-stats dt { order: 2; font-size: 13px; color: var(--muted-on-dark); }
+.home-stats dd { font-family: var(--font-display); font-size: 34px; font-weight: 700; line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+
+/* The stage: one shape whose size, corners, turn and color all morph for each shelf. Sizes use the
+   frame's own units (cqw, cqh), so every corner can morph smoothly from rounded square to capsule. */
+.stage { --stage-morph: 900ms cubic-bezier(.6, 0, .2, 1); display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.stage[data-shape="0"] { --w: 70cqw; --h: 74cqh; --r: 9cqmin; --turn: -6deg; --tone: var(--accent); }
+.stage[data-shape="1"] { --w: 42cqw; --h: 90cqh; --r: 21cqw; --turn: 0deg; --tone: var(--white); }
+.stage[data-shape="2"] { --w: 78cqmin; --h: 78cqmin; --r: 39cqmin; --turn: 90deg; --tone: #c7cac5; }
+.stage[data-shape="3"] { --w: 90cqw; --h: 46cqh; --r: 23cqh; --turn: -10deg; --tone: var(--accent-hover); }
+.stage-frame { position: relative; flex: 1; min-height: 380px; container-type: size; }
+.stage-shape, .stage-ring { position: absolute; top: 50%; left: 50%; width: var(--w); height: var(--h); border-radius: var(--r); translate: -50% -50%; rotate: var(--turn); }
+.stage-shape { background: var(--tone); transition: width var(--stage-morph), height var(--stage-morph), border-radius var(--stage-morph), rotate var(--stage-morph), background 600ms ease; }
+/* A thin outline follows the shape a beat late, like a wake. */
+.stage-ring { width: calc(var(--w) + 7cqmin); height: calc(var(--h) + 7cqmin); border-radius: calc(var(--r) + 3.5cqmin); border: 1.5px solid #e8f78b59; transition: width 1100ms cubic-bezier(.6, 0, .2, 1) 120ms, height 1100ms cubic-bezier(.6, 0, .2, 1) 120ms, border-radius 1100ms cubic-bezier(.6, 0, .2, 1) 120ms, rotate 1300ms cubic-bezier(.6, 0, .2, 1) 120ms; }
+.stage-art { position: absolute; inset: 9% 20%; display: grid; place-items: center; opacity: 0; translate: 0 22%; scale: .82; rotate: -10deg; transition: opacity 300ms ease, translate 300ms ease, scale 300ms ease, rotate 300ms ease; }
+.stage-art .art { filter: drop-shadow(0 24px 30px #14151866); }
+.stage-art.is-active { opacity: 1; translate: 0 0; scale: 1; rotate: 0deg; transition: opacity 500ms ease 260ms, translate 900ms cubic-bezier(.2, .8, .2, 1) 220ms, scale 900ms cubic-bezier(.2, .8, .2, 1) 220ms, rotate 900ms cubic-bezier(.2, .8, .2, 1) 220ms; }
+.stage-art.is-leaving { translate: 0 -24%; scale: .86; rotate: 10deg; }
+.stage-index { position: absolute; top: 0; right: 0; font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+.stage-index i { font-style: normal; color: var(--muted-on-dark); }
+.stage-switch { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 4px; background: var(--ink-raised); border-radius: var(--radius-pill); }
+.stage-switch button, .finder-pills button { position: relative; z-index: 1; min-height: 44px; padding: 8px 6px; font-size: 14px; font-weight: 600; color: var(--muted-on-dark); border-radius: var(--radius-pill); transition: color 160ms ease; }
+.stage-switch button:hover, .finder-pills button:hover { color: var(--on-dark); }
+.stage-switch .is-current, .stage-switch .is-current:hover, .finder-pills .is-current, .finder-pills .is-current:hover { color: var(--ink); transition: color 180ms ease 140ms; }
+/* The same liquid highlight as the admin sidebar: the leading edge moves first, the trailing edge catches up. */
+.stage-highlight { position: absolute; top: 4px; bottom: 4px; left: calc(4px + var(--active) * (100% - 8px) / 4); right: calc(4px + (3 - var(--active)) * (100% - 8px) / 4); background: var(--accent); border-radius: var(--radius-pill); }
+.stage.is-moving-forward .stage-highlight { transition: right 300ms cubic-bezier(.3, .7, .2, 1), left 480ms cubic-bezier(.6, 0, .2, 1) 40ms; }
+.stage.is-moving-back .stage-highlight { transition: left 300ms cubic-bezier(.3, .7, .2, 1), right 480ms cubic-bezier(.6, 0, .2, 1) 40ms; }
+.stage-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-inner); padding-left: 8px; }
+.stage-link { display: grid; gap: 2px; }
+.stage-link b { font-family: var(--font-display); font-size: 20px; font-weight: 700; letter-spacing: -.02em; animation: rise 400ms ease-out; }
+.stage-link span { font-size: 14px; font-weight: 500; color: var(--muted-on-dark); transition: color var(--motion); }
+.stage-link i { display: inline-block; font-style: normal; transition: translate var(--motion); }
+.stage-link:hover span { color: var(--accent); }
+.stage-link:hover i { translate: 4px 0; }
+.stage-pause { position: relative; display: grid; place-items: center; flex-shrink: 0; width: 44px; height: 44px; color: var(--on-dark); border-radius: var(--radius-pill); transition: color var(--motion); }
+.stage-pause:hover { color: var(--accent); }
+.stage-timer { position: absolute; inset: 0; rotate: -90deg; fill: none; stroke-width: 2; }
+.stage-timer circle:first-child { stroke: var(--line-dark); }
+.stage-timer circle + circle { stroke: var(--accent); stroke-dasharray: 126; stroke-dashoffset: 126; }
+.stage-timer .is-running { animation: timer var(--stage-time) linear forwards; }
+.stage-pause-icon { width: 14px; height: 14px; fill: currentColor; }
+
+/* Shelves: narrow pills side by side. The one under the pointer opens into a panel, like the sidebar. */
+.rail { --rail-morph: 640ms cubic-bezier(.5, 0, .15, 1); display: flex; gap: var(--space-inner); height: 440px; }
+.rail-panel { position: relative; flex: 1 1 0; min-width: 0; overflow: hidden; border-radius: 80px; transition: flex-grow var(--rail-morph), border-radius var(--rail-morph); }
+.rail-panel.is-open { flex-grow: 4.4; border-radius: var(--radius-panel); }
+.rail-count { position: absolute; top: 20px; left: 50%; display: grid; place-items: center; min-width: 44px; height: 32px; padding-inline: 10px; font-size: 13px; font-weight: 700; background: #14151814; border-radius: var(--radius-pill); translate: -50% 0; transition: left var(--rail-morph), translate var(--rail-morph); }
+.tone-dark .rail-count { background: #ffffff1f; }
+.rail-panel.is-open .rail-count { left: var(--space-related); translate: 0 0; }
+.rail-tag { position: absolute; bottom: 28px; left: 50%; font-family: var(--font-display); font-size: 22px; font-weight: 700; letter-spacing: -.02em; white-space: nowrap; writing-mode: vertical-rl; rotate: 180deg; translate: -50% 0; transition: opacity 200ms ease 300ms; }
+.rail-panel.is-open .rail-tag { opacity: 0; transition: opacity 120ms ease; }
+.rail-copy { position: absolute; bottom: var(--space-related); left: var(--space-related); display: grid; justify-items: start; gap: 8px; width: min(46%, 300px); opacity: 0; transition: opacity 120ms ease; }
+.rail-panel.is-open .rail-copy { opacity: 1; transition: opacity 300ms ease 320ms; }
+.rail-copy strong { font-family: var(--font-display); font-size: clamp(32px, 3vw, 44px); font-weight: 700; line-height: 1; letter-spacing: -.04em; }
+.rail-copy span { font-size: 15px; line-height: 1.45; color: var(--muted); }
+.tone-lime .rail-copy span { color: var(--ink); }
+.tone-dark .rail-copy span { color: var(--muted-on-dark); }
+.rail-copy em { display: inline-flex; gap: 6px; margin-top: 8px; padding: 10px 18px; font-size: 14px; font-style: normal; font-weight: 600; color: var(--on-dark); background: var(--ink); border-radius: var(--radius-pill); }
+.tone-dark .rail-copy em { color: var(--ink); background: var(--accent); }
+.rail-copy i { font-style: normal; transition: translate var(--motion); }
+.rail-panel:hover .rail-copy i { translate: 4px 0; }
+.rail-panel .art { position: absolute; top: 72px; right: 50%; width: 120px; height: 190px; rotate: -8deg; translate: 50% 0; transition: top var(--rail-morph), right var(--rail-morph), width var(--rail-morph), height var(--rail-morph), rotate var(--rail-morph), translate var(--rail-morph); }
+.rail-panel.is-open .art { top: 28px; right: 6%; width: 46%; height: calc(100% - 28px); rotate: 0deg; translate: 0 6%; }
+
+/* Coil finder: device pills with the liquid highlight, and the coils that fit popping in below. */
+.finder { display: grid; gap: var(--space-related); padding: 48px; color: var(--on-dark); background: var(--ink); border-radius: var(--radius-panel); }
+.finder-head { display: grid; gap: 12px; max-width: 34rem; }
+.finder-head h2 { font-size: clamp(32px, 3.4vw, 48px); line-height: 1.02; letter-spacing: -.04em; }
+.finder-head p { line-height: 1.5; color: var(--muted-on-dark); }
+.finder-pills { position: relative; display: flex; flex-wrap: wrap; justify-self: start; gap: 4px; max-width: 100%; padding: 4px; background: var(--ink-raised); border-radius: 26px; }
+.finder-pills button { padding-inline: 18px; }
+.finder-highlight { position: absolute; top: var(--top, 4px); right: var(--right, 100%); bottom: var(--bottom, 4px); left: var(--left, 4px); background: var(--accent); border-radius: var(--radius-pill); }
+.finder-pills.is-moving-forward .finder-highlight { transition: right 300ms cubic-bezier(.3, .7, .2, 1), bottom 300ms cubic-bezier(.3, .7, .2, 1), left 480ms cubic-bezier(.6, 0, .2, 1) 40ms, top 480ms cubic-bezier(.6, 0, .2, 1) 40ms; }
+.finder-pills.is-moving-back .finder-highlight { transition: left 300ms cubic-bezier(.3, .7, .2, 1), top 300ms cubic-bezier(.3, .7, .2, 1), right 480ms cubic-bezier(.6, 0, .2, 1) 40ms, bottom 480ms cubic-bezier(.6, 0, .2, 1) 40ms; }
+.finder-results .product { animation: card-pop 640ms cubic-bezier(.2, .8, .2, 1) both; }
+.finder-results .product:nth-child(2) { animation-delay: 70ms; }
+.finder-results .product:nth-child(3) { animation-delay: 140ms; }
+.finder-results .product:nth-child(4) { animation-delay: 210ms; }
+.finder-empty { padding-block: var(--space-group); color: var(--muted-on-dark); animation: rise 400ms ease-out; }
+.finder-all { justify-self: start; font-size: 14px; font-weight: 600; color: var(--accent); }
+.finder-all:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+.home-visit { padding-top: var(--space-section); }
+.home-visit-panel { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); grid-template-areas: "copy map" "details map"; gap: var(--space-group) 48px; padding: 48px; background: var(--accent); border-radius: var(--radius-panel); }
+.home-visit-copy { grid-area: copy; display: grid; justify-items: start; gap: var(--space-inner); }
+.home-visit-copy h2 { font-size: clamp(34px, 4vw, 56px); line-height: 1; letter-spacing: -.04em; }
+.home-visit-copy p { max-width: 30rem; line-height: 1.5; }
+.home-visit-copy .button { margin-top: 8px; }
+.home-visit-panel .store-details { grid-area: details; }
+.home-map { grid-area: map; position: relative; min-height: 320px; overflow: hidden; background: var(--ink); border-radius: var(--radius-card); }
+.home-map svg { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke: #ffffff1f; stroke-width: 10; stroke-linecap: round; }
+.home-map-route { stroke: var(--accent); stroke-width: 3; stroke-dasharray: 6 8; animation: route 1.6s linear infinite; }
+.home-pin { position: absolute; top: 47%; left: 68%; display: grid; place-items: center; width: 24px; height: 24px; translate: -50% -50%; }
+.home-pin b { width: 22px; height: 22px; background: var(--accent); border: 5px solid var(--ink); border-radius: 50%; box-shadow: 0 0 0 2px var(--accent); }
+.home-pin i { position: absolute; inset: 0; border: 2px solid var(--accent); border-radius: 50%; animation: ripple 2.4s ease-out infinite; }
+.home-pin i + i { animation-delay: 1.2s; }
+
+/* Intro, played once after the age check: the black hero grows from a dot, into a long pill, into
+   the full panel. Then the headline lines slide up and the lime pill sweeps behind "Every flavor." */
+.home.is-intro .home-hero-panel { animation: hero-open 1200ms cubic-bezier(.7, 0, .2, 1) both; }
+.home.is-intro .home-title > span > span { animation: line-up 900ms cubic-bezier(.2, .8, .2, 1) 700ms both; }
+.home.is-intro .home-title > span:nth-child(2) > span { animation-delay: 800ms; }
+.home.is-intro .home-title > span:nth-child(3) > span { animation-delay: 900ms; }
+.home.is-intro .home-title em { animation: ink-in 200ms ease 1700ms both; }
+.home.is-intro .home-title em::before { animation: swipe 700ms cubic-bezier(.7, 0, .2, 1) 1450ms both; }
+.home.is-intro .home-chip { animation: fade-up 700ms cubic-bezier(.2, .8, .2, 1) 600ms both; }
+.home.is-intro .home-hero-copy > p { animation: fade-up 700ms cubic-bezier(.2, .8, .2, 1) 1000ms both; }
+.home.is-intro .home-hero-copy .hero-actions { animation: fade-up 700ms cubic-bezier(.2, .8, .2, 1) 1100ms both; }
+.home.is-intro .home-stats { animation: fade-up 700ms cubic-bezier(.2, .8, .2, 1) 1200ms both; }
+.home.is-intro .stage { animation: stage-in 1100ms cubic-bezier(.2, .8, .2, 1) 650ms both; }
+
+/* Scroll-linked motion, where the browser supports it. Elsewhere everything simply shows. */
+@supports (animation-timeline: view()) {
+  .home-hero { animation: hero-tuck linear both; animation-timeline: view(); animation-range: exit 0% exit 100%; }
+  .home-reveal, .home-featured .product, .rail-panel { animation: rise-in linear both; animation-timeline: view(); animation-range: entry 0% entry 70%; }
+  .home-featured .product:nth-child(4n + 2), .rail-panel:nth-child(2) { animation-range: entry 8% entry 78%; }
+  .home-featured .product:nth-child(4n + 3), .rail-panel:nth-child(3) { animation-range: entry 16% entry 86%; }
+  .home-featured .product:nth-child(4n + 4), .rail-panel:nth-child(4) { animation-range: entry 24% entry 94%; }
+  .home-sheet, .finder, .home-visit-panel, .footer-panel { animation: pill-open linear both; animation-timeline: view(); animation-range: entry 0% entry 65%; }
+  .footer-giant span, .footer-giant i { animation: letter-up linear both; animation-timeline: view(); animation-range: entry calc(var(--i) * 5%) entry calc(55% + var(--i) * 5%); }
+}
+
+/* Footer: a dark panel that opens out of a pill as it scrolls in, with a giant wordmark rising letter by letter. */
+.site-footer { padding: var(--space-section) 0 var(--space-inner); }
+.footer-panel { display: grid; gap: 48px; padding: 56px 48px var(--space-related); overflow: hidden; color: var(--on-dark); background: var(--ink); border-radius: var(--radius-panel); }
+.footer-top { display: grid; grid-template-columns: minmax(0, 1.4fr) repeat(2, minmax(0, .7fr)) minmax(0, 1.2fr); gap: var(--space-group); }
+.footer-brand { display: grid; justify-items: start; align-content: start; gap: var(--space-inner); }
+.footer-brand p { max-width: 22rem; line-height: 1.5; color: var(--muted-on-dark); }
+.footer-age { padding: 4px 12px; font-size: 13px; font-weight: 700; color: var(--ink); background: var(--accent); border-radius: var(--radius-pill); }
+.footer-brand .footer-note { font-size: 13px; }
+.footer-col h2 { font-family: inherit; font-size: 13px; font-weight: 600; letter-spacing: 0; color: var(--muted-on-dark); }
+.footer-col ul { display: grid; gap: 12px; margin-top: var(--space-inner); list-style: none; }
+.footer-col a { position: relative; font-size: 15px; font-weight: 500; }
+.footer-col a::after { content: ""; position: absolute; right: 0; bottom: -3px; left: 0; height: 1.5px; background: var(--accent); scale: 0 1; transform-origin: left; transition: scale 260ms cubic-bezier(.2, .8, .2, 1); }
+.footer-col a:hover { color: var(--accent); }
+.footer-col a:hover::after { scale: 1 1; }
+.footer-visit .store-details { gap: 12px; margin-top: var(--space-inner); }
+.footer-visit .store-details > div { grid-template-columns: 72px 1fr; padding-bottom: 12px; border-color: var(--line-dark); }
+.footer-visit .store-details dt { font-size: 13px; color: var(--muted-on-dark); }
+.footer-visit .store-details dd { font-size: 14px; }
+.footer-giant { display: flex; justify-content: center; margin-block: -8px -24px; font-family: var(--font-display); font-size: clamp(64px, 15vw, 220px); font-weight: 800; line-height: .9; letter-spacing: -.06em; user-select: none; }
+.footer-giant span { display: inline-block; }
+.footer-giant i { display: inline-block; margin-left: .06em; padding: 0 .1em; font-style: normal; line-height: .95; color: var(--ink); background: var(--accent); border-radius: .16em; }
+.footer-bottom { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-inner); padding-top: var(--space-related); font-size: 13px; line-height: 1.5; color: var(--muted-on-dark); border-top: 1px solid var(--line-dark); }
+.footer-bottom p { max-width: 44rem; }
+.footer-up { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 18px; font-size: 14px; font-weight: 600; color: var(--on-dark); background: var(--ink-raised); border-radius: var(--radius-pill); transition: color var(--motion), background var(--motion), padding var(--morph); }
+.footer-up i { font-style: normal; transition: translate var(--motion); }
+.footer-up:hover { padding-inline: 24px; color: var(--ink); background: var(--accent); }
+.footer-up:hover i { translate: 0 -3px; }
 
 /* Product page: jump bar, large product tile, headline numbers, then full specs. */
 .breadcrumb { display: flex; flex-wrap: wrap; gap: 8px; padding-block: 8px var(--space-inner); font-size: 13px; color: var(--muted); }
@@ -515,10 +676,26 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
 
 @keyframes rise { from { opacity: 0; transform: translateY(12px); } }
 @keyframes ticker { to { transform: translateX(-50%); } }
+@keyframes ping { 0% { box-shadow: 0 0 0 0 #e8f78bb3; } 70%, 100% { box-shadow: 0 0 0 10px #e8f78b00; } }
+@keyframes hero-open { 0% { clip-path: inset(46% 47% round 160px); } 45% { clip-path: inset(46% 6% round 160px); } 100% { clip-path: inset(0 0 round var(--radius-panel)); } }
+@keyframes line-up { from { translate: 0 110%; rotate: 3deg; } }
+@keyframes ink-in { from { color: var(--accent); } }
+@keyframes swipe { from { clip-path: inset(0 100% 0 0 round var(--radius-pill)); } to { clip-path: inset(0 0 0 0 round var(--radius-pill)); } }
+@keyframes fade-up { from { opacity: 0; translate: 0 24px; } }
+@keyframes stage-in { from { opacity: 0; scale: .6; rotate: -12deg; } }
+@keyframes hero-tuck { from { opacity: 1; scale: 1; clip-path: inset(0 0 0 round var(--radius-panel)); } to { opacity: .3; scale: .96; clip-path: inset(10% 6% 0 round 120px); } }
+@keyframes rise-in { from { opacity: 0; translate: 0 56px; } }
+@keyframes pill-open { from { clip-path: inset(0 22% round 160px); } to { clip-path: inset(0 0 round var(--radius-panel)); } }
+@keyframes letter-up { from { opacity: 0; translate: 0 60%; } }
+@keyframes card-pop { from { opacity: 0; translate: 0 32px; scale: .94; } }
+@keyframes timer { to { stroke-dashoffset: 0; } }
+@keyframes route { to { stroke-dashoffset: -28; } }
+@keyframes ripple { from { opacity: .9; scale: 1; } to { opacity: 0; scale: 5; } }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  /* The admin sidebar keeps its motion: it only moves when clicked, and was asked for. */
-  *:not(.admin-side, .admin-main, .admin-highlight, .admin-label, .admin-nav > button, .admin-collapse .admin-icon), *::before, *::after { animation: none !important; transition: none !important; }
+  /* The admin sidebar and the home page motion (with the header and footer) stay on: the user asked for them. */
+  *:not(.admin-side, .admin-main, .admin-highlight, .admin-label, .admin-nav > button, .admin-collapse .admin-icon, .motion, .motion *), *:not(.motion *)::before, *:not(.motion *)::after { animation: none !important; transition: none !important; }
+  .ticker-track { animation: none !important; }
   .ticker-toggle { display: none; }
 }
 @media (max-width: 1280px) {
@@ -528,8 +705,10 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
 }
 @media (max-width: 1080px) {
   .product-grid { grid-template-columns: repeat(2, 1fr); }
-  .category { grid-column: span 6; height: 160px; }
-  .hero-copy, .page-head-copy { padding: var(--space-group); }
+  .page-head-copy { padding: var(--space-group); }
+  .home-hero-panel { padding: 40px var(--space-group) var(--space-group); }
+  .footer-top { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .footer-brand { grid-column: 1 / -1; }
   .info-grid { grid-template-columns: 1fr; }
   .admin-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .admin-card.is-black { grid-column: 1 / -1; min-height: 200px; }
@@ -539,8 +718,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
 @media (max-width: 860px) {
   :root { --space-section: 64px; }
   .shell { width: calc(100% - 24px); }
-  .hero-copy, .hero-display, .page-head-copy { grid-column: 1 / -1; }
-  .page-head-copy { padding: var(--space-related); }
+  .page-head-copy { grid-column: 1 / -1; padding: var(--space-related); }
   .page-head-art { display: none; }
   .contact-grid, .auth { grid-template-columns: 1fr; }
   .form-panel, .contact-details, .info-card { padding: var(--space-related); }
@@ -550,15 +728,33 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
   .auth-art { display: none; }
   .auth-main { padding: 0; }
   .auth-form { width: 100%; }
-  .hero-copy { padding: var(--space-group) var(--space-related); }
-  .hero-copy h1 { font-size: 11.4vw; }
-  .hero-display { padding-top: 72px; }
-  .hero-label { left: var(--space-related); }
-  .hero-display > div { max-width: 150px; }
   .hero-item-main { max-width: 220px !important; }
   .section-heading { flex-direction: column; align-items: flex-start; gap: 8px; }
   .sheet { padding-block: 48px; }
   .visit-inner { grid-template-columns: 1fr; gap: var(--space-related); padding: var(--space-group) var(--space-related); }
+  .home-hero-panel { grid-template-columns: minmax(0, 1fr); gap: var(--space-related); min-height: 0; padding: var(--space-group) var(--space-inner) var(--space-inner); }
+  .home-hero-copy { padding-inline: 8px; }
+  .home-title { font-size: 12vw; }
+  .home-stats { gap: var(--space-inner) var(--space-group); margin-top: var(--space-group); }
+  .home-stats dd { font-size: 28px; }
+  .stage-frame { min-height: 300px; }
+  .stage-switch button { padding-inline: 2px; font-size: 12px; }
+  .rail { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; height: auto; }
+  .rail-panel, .rail-panel.is-open { height: 220px; border-radius: var(--radius-panel); }
+  .rail-tag { display: none; }
+  .rail-count, .rail-panel.is-open .rail-count { top: var(--space-inner); left: var(--space-inner); translate: 0 0; }
+  .rail-copy, .rail-panel.is-open .rail-copy { right: var(--space-inner); bottom: var(--space-inner); left: var(--space-inner); width: auto; opacity: 1; }
+  .rail-copy strong { font-size: 22px; }
+  .rail-copy span, .rail-copy em { display: none; }
+  .rail-panel .art, .rail-panel.is-open .art { top: 12px; right: 8px; width: 50%; height: 62%; rotate: 0deg; translate: 0 0; }
+  .finder { padding: var(--space-group) var(--space-related); }
+  .finder-pills button { padding-inline: 14px; }
+  .home-visit-panel { grid-template-columns: minmax(0, 1fr); grid-template-areas: "copy" "map" "details"; gap: var(--space-related); padding: var(--space-group) var(--space-related); }
+  .home-map { min-height: 220px; }
+  .footer-panel { gap: var(--space-group); padding: 40px var(--space-related) var(--space-related); }
+  .footer-top { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .footer-visit { grid-column: 1 / -1; }
+  .footer-giant { margin-block: 0 -8px; font-size: 16.5vw; }
 }
 @media (max-width: 768px) {
   html { scroll-padding-top: 72px; }
@@ -567,6 +763,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
   .wordmark { font-size: 24px; }
   .cart-button { min-height: 44px; padding-block: 6px; }
   .menu-toggle { display: grid; }
+  .site-header.is-floating .header-inner { min-height: 48px; margin-top: 6px; margin-bottom: 6px; padding: 2px 2px 2px 16px; }
   .mobile-menu { display: grid; gap: 8px; max-height: calc(100dvh - 60px); padding: 4px 12px var(--space-inner); overflow-y: auto; background: var(--background); border-bottom: 1px solid var(--line); box-shadow: 0 20px 40px #14151826; }
   .mobile-menu .menu-tiles { grid-template-columns: repeat(2, 1fr); }
   .mobile-menu nav { display: grid; }
@@ -586,9 +783,6 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
   .detail-highlights span { font-size: 12px; }
   .detail-specs { padding: 4px var(--space-inner); }
   .cart-toast-region { left: 12px; right: 12px; bottom: 12px; width: auto; }
-  .category { padding-left: var(--space-inner); }
-  .category h2 { font-size: 20px; }
-  .category .art { width: 64px; height: 110px; }
   .product { padding: 12px; }
   .product-buy { flex-direction: column; align-items: stretch; gap: 8px; }
 

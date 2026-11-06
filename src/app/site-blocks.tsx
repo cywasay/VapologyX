@@ -1,13 +1,13 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { BottleArt, CoilArt, DeviceArt, DisposableArt } from "./art";
-import { BRAND, GRAPHITE, LIME } from "./products";
+import { BRAND, GRAPHITE, LIME, type Category } from "./products";
 
-export const categories = [
-  { href: "/devices", name: "Devices", tone: "tone-light", art: <DeviceArt kind="box" color={LIME} /> },
-  { href: "/disposables", name: "Disposables", tone: "tone-gray", art: <DisposableArt color={GRAPHITE} /> },
-  { href: "/bottles", name: "Bottles", tone: "tone-lime", art: <BottleArt color={GRAPHITE} /> },
-  { href: "/coils", name: "Coils", tone: "tone-dark", art: <CoilArt color={LIME} /> },
+export const categories: { category: Category; href: string; name: string; blurb: string; tone: string; art: ReactNode }[] = [
+  { category: "device", href: "/devices", name: "Devices", blurb: "Pods, boxes and pens for every style.", tone: "tone-light", art: <DeviceArt kind="box" color={LIME} /> },
+  { category: "disposable", href: "/disposables", name: "Disposables", blurb: "Ready to go, with nothing to set up.", tone: "tone-gray", art: <DisposableArt color={GRAPHITE} /> },
+  { category: "bottle", href: "/bottles", name: "Bottles", blurb: "Flavors sorted by taste, from fruit to menthol.", tone: "tone-lime", art: <BottleArt color={GRAPHITE} /> },
+  { category: "coil", href: "/coils", name: "Coils", blurb: "Matched to the device you already own.", tone: "tone-dark", art: <CoilArt color={LIME} /> },
 ];
 
 export function PageHead({ eyebrow, title, text, art, children }: { eyebrow: string; title: string; text: string; art?: ReactNode; children?: ReactNode }) {
