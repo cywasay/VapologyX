@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Loader } from "@/components/loader/Loader";
@@ -51,7 +52,10 @@ export function ProductsView() {
   return <>
     <div className="admin-page-head">
       <h1 className="admin-title is-small">Products</h1>
-      <button className="button button-black" onClick={() => { setNotice(""); setAddress(shelf, true); }}><Icon name="plus" />Add product</button>
+      <div className="admin-head-actions">
+        <Link className="button button-outline" href="/admin/dashboard/products/import">Import from Excel</Link>
+        <button className="button button-black" onClick={() => { setNotice(""); setAddress(shelf, true); }}><Icon name="plus" />Add product</button>
+      </div>
     </div>
     <Pills label="Filter products" options={shelfOptions} value={shelf} onChange={next => { setAddress(next as ShelfFilter, adding); list.setPage(0); }} count={option => counts[option as ShelfFilter] ?? "…"} />
     <ProductSearch value={list.search} onChange={list.setSearch} />
