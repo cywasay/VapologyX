@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ButtonOrigin } from "@/components/store/ButtonOrigin";
 import { StoreProvider } from "@/components/store/store-context";
 import { CartDrawer } from "./_shell/CartDrawer";
 import { CartToast } from "./_shell/CartToast";
@@ -16,6 +17,7 @@ export default function StoreLayout({ children }: { children: ReactNode }) {
       <main className="store-main">{children}</main>
       <Footer />
     </div>
+    <ButtonOrigin />
     <CartToast />
     <CartDrawer />
     <SearchDialog />

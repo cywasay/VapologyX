@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { CSSProperties } from "react";
 import { categories } from "@/components/categories";
 import { NavLink } from "./NavLink";
 
 // The main links: a Shop drop-down with the four shelves, then About and Contact.
+// The drop-down stays in the page, hidden, so it can animate closed as well as open.
 export function HeaderNav({ open, onToggle }: { open: boolean; onToggle: () => void }) {
   const pathname = usePathname();
   const inShop = categories.some(item => item.href === pathname);
@@ -15,8 +17,22 @@ export function HeaderNav({ open, onToggle }: { open: boolean; onToggle: () => v
     </button>
     <NavLink href="/about">About</NavLink>
     <NavLink href="/contact">Contact</NavLink>
-    {open && <div id="shop-menu" className="shop-menu menu-tiles">
-      {categories.map(item => <Link key={item.href} href={item.href}>{item.art}<span>{item.name}</span></Link>)}
-    </div>}
+    <div id="shop-menu" className={`shop-menu ${open ? "is-open" : ""}`} inert={!open}>
+      <div className="shop-menu-panel">
+        <ul className="shop-menu-grid">
+          {categories.map((item, index) => <li key={item.href} style={{ "--i": index } as CSSProperties}>
+            <Link href={item.href} className={`shop-tile ${item.tone}`} aria-current={pathname === item.href ? "page" : undefined}>
+              <span className="shop-tile-art">{item.art}</span>
+              <span className="shop-tile-copy"><strong>{item.name}</strong><small>{item.blurb}</small></span>
+              <i aria-hidden="true">→</i>
+            </Link>
+          </li>)}
+        </ul>
+        <div className="shop-menu-foot" style={{ "--i": categories.length } as CSSProperties}>
+          <span>Not sure which coil fits your device?</span>
+          <Link href="/#coil-finder">Find my coil <i aria-hidden="true">↗</i></Link>
+        </div>
+      </div>
+    </div>
   </nav>;
 }

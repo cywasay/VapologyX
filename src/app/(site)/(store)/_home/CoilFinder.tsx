@@ -11,7 +11,7 @@ const SWAP_TIME = 440;
 
 // Pick a device and its coils slide out from underneath the device tile, like drawers.
 // Changing device pulls the old coils back in first, then deals the new ones.
-export function CoilFinder({ devices, coils }: { devices: Product[]; coils: Record<string, Product[]> }) {
+export function CoilFinder({ devices, coils, totalDevices }: { devices: Product[]; coils: Record<string, Product[]>; totalDevices: number }) {
   const [ref, seen, phone] = useSeen<HTMLDivElement>();
   const [selected, setSelected] = useState(0);
   const [shown, setShown] = useState(0);
@@ -49,6 +49,7 @@ export function CoilFinder({ devices, coils }: { devices: Product[]; coils: Reco
         <p>Pick your device to see only the coils made for it.</p>
       </div>
       <FinderDeviceList devices={devices} coils={coils} selected={selected} onChoose={choose} />
+      {totalDevices > devices.length && <Link className="finder-more" href="/coils" prefetch={false}>Not listed? Pick from all {totalDevices} devices <i aria-hidden="true">→</i></Link>}
     </div>
     <div className="finder-main">
       <p className="sr-only" role="status">{!phone && leaving ? "" : `Showing coils for ${device.name}`}</p>

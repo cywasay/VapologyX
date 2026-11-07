@@ -3,6 +3,7 @@ import { PAGE_SIZE, PRODUCT_COLUMNS, type Category, type Product, type ProductPa
 import { publicClient } from "@/utils/supabase/public";
 
 // Shop reads are cached and cleared by refreshShop in product-actions.ts whenever an admin saves.
+// Changes made straight in the database do not clear this cache. Save a product in the admin, or restart the server.
 const products = () => publicClient().from("products").select(PRODUCT_COLUMNS, { count: "exact" }).order("position");
 
 function checked<T>(result: { data: T | null; error: { message: string } | null }) {
@@ -38,6 +39,14 @@ export async function getCoilsFor(deviceId: string): Promise<Product[]> {
   cacheTag("products");
   cacheLife("hours");
   return (checked(await products().eq("category", "coil").contains("fits", [deviceId]).limit(PAGE_SIZE)) ?? []) as unknown as Product[];
+}
+
+// Every coil that is linked to at least one device. The home page's coil finder works out each device's coils from this one list.
+export async function getLinkedCoils(): Promise<Product[]> {
+  "use cache";
+  cacheTag("products");
+  cacheLife("hours");
+  return (checked(await products().eq("category", "coil").neq("fits", "{}").limit(200)) ?? []) as unknown as Product[];
 }
 
 export async function getTypes(category: Category): Promise<string[]> {

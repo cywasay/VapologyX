@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { refreshShop } from "@/lib/product-actions";
 import { createClient } from "@/utils/supabase/client";
 import { readInventory, type InventoryReading } from "./readInventory";
 
@@ -48,11 +49,14 @@ export function useInventoryImport() {
     setError("");
     const rows = reading.rows.map(({ category, name, qty, cost, price }) => ({ category, name, qty, cost, price }));
     const { data, error: saveError } = await createClient().rpc("import_inventory", { rows, replace_all: replace });
-    setBusy(false);
     if (saveError) {
+      setBusy(false);
       setError(saveError.message.startsWith("invalid_import") ? `Nothing was saved. ${saveError.message.replace("invalid_import: ", "")}` : "Nothing was saved. Please try again.");
       return;
     }
+    // The shop keeps products in a cache for a while, so tell it the products changed.
+    await refreshShop().catch(() => undefined);
+    setBusy(false);
     setResult(data as ImportResult);
     setReading(null);
   }
