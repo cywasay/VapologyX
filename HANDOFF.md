@@ -18,6 +18,7 @@ Last updated: 2026-11-07.
 - Do not commit until the user asks. **Do not push** (see section 3).
 
 ## 3. SECURITY – GitHub repo was compromised (2026-11-07)
+**Resolved 2026-11-07:** the user secured GitHub and approved a force-push; origin/main is now the clean commit a91a1da and GitHub has no other branches or tags. Normal pushes are fine again. Keep the history below in mind if anything odd reappears.
 - `origin/main` was force-replaced by commit `166805d` (fake copy of `7cfa595`) that adds obfuscated malware: an `init` file, `package.json` scripts `node init && …`, a payload appended to `eslint.config.mjs`, `.env*` removed from `.gitignore`, a `config.bat`.
 - **Never `git pull`, merge, reset to or run anything from origin/main.**
 - The local `main` is clean. Pushing needs a **force-push**, only after the user has secured their GitHub account (password, 2FA, tokens, deploy keys) and says yes explicitly. Tell them to rotate secrets (Supabase keys) if anything built from the bad commit.
