@@ -83,6 +83,12 @@ How the month figures are worked out (from the sheet, plus the user's answers):
 - Stock in the match check is the stock value right now (a locked month keeps its saved value).
 - Online orders are shown but **not** included in the month totals (sheet has no online sales) – **ask the user**.
 
+### 8a. Phone layout + Contact → Messages (2026-11-07, uncommitted)
+- Counter phone layout was broken by my own later CSS overriding the phone rules (sale panel overlapped the items); fixed at the end of `counter/counter.css`, plus a sticky "Current sale · N items · Rs X" bar on phones (`.ct-jump`). Closing cards no longer overflow.
+- Admin tables (`ProductsTable`, `OrdersTable`, import preview, closing discount list) become cards on phones via `.admin-table.is-cards` + `data-label`/`data-wide` on cells (end of `admin/admin.css`). Overview no longer scrolls sideways.
+- Checked at 375px with a temporary fake-data page (deleted). Not checked on a real phone or with real admin data.
+- **Contact form now saves messages.** Migration `20261107240000_contact_messages.sql` (applied): table `contact_messages` (admins only), public function `send_contact_message` (checks input, max 40 per hour, ignores an identical repeat within 10 minutes; the form also has a hidden spam box). Admin → Messages (`dashboard/messages/MessagesView.tsx`) lists them newest first, 10 per page, unread marked, opening marks read, Reply by email, Delete. No email/WhatsApp notification and no unread count in the menu yet.
+
 ## 8b. Questions to ask the user next
 1. Should "Paid for restock" come automatically from Restock records (as built), or be typed?
 2. Should online orders count in the monthly sales/profit? (Order lines don't store cost yet.)

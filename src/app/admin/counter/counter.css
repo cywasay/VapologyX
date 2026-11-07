@@ -150,7 +150,7 @@
 .ct-sales-list .is-voided { opacity: .5; }
 .ct-sales-list .is-voided strong { text-decoration: line-through; }
 
-.ct-closing { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 12px; align-items: start; }
+.ct-closing { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 12px; align-items: start; }
 .ct-card { display: grid; gap: 10px; }
 .ct-card .ct-section-title { margin-bottom: 0; }
 .ct-subtitle { font-family: var(--font-display); font-size: 14px; }
@@ -253,7 +253,32 @@
 .ct.is-dark .ct-tabs button small { background: #ffffff1f; }
 .ct.is-dark .ct-tabs button.is-current small { background: #1415181a; }
 .ct:fullscreen, :fullscreen .ct { overflow-y: auto; }
-@media (max-width: 1100px) { .ct-sell { grid-template-columns: minmax(0, 1fr) 300px; } }
+@media (min-width: 961px) and (max-width: 1100px) { .ct-sell { grid-template-columns: minmax(0, 1fr) 300px; } }
+/* On phones the sale sits below the items, so a bar at the bottom jumps to it. Hidden on wider screens. */
+.ct-jump { display: none; }
+/* Phones and small tablets. This sits after the compact-tile rules above so it wins over them. */
+@media (max-width: 960px) {
+  .ct-sell { grid-template-columns: minmax(0, 1fr); }
+  .ct-sale { position: static; min-height: 0; max-height: none; scroll-margin-top: 8px; }
+  .ct-jump { position: sticky; bottom: 8px; z-index: 5; display: block; padding: 12px 16px; font-size: 14px; font-weight: 700; text-align: center; color: var(--ink); background: var(--accent); border-radius: var(--radius-pill); box-shadow: 0 6px 20px #14151840; }
+}
+@media (max-width: 640px) {
+  .ct { gap: 10px; padding: 8px; }
+  .ct-top { gap: 8px; border-radius: 18px; }
+  .ct-modes { overflow-x: auto; scrollbar-width: none; }
+  .ct-modes button { flex: 1 0 auto; min-width: 64px; }
+  .ct-totals { width: 100%; margin: 0; }
+  .ct-totals > div { flex: 1 1 96px; min-width: 0; }
+  .ct-tabs { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+  .ct-tabs button { flex: 0 0 auto; }
+  .ct-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .ct-item { grid-template-columns: 30px minmax(0, 1fr); gap: 8px; padding: 8px; }
+  .ct-item-art { width: 30px; height: 40px; }
+  .ct-receipt { width: calc(100vw - 16px); max-width: 360px; }
+  .ct-custom { flex-wrap: wrap; }
+  .ct-card .ct-custom input:first-child { flex: 1 1 90px; }
+  .ct-custom input { flex: 1 1 120px; }
+}
 
 /* Printing a receipt: only the slip, sized for an 80 mm till printer, in plain black on white. */
 @media print {

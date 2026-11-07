@@ -180,7 +180,9 @@
   .admin-collapse { display: none; }
   .admin-backdrop { position: fixed; inset: 0; z-index: 45; display: block; background: #14151880; opacity: 0; pointer-events: none; transition: opacity var(--motion); }
   .admin.is-open .admin-backdrop { opacity: 1; pointer-events: auto; }
-  .admin-main { margin-left: 0; padding: 12px 12px 24px; }
+  .admin-main { margin-left: 0; padding: 12px 12px 24px; overflow-x: clip; }
+  .admin-bar:nth-last-of-type(-n+2) .admin-bar-tip { left: auto; right: 0; translate: 0 6px; }
+  .admin-bar:nth-last-of-type(-n+2):hover .admin-bar-tip, .admin-bar:nth-last-of-type(-n+2):focus-visible .admin-bar-tip { translate: 0 0; }
   .admin-menu { display: grid; }
   .admin-topbar { justify-content: space-between; }
   .admin-overview-side { grid-template-columns: minmax(0, 1fr); }
@@ -317,3 +319,39 @@
 .cl-adjusted { padding: 0; }
 .cl-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: var(--space-related, 16px); }
 @media (max-width: 600px) { .cl-form { grid-template-columns: 1fr; } }
+
+/* Phones: tables that opt in (is-cards) turn each row into a small card, so nothing needs sideways scrolling. */
+@media (max-width: 640px) {
+  .admin-table.is-cards { padding: 4px 12px; overflow-x: visible; }
+  .admin-table.is-cards table { min-width: 0; }
+  .admin-table.is-cards :is(table, tbody, tr, td) { display: block; }
+  .admin-table.is-cards thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .admin-table.is-cards tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .admin-table.is-cards tr:last-child { border-bottom: 0; }
+  .admin-table.is-cards td { min-width: 0; padding: 0; border: 0; overflow-wrap: anywhere; }
+  .admin-table.is-cards td[data-wide] { grid-column: 1 / -1; }
+  .admin-table.is-cards td[data-label]::before { content: attr(data-label); display: block; font-size: 11px; font-weight: 600; color: var(--muted); }
+  .admin-table.is-cards .admin-row-actions { justify-content: flex-end; }
+  .cl-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .admin-table.is-skeleton { overflow-x: hidden; }
+  .admin-table.is-skeleton table { min-width: 0; }
+  .admin-table.is-skeleton :is(th, td):nth-child(n+3) { display: none; }
+}
+@media (max-width: 640px) { .cl-table { font-size: 13px; } .cl-table td, .cl-table tfoot th { white-space: nowrap; } .cl-table th:first-child { white-space: normal; } }
+
+/* Messages from the Contact page */
+.msg-list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.msg { padding: 12px 16px; background: var(--white); border-radius: var(--radius-card); }
+.msg.is-unread { box-shadow: inset 4px 0 0 var(--accent-strong, var(--ink)); }
+.msg-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; width: 100%; padding: 0; text-align: left; background: none; }
+.msg-who { display: grid; min-width: 0; }
+.msg-who strong, .msg-who small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.msg-who small, .msg-when { font-size: 12px; color: var(--muted); }
+.msg-when { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.msg-dot { width: 8px; height: 8px; background: var(--ink); border-radius: 50%; }
+.msg-preview { margin: 6px 0 0; overflow: hidden; font-size: 14px; color: var(--muted); text-overflow: ellipsis; white-space: nowrap; }
+.msg-body p { margin: 10px 0; font-size: 14px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+.msg-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.msg.is-unread .msg-who strong { font-weight: 700; }

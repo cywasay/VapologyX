@@ -151,9 +151,9 @@ export function ClosingView() {
           <div><dt>Extra charged ({report.extra.count} sales)</dt><dd>{rs(report.extra.total)}</dd></div>
           <div><dt>Last month</dt><dd>{rs(report.extra.lastMonth)}</dd></div>
         </dl>
-        {report.adjustedSales.length > 0 && <div className="admin-table cl-adjusted"><table>
+        {report.adjustedSales.length > 0 && <div className="admin-table is-cards cl-adjusted"><table>
           <thead><tr><th>Sale</th><th>Date</th><th>Items</th><th>Bill</th><th>Received</th><th>Difference</th></tr></thead>
-          <tbody>{report.adjustedSales.map(sale => <tr key={sale.number}><td>#{sale.number}</td><td>{sale.date}</td><td>{sale.items}</td><td>{rs(sale.listTotal)}</td><td>{rs(sale.total)}</td><td>{sale.total < sale.listTotal ? `Discount ${rs(sale.listTotal - sale.total)}` : `Extra ${rs(sale.total - sale.listTotal)}`}</td></tr>)}</tbody>
+          <tbody>{report.adjustedSales.map(sale => <tr key={sale.number}><td data-label="Sale">#{sale.number}</td><td data-label="Date">{sale.date}</td><td data-label="Items" data-wide>{sale.items}</td><td data-label="Bill">{rs(sale.listTotal)}</td><td data-label="Received">{rs(sale.total)}</td><td data-label="Difference">{sale.total < sale.listTotal ? `Discount ${rs(sale.listTotal - sale.total)}` : `Extra ${rs(sale.total - sale.listTotal)}`}</td></tr>)}</tbody>
         </table></div>}
       </section>
 

@@ -30,15 +30,15 @@ export function ImportPreview({ reading }: { reading: InventoryReading }) {
       <ul>{notes.map(item => <li key={`${item.line}-${item.message}`}>Row {item.line}: {item.message}</li>)}</ul>
     </div>}
 
-    <div className="admin-table">
+    <div className="admin-table is-cards">
       <table>
         <thead><tr><th>Product</th><th>Shelf</th><th>Stock</th><th>Cost</th><th>Price</th></tr></thead>
         <tbody>{visible.map(row => <tr key={`${row.category}-${row.name}`}>
-          <td>{row.name}</td>
-          <td>{shelfOf(row.category).singular}</td>
-          <td>{row.qty === 0 ? <small className="admin-hidden-tag is-sold">Sold out</small> : row.qty}</td>
-          <td>{cost(row.cost)}</td>
-          <td>{money(row.price)}</td>
+          <td data-wide>{row.name}</td>
+          <td data-label="Shelf">{shelfOf(row.category).singular}</td>
+          <td data-label="Stock">{row.qty === 0 ? <small className="admin-hidden-tag is-sold">Sold out</small> : row.qty}</td>
+          <td data-label="Cost">{cost(row.cost)}</td>
+          <td data-label="Price">{money(row.price)}</td>
         </tr>)}</tbody>
       </table>
     </div>
