@@ -6,7 +6,7 @@ export type Mode = "sell" | "refill" | "sales" | "closing" | "restock";
 export type CounterItem = { id: string; code: string; name: string; shelf: Shelf; type: string; price: number; stock: number };
 
 // A bottle opened to refill customers' empty bottles. It stays open until staff finish it, however many days that takes.
-export type Bottle = { id: string; flavor: string; openedOn: string; cost: number; entries: number[]; finished: boolean };
+export type Bottle = { id: string; flavor: string; openedOn: string; cost: number | null; entries: number[]; finished: boolean };
 
 export type SaleLine = { itemId: string; name: string; price: number; quantity: number };
 export type Sale = { id: string; number: number; time: string; lines: SaleLine[]; total: number; pay: Pay; given: number | null; voided: boolean };

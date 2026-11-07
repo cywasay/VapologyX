@@ -171,3 +171,7 @@
   .ct-sales-list li { grid-template-columns: minmax(0, 1fr) auto; }
   .ct-sale-items, .ct-sale-pay { grid-column: 1 / -1; }
 }
+.ct-alert { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 12px; padding: 10px 14px; font-size: 13px; font-weight: 600; color: var(--on-dark); background: var(--error); border-radius: var(--radius-input); }
+.ct-alert .ct-link { color: inherit; }
+.ct-failed { display: grid; justify-items: center; gap: 12px; padding: 64px 16px; text-align: center; }
+.ct-failed p { margin: 0; }

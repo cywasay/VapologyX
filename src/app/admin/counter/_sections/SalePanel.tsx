@@ -26,7 +26,7 @@ export function SalePanel({ counter }: { counter: Counter }) {
       {payments.map(method => <button key={method} className={counter.pay === method ? "is-current" : ""} aria-pressed={counter.pay === method} onClick={() => counter.setPay(method)}>{method}</button>)}
     </div>
     {counter.pay === "Cash" && <CashGiven counter={counter} />}
-    <button className="ct-complete" onClick={counter.completeSale} disabled={counter.closed}>{counter.closed ? "Day is closed" : "Complete sale"}</button>
+    <button className="ct-complete" onClick={counter.completeSale} disabled={counter.closed || counter.busy}>{counter.closed ? "Day is closed" : "Complete sale"}</button>
     <p className="ct-note" role="status">{counter.note}</p>
   </aside>;
 }

@@ -1,6 +1,6 @@
 import { CounterApp } from "./_sections/CounterApp";
 
-// Counter mode: a full-screen page for the till, with Sell, Refill and Restock. This first version uses sample data.
+// Counter mode: a full-screen page for the till. Sales, refills and the daily close are saved in the database.
 export default function CounterPage() {
   return <CounterApp />;
 }

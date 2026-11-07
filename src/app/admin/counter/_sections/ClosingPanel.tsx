@@ -28,7 +28,7 @@ export function ClosingPanel({ counter }: { counter: Counter }) {
     <section className="ct-card" aria-labelledby="ct-cash-title">
       <h2 id="ct-cash-title" className="ct-section-title">Cash drawer</h2>
       <label className="ct-field">Cash in the drawer this morning
-        <input inputMode="numeric" value={String(counter.opening)} onChange={event => counter.setOpening(toNumber(event.target.value))} disabled={counter.closed} />
+        <input inputMode="numeric" value={String(counter.opening)} onChange={event => counter.setOpening(toNumber(event.target.value))} onBlur={counter.saveOpening} disabled={counter.closed} />
       </label>
       <h3 className="ct-subtitle">Cash taken out</h3>
       <ul className="ct-outs">
@@ -49,9 +49,9 @@ export function ClosingPanel({ counter }: { counter: Counter }) {
       {difference !== null && <p className={`ct-diff ${difference === 0 ? "is-ok" : "is-off"}`}>{difference === 0 ? "The drawer matches." : difference > 0 ? `Over by ${money(difference)}` : `Short by ${money(-difference)}`}</p>}
 
       {counter.closed
-        ? <p className="ct-closed">The day is closed. Sales are switched off until tomorrow.</p>
+        ? <p className="ct-closed">The day is closed. {counter.closing ? `You counted ${money(counter.closing.counted)} against ${money(counter.closing.expected)} expected${counter.closing.difference === 0 ? ", a match." : counter.closing.difference > 0 ? `, over by ${money(counter.closing.difference)}.` : `, short by ${money(-counter.closing.difference)}.`} ` : ""}Sales are switched off until tomorrow.</p>
         : confirming
-        ? <div className="ct-confirm-row">Close the day? Sales will be switched off. <button className="ct-primary" onClick={counter.closeDay}>Yes, close the day</button><button className="ct-link" onClick={() => setConfirming(false)}>Cancel</button></div>
+        ? <div className="ct-confirm-row">Close the day? Sales will be switched off. <button className="ct-primary" onClick={() => counter.closeDay(toNumber(counted))}>Yes, close the day</button><button className="ct-link" onClick={() => setConfirming(false)}>Cancel</button></div>
         : <button className="ct-complete" disabled={difference === null} onClick={() => setConfirming(true)}>{difference === null ? "Count the drawer to close" : "Close the day"}</button>}
     </section>
   </div>;
