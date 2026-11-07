@@ -1,5 +1,6 @@
+import { Suspense } from "react";
 import { MessagesView } from "./MessagesView";
 
 export default function MessagesPage() {
-  return <MessagesView />;
+  return <Suspense><MessagesView /></Suspense>;
 }

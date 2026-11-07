@@ -1439,3 +1439,14 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
 }
 
 @keyframes phone-fade { from { opacity: .65; } }
+
+/* Contact page: confirmation after a message is sent */
+.contact-sent { display: grid; align-content: start; gap: 14px; }
+.contact-sent h2, .contact-sent p { margin: 0; }
+.contact-sent p { line-height: 1.6; overflow-wrap: anywhere; }
+.contact-sent-mark { display: grid; place-items: center; width: 56px; height: 56px; background: var(--accent); border-radius: 50%; animation: sent-pop 480ms cubic-bezier(.3, 1.5, .4, 1) backwards; }
+.contact-sent-mark svg { width: 28px; height: 28px; fill: none; stroke: var(--ink); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.contact-follow { display: grid; gap: 12px; }
+.contact-follow-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.contact-new { font-size: 13px; color: var(--muted); text-decoration: underline; background: none; }
+@keyframes sent-pop { from { transform: scale(.4); opacity: 0; } }

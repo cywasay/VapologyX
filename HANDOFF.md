@@ -89,6 +89,13 @@ How the month figures are worked out (from the sheet, plus the user's answers):
 - Checked at 375px with a temporary fake-data page (deleted). Not checked on a real phone or with real admin data.
 - **Contact form now saves messages.** Migration `20261107240000_contact_messages.sql` (applied): table `contact_messages` (admins only), public function `send_contact_message` (checks input, max 40 per hour, ignores an identical repeat within 10 minutes; the form also has a hidden spam box). Admin → Messages (`dashboard/messages/MessagesView.tsx`) lists them newest first, 10 per page, unread marked, opening marks read, Reply by email, Delete. No email/WhatsApp notification and no unread count in the menu yet.
 
+### 8c. Messages inbox, bell and follow-ups (2026-11-07, uncommitted)
+- Migration applied (`message_threads` in Supabase; add it as a file in `supabase/migrations/20261107260000_message_threads.sql` if missing): emails stored lowercase; one conversation = one email; functions `message_threads`, `message_thread_read`, `message_thread_delete`; table added to the realtime publication.
+- Contact page (`contact/_sections/ContactForm.tsx`): after sending shows "Message sent… we'll respond soon" with "Send a follow-up" (same name/email, kept in sessionStorage for the visit; "Not you? Start again"). Follow-ups land in the same conversation because the email matches.
+- Admin → Messages (`dashboard/messages/MessagesView.tsx`): inbox with conversation list (All/Unread, 10 per page) and a full conversation view (long messages shown in full, bubbles by date, "Follow-up" label, Reply by email, Mark unread, Delete conversation). `?c=email` in the address opens a conversation; phone shows list then conversation with a back button.
+- Bell + toast: `dashboard/_data/Notifications.tsx` (Supabase realtime on new messages), `_shell/NotificationBell.tsx` (unread count, latest 6, "Turn on desktop alerts"), `_shell/MessageToast.tsx` (toast with Open). Toast is skipped when that conversation is already open. Desktop alerts only work while an admin tab is open (even in the background). **Nothing reaches the owner when no admin tab is open** – next step would be an email or WhatsApp alert (needs an email service account and a server function; ask the user).
+- Tested: contact send + follow-up in the real database and browser; inbox/bell layout with fake data at desktop and 375px. **Not tested with a real admin login or a real live toast** (realtime needs a signed-in admin).
+
 ## 8b. Questions to ask the user next
 1. Should "Paid for restock" come automatically from Restock records (as built), or be typed?
 2. Should online orders count in the monthly sales/profit? (Order lines don't store cost yet.)

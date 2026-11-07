@@ -1,68 +1,150 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { EmptyState } from "../../_shared/EmptyState";
 import { ADMIN_PAGE_SIZE, Pager } from "../../_shared/Pager";
+import { Pills } from "../../_shared/Pills";
+import { useNotifications } from "../_data/Notifications";
 
-type Message = { id: string; name: string; email: string; message: string; created_at: string; read_at: string | null };
+type Thread = { email: string; name: string; last: string; lastAt: string; total: number; unread: number };
+type Page = { total: number; items: Thread[] };
+type Message = { id: string; name: string; message: string; created_at: string; read_at: string | null };
 
-const when = (iso: string) => new Date(iso).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" });
+const filters = [{ value: "all", label: "All" }, { value: "unread", label: "Unread" }];
+const clock = (iso: string) => new Date(iso).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" });
+// Today shows the time, anything older shows the date.
+const short = (iso: string) => {
+  const date = new Date(iso);
+  return date.toDateString() === new Date().toDateString() ? date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : date.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+};
+const initial = (name: string) => name.trim().slice(0, 1).toUpperCase() || "?";
 
-// Messages sent from the shop's Contact page, newest first. Opening one marks it read.
+// The shop's inbox. Every email that has written in is one conversation; follow-ups join the same one.
+// The open conversation lives in the page address (?c=email), so the bell can link straight to it.
 export function MessagesView() {
+  const params = useSearchParams();
+  const open = params.get("c");
+  const { refresh, arrivals, watching } = useNotifications();
+  const [filter, setFilter] = useState("all");
   const [page, setPage] = useState(0);
-  const [rows, setRows] = useState<Message[] | null>(null);
-  const [total, setTotal] = useState(0);
+  const [list, setList] = useState<Page | null>(null);
   const [failed, setFailed] = useState(false);
-  const [open, setOpen] = useState<string | null>(null);
   const [version, setVersion] = useState(0);
+
+  const choose = useCallback((email: string | null) => {
+    const url = new URL(window.location.href);
+    if (email) url.searchParams.set("c", email); else url.searchParams.delete("c");
+    window.history.replaceState(null, "", url);
+    setVersion(current => current + 1);
+  }, []);
 
   useEffect(() => {
     let stale = false;
-    Promise.resolve(createClient().from("contact_messages").select("id,name,email,message,created_at,read_at", { count: "exact" }).order("created_at", { ascending: false }).range(page * ADMIN_PAGE_SIZE, page * ADMIN_PAGE_SIZE + ADMIN_PAGE_SIZE - 1)).then(({ data, count, error }) => {
+    Promise.resolve(createClient().rpc("message_threads", { p_offset: page * ADMIN_PAGE_SIZE, p_limit: ADMIN_PAGE_SIZE, p_unread_only: filter === "unread" })).then(({ data, error }) => {
       if (stale) return;
-      if (error) return setFailed(true);
+      if (error || !data) return setFailed(true);
       setFailed(false);
-      setRows(data as Message[]);
-      setTotal(count ?? 0);
+      setList(data as Page);
     });
     return () => { stale = true; };
-  }, [page, version]);
+  }, [page, filter, version, arrivals]);
 
-  const toggle = useCallback(async (message: Message) => {
-    setOpen(current => current === message.id ? null : message.id);
-    if (message.read_at) return;
-    const readAt = new Date().toISOString();
-    setRows(current => current && current.map(row => row.id === message.id ? { ...row, read_at: readAt } : row));
-    await createClient().from("contact_messages").update({ read_at: readAt }).eq("id", message.id);
-  }, []);
+  useEffect(() => { watching(open); return () => watching(null); }, [open, watching]);
 
-  async function remove(message: Message) {
-    const { error } = await createClient().from("contact_messages").delete().eq("id", message.id);
-    if (error) return setFailed(true);
-    setOpen(null);
-    setVersion(current => current + 1);
-  }
+  const unreadTotal = list?.items.reduce((sum, item) => sum + item.unread, 0) ?? 0;
 
   return <>
     <h1 className="admin-title is-small">Messages</h1>
     {failed && <p className="form-status is-error" role="alert">We couldn&apos;t load the messages. Please refresh the page.</p>}
-    {!failed && !rows && <p className="admin-caption">Loading…</p>}
-    {rows && rows.length === 0 && <EmptyState icon="messages" title="No messages yet">Messages sent from the Contact page will appear here.</EmptyState>}
-    {rows && rows.length > 0 && <>
-      <ul className="msg-list">
-        {rows.map(row => <li key={row.id} className={`msg ${row.read_at ? "" : "is-unread"}`}>
-          <button className="msg-head" aria-expanded={open === row.id} onClick={() => toggle(row)}>
-            <span className="msg-who"><strong>{row.name}</strong><small>{row.email}</small></span>
-            <span className="msg-when">{!row.read_at && <i className="msg-dot" aria-label="Unread" />}{when(row.created_at)}</span>
-          </button>
-          {open === row.id
-            ? <div className="msg-body"><p>{row.message}</p><div className="msg-actions"><a className="button button-black" href={`mailto:${row.email}`}>Reply by email</a><button className="button button-outline" onClick={() => remove(row)}>Delete</button></div></div>
-            : <p className="msg-preview">{row.message}</p>}
-        </li>)}
-      </ul>
-      <Pager page={page} shown={rows.length} total={total} onPage={setPage} />
-    </>}
+    {!failed && !list && <p className="admin-caption">Loading…</p>}
+    {list && list.total === 0 && filter === "all" && !open && <EmptyState icon="messages" title="No messages yet">Messages sent from the Contact page will appear here, and you&apos;ll get a notification the moment one arrives.</EmptyState>}
+    {list && (list.total > 0 || filter !== "all" || open) && <div className={`inbox ${open ? "has-open" : ""}`}>
+      <section className="inbox-list" aria-label="Conversations">
+        <Pills label="Filter conversations" options={filters} value={filter} onChange={next => { setFilter(next); setPage(0); }} count={option => option === "unread" ? unreadTotal : list.total} />
+        {list.items.length === 0
+          ? <p className="inbox-none">{filter === "unread" ? "No unread messages. Nice." : "Nothing here yet."}</p>
+          : <ul>{list.items.map(item => <li key={item.email}>
+            <button className={`thread ${open === item.email ? "is-open" : ""} ${item.unread ? "is-unread" : ""}`} aria-current={open === item.email ? "true" : undefined} onClick={() => choose(item.email)}>
+              <span className="thread-avatar" aria-hidden="true">{initial(item.name)}</span>
+              <span className="thread-text">
+                <span className="thread-top"><strong>{item.name}</strong><time dateTime={item.lastAt}>{short(item.lastAt)}</time></span>
+                <span className="thread-last">{item.last}</span>
+              </span>
+              {item.unread > 0 && <b className="thread-badge" aria-label={`${item.unread} unread`}>{item.unread}</b>}
+            </button>
+          </li>)}</ul>}
+        <Pager page={page} shown={list.items.length} total={list.total} onPage={setPage} />
+      </section>
+      <section className="inbox-view" aria-label="Conversation">
+        {open ? <Conversation key={open} email={open} onClose={() => choose(null)} onChanged={() => { setVersion(current => current + 1); refresh(); }} />
+          : <div className="inbox-pick"><EmptyState icon="messages" title="Pick a conversation">Choose one on the left to read it in full.</EmptyState></div>}
+      </section>
+    </div>}
   </>;
+}
+
+// One conversation: everything this email has sent, oldest first, each message in full.
+function Conversation({ email, onClose, onChanged }: { email: string; onClose: () => void; onChanged: () => void }) {
+  const { arrivals } = useNotifications();
+  const [messages, setMessages] = useState<Message[] | null>(null);
+  const [confirming, setConfirming] = useState(false);
+  const [problem, setProblem] = useState("");
+
+  useEffect(() => {
+    let stale = false;
+    const supabase = createClient();
+    Promise.resolve(supabase.from("contact_messages").select("id,name,message,created_at,read_at").eq("email", email).order("created_at")).then(async ({ data }) => {
+      if (stale) return;
+      const rows = (data as Message[] | null) ?? [];
+      setMessages(rows);
+      // Opening a conversation marks it read.
+      if (rows.some(row => !row.read_at)) {
+        await supabase.rpc("message_thread_read", { p_email: email, p_read: true });
+        if (!stale) onChanged();
+      }
+    });
+    return () => { stale = true; };
+    // onChanged is recreated by the parent on every render; only a new arrival or a different conversation should reload this.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [email, arrivals]);
+
+  async function markUnread() {
+    const { error } = await createClient().rpc("message_thread_read", { p_email: email, p_read: false });
+    if (error) return setProblem("That didn't work. Please try again.");
+    onChanged();
+    onClose();
+  }
+
+  async function remove() {
+    const { error } = await createClient().rpc("message_thread_delete", { p_email: email });
+    if (error) return setProblem("That didn't work. Please try again.");
+    onChanged();
+    onClose();
+  }
+
+  const name = messages?.at(-1)?.name ?? email;
+  return <article className="convo">
+    <header className="convo-head">
+      <button className="convo-back" onClick={onClose} aria-label="Back to all conversations">‹</button>
+      <span className="thread-avatar is-large" aria-hidden="true">{initial(name)}</span>
+      <div className="convo-who"><h2>{name}</h2><a href={`mailto:${email}`}>{email}</a></div>
+      <div className="convo-actions">
+        <a className="button button-black" href={`mailto:${email}?subject=${encodeURIComponent("Re: your message to VapologyX")}`}>Reply by email</a>
+        <button className="button button-outline" onClick={markUnread}>Mark unread</button>
+        {confirming
+          ? <><button className="button button-black" onClick={remove}>Yes, delete</button><button className="button button-outline" onClick={() => setConfirming(false)}>Cancel</button></>
+          : <button className="button button-outline" onClick={() => setConfirming(true)}>Delete</button>}
+      </div>
+    </header>
+    {problem && <p className="form-status is-error" role="alert">{problem}</p>}
+    {!messages && <p className="admin-caption">Loading…</p>}
+    {messages && <ol className="convo-log" aria-label={`Messages from ${name}`}>
+      {messages.map((row, index) => <li key={row.id}>
+        {(index === 0 || new Date(row.created_at).toDateString() !== new Date(messages[index - 1].created_at).toDateString()) && <p className="convo-day">{new Date(row.created_at).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}</p>}
+        <div className="bubble"><p>{row.message}</p><time dateTime={row.created_at}>{index > 0 && "Follow-up · "}{clock(row.created_at)}</time></div>
+      </li>)}
+    </ol>}
+  </article>;
 }
