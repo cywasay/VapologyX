@@ -1,4 +1,8 @@
+"use client";
+
+import { useState } from "react";
 import { money, shelfOf, shelves } from "@/lib/products";
+import { ADMIN_PAGE_SIZE, Pager } from "../../../_shared/Pager";
 import type { InventoryReading } from "./readInventory";
 
 const cost = (value: number) => `Rs ${value.toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
@@ -7,6 +11,10 @@ const cost = (value: number) => `Rs ${value.toLocaleString("en-US", { maximumFra
 export function ImportPreview({ reading }: { reading: InventoryReading }) {
   const { rows, problems, notes } = reading;
   const stockValue = rows.reduce((sum, row) => sum + row.qty * row.cost, 0);
+  // Ten rows at a time, like every other table. The counts and the stock value above still cover the whole file.
+  const [page, setPage] = useState(0);
+  const current = Math.min(page, Math.max(0, Math.ceil(rows.length / ADMIN_PAGE_SIZE) - 1));
+  const visible = rows.slice(current * ADMIN_PAGE_SIZE, (current + 1) * ADMIN_PAGE_SIZE);
   return <>
     <ul className="import-counts">
       {shelves.map(shelf => <li key={shelf.category}><b>{rows.filter(row => row.category === shelf.category).length}</b>{shelf.name}</li>)}
@@ -25,7 +33,7 @@ export function ImportPreview({ reading }: { reading: InventoryReading }) {
     <div className="admin-table">
       <table>
         <thead><tr><th>Product</th><th>Shelf</th><th>Stock</th><th>Cost</th><th>Price</th></tr></thead>
-        <tbody>{rows.map(row => <tr key={`${row.category}-${row.name}`}>
+        <tbody>{visible.map(row => <tr key={`${row.category}-${row.name}`}>
           <td>{row.name}</td>
           <td>{shelfOf(row.category).singular}</td>
           <td>{row.qty === 0 ? <small className="admin-hidden-tag is-sold">Sold out</small> : row.qty}</td>
@@ -34,5 +42,6 @@ export function ImportPreview({ reading }: { reading: InventoryReading }) {
         </tr>)}</tbody>
       </table>
     </div>
+    <Pager page={current} shown={visible.length} total={rows.length} onPage={setPage} />
   </>;
 }

@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useRef, useState } from "react";
 import { ProductArt } from "@/components/art";
 import { PHONE_MEDIA } from "@/lib/phone-media";
-import { photosOf, type Product } from "@/lib/products";
+import { photosOf, saleTag, type Product } from "@/lib/products";
 
 // A swipe of at least this many pixels moves to the next or previous photo.
 const SWIPE = 40;
@@ -34,7 +34,7 @@ export function ProductGallery({ item, soldOut }: { item: Product; soldOut: bool
       } : undefined}
       onPointerCancel={many ? () => { dragStart.current = null; } : undefined}
     >
-      {soldOut ? <span className="badge is-sold">Sold out</span> : item.badge && <span className="badge">{item.badge}</span>}
+      {soldOut ? <span className="badge is-sold">Sold out</span> : saleTag(item) ? <span className="badge is-sale">{saleTag(item)}</span> : item.badge && <span className="badge">{item.badge}</span>}
       {photos.length === 0 && <ProductArt item={item} alt={item.name} sizes={PHOTO_SIZES} />}
       {photos.map((url, position) => <div key={`${position}:${url}`} className={`detail-slide ${position === current ? "is-active" : ""}`} aria-hidden={position === current ? undefined : true}>
         <Image className="art art-photo" src={url} alt={position === current ? (many ? `${item.name}, photo ${position + 1} of ${photos.length}` : item.name) : ""} width={1200} height={1200} sizes={PHOTO_SIZES} loading={position === 0 ? "eager" : "lazy"} fetchPriority={position === 0 ? "high" : "auto"} draggable={false} />

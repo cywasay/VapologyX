@@ -8,6 +8,9 @@ import type { Shelf } from "../types";
 
 const tabs: { id: Shelf | "all"; label: string }[] = [{ id: "all", label: "All" }, ...shelves.map(shelf => ({ id: shelf.category, label: shelf.name }))];
 
+// "Oxva - Xlim Go" shows the brand small above the model, so long names fit on one or two short lines.
+const splitName = (name: string) => { const at = name.indexOf(" - "); return at > 0 ? { brand: name.slice(0, at), model: name.slice(at + 3) } : { brand: "", model: name }; };
+
 // The shelf tabs, the search box and one tile per item. Tapping a tile adds it to the sale.
 // A barcode scanner types its code into the search box and presses Enter, which adds that item.
 export function ItemGrid({ counter, shelf, onShelf, search, onSearch }: { counter: Counter; shelf: Shelf | "all"; onShelf: (shelf: Shelf | "all") => void; search: string; onSearch: (text: string) => void }) {
@@ -31,19 +34,20 @@ export function ItemGrid({ counter, shelf, onShelf, search, onSearch }: { counte
 
   return <div className="ct-items">
     <div className="ct-tabs" role="group" aria-label="Shelf">
-      {tabs.map(tab => <button key={tab.id} className={shelf === tab.id ? "is-current" : ""} aria-pressed={shelf === tab.id} onClick={() => onShelf(tab.id)}>{tab.label}</button>)}
+      {tabs.map(tab => <button key={tab.id} className={shelf === tab.id ? "is-current" : ""} aria-pressed={shelf === tab.id} onClick={() => onShelf(tab.id)}>{tab.label}<small>{tab.id === "all" ? counter.items.length : counter.items.filter(item => item.shelf === tab.id).length}</small></button>)}
     </div>
     <input className="ct-search" type="search" placeholder="Search, or scan a barcode" aria-label="Search items or scan a barcode" value={search} onChange={event => { onSearch(event.target.value); setScanned(""); }} onKeyDown={event => { if (event.key === "Enter") enter(); }} />
     {scanned && <p className="ct-note" role="status">{scanned}</p>}
     <div className="ct-grid">
       {shown.map(item => {
         const left = item.stock - inSale(item.id);
-        return <button key={item.id} className={`ct-item ${left <= 0 ? "is-out" : ""}`} onClick={() => counter.add(item.id)} disabled={left <= 0}>
+        return <button key={item.id} title={item.name} className={`ct-item ${left <= 0 ? "is-out" : ""}`} onClick={() => counter.add(item.id)} disabled={left <= 0}>
           <span className="ct-item-art"><ProductArt item={{ name: item.name, category: item.shelf, type: item.type, color: LIME, image_url: null }} sizes="96px" /></span>
-          <strong>{item.name}</strong>
-          {sharedNames.has(item.name) && <small>{shelves.find(entry => entry.category === item.shelf)?.singular}</small>}
-          <span>{money(item.price)}</span>
-          <em>{left <= 0 ? "Sold out" : left <= 2 ? `Only ${left} left` : `${left} in stock`}</em>
+          <span className="ct-item-text">
+            <small>{splitName(item.name).brand}{sharedNames.has(item.name) ? ` · ${shelves.find(entry => entry.category === item.shelf)?.singular}` : ""}</small>
+            <strong>{splitName(item.name).model}</strong>
+            <span className="ct-item-meta"><b>{money(item.price)}</b><em className={left > 0 && left <= 2 ? "is-low" : ""}>{left <= 0 ? "Sold out" : left <= 2 ? `Only ${left} left` : `${left} left`}</em></span>
+          </span>
           {inSale(item.id) > 0 && <b className="ct-badge">{inSale(item.id)}</b>}
         </button>;
       })}

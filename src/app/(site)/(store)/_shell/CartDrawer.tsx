@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ProductArt } from "@/components/art";
+import { FreeDeliveryBar } from "@/components/flow/FreeDeliveryBar";
 import { useStore } from "@/components/store/store-context";
 import { cart, lineLimit, lineName, lineUnitPrice } from "@/lib/cart-store";
 import { money, productHref } from "@/lib/products";
@@ -26,6 +27,7 @@ export function CartDrawer() {
         </li>)}
       </ul>
       <div className="cart-total"><span>Subtotal</span><strong>{money(subtotal)}</strong></div>
+      {lines.length > 0 && <FreeDeliveryBar subtotal={subtotal} />}
       <p className="cart-note">Delivery is worked out at checkout.</p>
       {lines.length > 0
         ? <Link className="button button-primary cart-checkout" href="/checkout" onClick={closeCart}>Checkout</Link>

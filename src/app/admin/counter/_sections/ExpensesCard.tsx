@@ -30,11 +30,11 @@ export function ExpensesCard({ counter }: { counter: Counter }) {
       {counter.expenses.map(entry => <li key={entry.id}>
         <span>{entry.kind}{entry.note ? ` · ${entry.note}` : ""}<small>{entry.fromDrawer ? "paid from the drawer" : "not from the drawer"}</small></span>
         <b>{money(entry.amount)}</b>
-        {!counter.closed && <button className="ct-link" onClick={() => counter.removeExpense(entry.id)}>Remove</button>}
+        {!counter.locked && <button className="ct-link" onClick={() => counter.removeExpense(entry.id)}>Remove</button>}
       </li>)}
       {counter.expenses.length === 0 && <li className="ct-hint">No expenses today.</li>}
     </ul>
-    {!counter.closed && <form className="ct-expense-form" onSubmit={add}>
+    {!counter.locked && <form className="ct-expense-form" onSubmit={add}>
       <Select variant="pill" value={kind} options={EXPENSE_KINDS.map(item => ({ value: item, label: item }))} onChange={next => setKind(next as ExpenseKind)} aria-label="What the expense was for" />
       <input inputMode="numeric" placeholder="Rupees" aria-label="Expense amount" value={amount} onChange={event => setAmount(event.target.value)} />
       <input placeholder="Note (optional)" maxLength={120} aria-label="Expense note" value={note} onChange={event => setNote(event.target.value)} />

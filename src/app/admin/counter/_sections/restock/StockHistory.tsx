@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Loader } from "@/components/loader/Loader";
 import { createClient } from "@/utils/supabase/client";
+import { ADMIN_PAGE_SIZE, Pager } from "../../../_shared/Pager";
 
 type Move = { id: number; product_name: string; change: number; stock_after: number; reason: string; note: string; created_at: string };
 
@@ -10,27 +11,26 @@ const REASONS: Record<string, string> = {
   import: "Import", sale: "Sale", void: "Sale voided", order: "Online order", order_cancel: "Order cancelled",
   restock: "Restock", refill: "Opened for refills", writeoff: "Removed", adjustment: "Edited",
 };
-const STEP = 50;
 const when = (iso: string) => new Date(iso).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
 
 // Every change to the stock, newest first, with the reason.
 export function StockHistory({ onBack }: { onBack: () => void }) {
   const [search, setSearch] = useState("");
   const [query, setQuery] = useState("");
-  const [limit, setLimit] = useState(STEP);
+  const [page, setPage] = useState(0);
   const [rows, setRows] = useState<Move[] | null>(null);
   const [total, setTotal] = useState(0);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => { setQuery(search.trim()); setLimit(STEP); }, 300);
+    const timer = setTimeout(() => { setQuery(search.trim()); setPage(0); }, 300);
     return () => clearTimeout(timer);
   }, [search]);
 
   useEffect(() => {
     let stale = false;
     let request = createClient().from("stock_moves").select("id,product_name,change,stock_after,reason,note,created_at", { count: "exact" })
-      .order("created_at", { ascending: false }).order("id", { ascending: false }).range(0, limit - 1);
+      .order("created_at", { ascending: false }).order("id", { ascending: false }).range(page * ADMIN_PAGE_SIZE, (page + 1) * ADMIN_PAGE_SIZE - 1);
     if (query) request = request.ilike("product_name", `%${query.replace(/[\\%_]/g, "\\$&")}%`);
     request.then(({ data, count, error }) => {
       if (stale) return;
@@ -38,7 +38,7 @@ export function StockHistory({ onBack }: { onBack: () => void }) {
       if (!error) { setRows((data ?? []) as Move[]); setTotal(count ?? 0); }
     });
     return () => { stale = true; };
-  }, [query, limit]);
+  }, [query, page]);
 
   return <section className="ct-card ct-history" aria-labelledby="ct-history-title">
     <div className="ct-back"><button type="button" className="ct-link" onClick={onBack}>← Restock</button></div>
@@ -59,6 +59,6 @@ export function StockHistory({ onBack }: { onBack: () => void }) {
         </tr>)}</tbody>
       </table>
     </div>}
-    {rows && rows.length < total && <button type="button" className="ct-primary" onClick={() => setLimit(current => current + STEP)}>Show more</button>}
+    {rows && rows.length > 0 && <Pager page={page} shown={rows.length} total={total} onPage={setPage} />}
   </section>;
 }

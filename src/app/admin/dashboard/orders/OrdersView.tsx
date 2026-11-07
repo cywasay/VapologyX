@@ -2,11 +2,11 @@
 
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { Loader } from "@/components/loader/Loader";
 import { EmptyState } from "../../_shared/EmptyState";
 import { Icon } from "../../_shared/Icon";
 import { Pager } from "../../_shared/Pager";
 import { Pills } from "../../_shared/Pills";
+import { TableSkeleton } from "../../_shared/TableSkeleton";
 import { useOrderStats } from "../_data/useOrderStats";
 import { OrderDialog } from "./OrderDialog";
 import { orderOptions, orderStatuses, statusName } from "./orderStatuses";
@@ -41,7 +41,7 @@ export function OrdersView() {
     </label>
     {notice && <p className="admin-notice" role="status">{notice}</p>}
     {list.failed && <p className="form-status is-error" role="alert">We couldn&apos;t load your orders. Please refresh the page.</p>}
-    {!list.failed && !results && <Loader label="Loading orders" />}
+    {!list.failed && !results && <TableSkeleton label="Loading orders" headers={["Order", "Customer", "Items", "Total", "Status", "Placed", ""]} />}
     {results && results.items.length === 0 && <EmptyState icon="orders" title={list.query ? "No orders match your search" : `No ${label}orders yet`}>{list.query ? "Try an order number, a name or a mobile number." : "Orders placed in the shop will appear here."}</EmptyState>}
     {results && results.items.length > 0 && <>
       <OrdersTable items={results.items} onOpen={order => { setNotice(""); setOpen(order); }} />

@@ -47,7 +47,7 @@ export function ImportView() {
           <button type="button" className="button button-outline" disabled={busy} onClick={job.reset}>Choose another file</button>
         </div>
       </div>
-      <ImportPreview reading={reading} />
+      <ImportPreview key={job.fileName} reading={reading} />
     </>}
   </>;
 }

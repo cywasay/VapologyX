@@ -618,7 +618,18 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
 .delivery-bar p { margin: 0; color: var(--muted-on-dark); }
 .delivery-bar b { color: var(--accent); }
 .delivery-track { height: 6px; overflow: hidden; background: var(--ink-raised); border-radius: var(--radius-pill); }
-.delivery-track i { display: block; height: 100%; background: var(--accent); border-radius: inherit; transition: width 500ms cubic-bezier(.2, .8, .2, 1); }
+.delivery-track i { display: block; width: 100%; height: 100%; background: var(--accent); border-radius: inherit; transform: scaleX(var(--p, 0)); transform-origin: left center; transition: transform 700ms cubic-bezier(.2, .8, .2, 1); }
+.delivery-tick { display: inline-grid; place-items: center; width: 18px; height: 18px; margin-right: 4px; font-size: 11px; font-weight: 800; color: var(--ink); background: var(--accent); border-radius: 50%; animation: delivery-pop 520ms cubic-bezier(.3, 1.7, .4, 1) backwards; }
+.delivery-bar.is-done .delivery-track { animation: delivery-glow 900ms ease-out; }
+@keyframes delivery-pop { from { scale: 0; } }
+@keyframes delivery-glow { 0% { scale: 1 1; } 30% { scale: 1.03 1.9; } 100% { scale: 1 1; } }
+.cart .delivery-bar { padding-bottom: 8px; }
+.cart .delivery-bar p { color: var(--muted); }
+.cart .delivery-bar b { color: var(--ink); }
+.cart .delivery-track { background: var(--surface); }
+.cart .delivery-track i { background: var(--ink); }
+.cart .delivery-bar.is-done .delivery-track i { background: var(--accent); box-shadow: 0 0 0 1.5px var(--ink); }
+.cart .delivery-tick { background: var(--ink); color: var(--accent); }
 
 /* The form is the grid, so on a phone the order summary sits between the payment choice and the Place order button. */
 .checkout { display: grid; grid-template-columns: minmax(0, 1fr) 400px; column-gap: var(--space-inner); align-items: start; }
@@ -691,6 +702,8 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
 .stock-note.is-sold { color: var(--on-dark); background: var(--ink); }
 .stock-note.is-sold a { text-decoration: underline; text-underline-offset: 3px; }
 .detail-buy .stock-note { justify-self: start; margin: 0; }
+.badge.is-sale { color: var(--on-dark); background: var(--ink); }
+.price-was { margin-left: 6px; font-size: 0.85em; font-weight: 500; color: var(--muted); }
 .badge.is-sold { color: var(--on-dark); background: var(--ink); }
 .product.is-sold-out .product-image, .product.is-sold-out .product-specs { opacity: .55; }
 .product.is-sold-out .button-add:disabled { color: var(--muted); background: var(--surface); }
@@ -790,10 +803,66 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
   .home :is(.button-lime, .button-dark)::after { content: "→" / ""; display: inline-block; width: 0; margin-left: -8px; overflow: hidden; opacity: 0; translate: -8px 0; transition: width 340ms cubic-bezier(.2, .85, .2, 1), margin 340ms cubic-bezier(.2, .85, .2, 1), opacity 220ms ease, translate 340ms cubic-bezier(.2, .85, .2, 1); }
   .home :is(.button-lime, .button-dark):is(:hover, :focus-visible)::after { width: 1.1em; margin-left: 0; opacity: 1; translate: 0 0; }
 }
+/* Loading placeholders: grey shapes with a light sweep. The sweep moves with transform only, which phones handle easily. */
+.sk { position: relative; display: block; overflow: hidden; background: var(--surface); border-radius: var(--radius-input); }
+.sk::after { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, #ffffffb3 50%, transparent 70%); transform: translateX(-100%); animation: sk-sweep 1.3s ease-in-out infinite; }
+@keyframes sk-sweep { to { transform: translateX(100%); } }
+.sk-card { pointer-events: none; }
+.sk-image { aspect-ratio: 1 / 1.05; border-radius: var(--radius-card); }
+.sk-line { width: 82%; height: 16px; margin-top: 14px; }
+.sk-line.is-short { width: 48%; margin-top: 8px; }
+.sk-button { height: 44px; margin-top: 18px; border-radius: var(--radius-pill); }
+@media (hover: none) and (pointer: coarse) { .sk-line::after, .sk-button::after { display: none; } }
+/* Order confirmation: a check that draws itself with a small burst around it, and a timeline whose line fills and dots pop in turn. */
+.order-celebrate { position: relative; display: grid; place-items: center; width: 64px; height: 64px; }
+.order-celebrate svg { width: 64px; height: 64px; overflow: visible; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.order-check-ring { fill: var(--accent); stroke: var(--ink); stroke-width: 2; transform-origin: 50% 50%; animation: check-ring 520ms cubic-bezier(.3, 1.5, .4, 1) backwards; }
+.order-check-tick { stroke: var(--ink); stroke-width: 4; stroke-dasharray: 40; stroke-dashoffset: 0; animation: check-tick 420ms ease-out 360ms backwards; }
+.order-celebrate i { position: absolute; top: 50%; left: 50%; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; background: var(--c); border: 1px solid var(--ink); border-radius: 2px; opacity: 0; animation: confetti 900ms cubic-bezier(.2, .8, .3, 1) 320ms backwards; }
+.order-celebrate i:nth-of-type(3n) { border-radius: 50%; }
+@keyframes check-ring { from { scale: 0; } }
+@keyframes check-tick { from { stroke-dashoffset: 40; } }
+@keyframes confetti { 0% { opacity: 1; translate: 0 0; rotate: 0deg; scale: .4; } 70% { opacity: 1; } 100% { opacity: 0; translate: var(--x) calc(var(--y) + 22px); rotate: var(--r); scale: 1; } }
+.timeline li::before { transform-origin: left center; }
+.timeline .is-done::before, .timeline .is-current::before { animation: timeline-fill 520ms cubic-bezier(.3, .8, .3, 1) backwards; animation-delay: calc(var(--n) * 170ms); }
+.timeline-dot { animation: dot-pop 460ms cubic-bezier(.3, 1.7, .4, 1) backwards; animation-delay: calc(var(--n) * 170ms + 120ms); }
+.timeline .is-current .timeline-dot::after { content: ""; position: absolute; inset: -5px; border: 2px solid var(--ink); border-radius: 50%; opacity: 0; animation: dot-ring 1.8s ease-out 1s 3; }
+@keyframes timeline-fill { from { transform: scaleX(0); } }
+@keyframes dot-pop { from { scale: 0; } }
+@keyframes dot-ring { 0% { opacity: .55; scale: .8; } 100% { opacity: 0; scale: 1.5; } }
+@media (hover: none) and (pointer: coarse) { .order-celebrate i:nth-of-type(n + 9) { display: none; } }
+/* Skip link, questions and answers, and the 404 page. */
+.skip-link { position: fixed; top: 8px; left: 8px; z-index: 100; padding: 10px 18px; font-size: 14px; font-weight: 600; color: var(--on-dark); background: var(--ink); border-radius: var(--radius-pill); translate: 0 -220%; }
+.skip-link:focus { translate: 0 0; outline: 2px solid var(--accent); outline-offset: 2px; }
+.store-main:focus { outline: none; }
+.faq { display: grid; padding: 12px 32px; }
+.faq details { border-bottom: 1px solid var(--line); }
+.faq details:last-child { border-bottom: 0; }
+.faq summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 60px; font-size: 18px; font-weight: 600; letter-spacing: -.01em; cursor: pointer; list-style: none; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; display: grid; flex: none; place-items: center; width: 34px; height: 34px; font-size: 20px; background: var(--surface); border-radius: 50%; transition: rotate 320ms cubic-bezier(.3, 1.4, .4, 1), background 240ms ease; }
+.faq details[open] summary::after { rotate: 135deg; background: var(--accent); }
+.faq summary:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: var(--radius-input); }
+.faq p { max-width: 46rem; margin: 0 0 20px; line-height: 1.55; color: var(--muted); animation: faq-open 320ms ease-out; }
+.faq a { text-decoration: underline; text-underline-offset: 3px; color: var(--ink); }
+@keyframes faq-open { from { opacity: 0; translate: 0 -8px; } }
+.notfound-page { display: grid; align-items: center; min-height: 100dvh; background: var(--background); }
+.notfound { padding-block: 48px; }
+.notfound-card { position: relative; display: grid; justify-items: center; gap: 16px; padding: clamp(32px, 6vw, 72px) 24px; overflow: hidden; text-align: center; color: var(--on-dark); background: var(--ink); border-radius: var(--radius-panel); }
+.notfound-brand { color: var(--on-dark); }
+.notfound-digits { display: flex; align-items: center; gap: .08em; font-family: var(--font-display); font-size: clamp(96px, 22vw, 200px); font-weight: 800; line-height: 1; letter-spacing: -.06em; }
+.notfound-digits b { font-weight: 800; animation: nf-drop 700ms cubic-bezier(.3, 1.5, .4, 1) backwards; }
+.notfound-digits b:last-child { animation-delay: 160ms; }
+.notfound-digits span { display: block; width: .6em; height: .6em; background: var(--accent); border-radius: 50%; animation: nf-bob 3.2s ease-in-out infinite; }
+.notfound-card h1 { font-size: clamp(26px, 4vw, 40px); line-height: 1.05; letter-spacing: -.035em; }
+.notfound-card p { max-width: 30rem; line-height: 1.5; color: var(--muted-on-dark); }
+.notfound-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 8px; }
+@keyframes nf-drop { from { opacity: 0; translate: 0 -50px; } }
+@keyframes nf-bob { 50% { translate: 0 -12px; scale: 1.05; } }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   /* The admin sidebar and the home page motion (with the header and footer) stay on: the user asked for them. */
-  *:not(.loader, .loader *, .skeleton, .admin-side, .admin-main, .admin-highlight, .admin-label, .admin-nav > button, .admin-nav > a, .admin-collapse .admin-icon, .motion, .motion *), *:not(.motion *, .loader *)::before, *:not(.motion *, .loader *)::after { animation: none !important; transition: none !important; }
+  *:not(.loader, .loader *, .skeleton, .skeleton *, .keep-motion, .keep-motion *, .admin-side, .admin-main, .admin-highlight, .admin-label, .admin-nav > button, .admin-nav > a, .admin-collapse .admin-icon, .motion, .motion *), *:not(.motion *, .loader *, .keep-motion *)::before, *:not(.motion *, .loader *, .keep-motion *)::after { animation: none !important; transition: none !important; }
 }
 @media (max-width: 1240px) {
   .finder { grid-template-columns: minmax(0, 1fr); }

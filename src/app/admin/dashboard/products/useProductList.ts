@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { PRODUCT_COLUMNS, type Product } from "@/lib/products";
 import { createClient } from "@/utils/supabase/client";
+import { ADMIN_PAGE_SIZE } from "../../_shared/Pager";
 import type { ShelfFilter } from "../_data/useProductCounts";
 
-export const PAGE_SIZE = 25;
+export const PAGE_SIZE = ADMIN_PAGE_SIZE;
 type Results = { items: Product[]; total: number };
 
 // The admin's product list: one shelf (or all), narrowed by a name search, a page at a time.

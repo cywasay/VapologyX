@@ -15,7 +15,8 @@ export function useCounter() {
   const [items, setItems] = useState<CounterItem[]>([]);
   const [cart, setCart] = useState<Record<string, number>>({});
   const [pay, setPay] = useState<Pay>("Cash");
-  const [given, setGiven] = useState("");
+  const [received, setReceivedText] = useState("");
+  const [warned, setWarned] = useState("");
   const [bottles, setBottles] = useState<Bottle[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
   const [receipt, setReceipt] = useState<Sale | null>(null);
@@ -25,6 +26,7 @@ export function useCounter() {
   const [cashOuts, setCashOuts] = useState<CashOut[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [closed, setClosed] = useState(false);
+  const [locked, setLocked] = useState(false);
   const [closing, setClosing] = useState<Closing | null>(null);
   const [note, setNote] = useState("");
   const [problem, setProblem] = useState("");
@@ -41,6 +43,7 @@ export function useCounter() {
     setCashOuts(state.cashOuts);
     setExpenses(state.expenses);
     setClosed(state.closed);
+    setLocked(state.locked);
     setClosing(state.closing);
   }, []);
 
@@ -98,8 +101,11 @@ export function useCounter() {
   // The cash that should be in the drawer: what it started with, cash sales and refills, less cash taken out and expenses paid from the till.
   const expectedCash = opening + byPay("Cash") + refillsToday - cashOutTotal - drawerExpensesTotal;
 
-  const givenAmount = Number(given.replace(/[,\s]/g, "")) || 0;
-  const change = pay === "Cash" && givenAmount > 0 ? givenAmount - total : null;
+  // What the shop kept for this sale, after any change was given back. Empty means the full bill.
+  const receivedAmount = received.trim() === "" ? null : Number(received.replace(/[,\s]/g, ""));
+  const receivedValid = receivedAmount === null || (Number.isInteger(receivedAmount) && receivedAmount >= 0);
+  const adjustment = receivedAmount === null || !receivedValid ? 0 : receivedAmount - total;
+  const setReceived = (text: string) => { setReceivedText(text); setWarned(""); };
 
   function add(id: string) {
     const item = items.find(entry => entry.id === id);
@@ -129,16 +135,25 @@ export function useCounter() {
 
   function clearSale() {
     setCart({});
-    setGiven("");
+    setReceived("");
   }
 
   async function completeSale() {
-    if (closed) return setNote("The day is closed. Sales are switched off.");
+    if (locked) return setNote("Today is locked. Sales are switched off.");
     if (total === 0) return setNote("Tap an item to start a sale.");
-    if (pay === "Cash" && givenAmount > 0 && givenAmount < total) return setNote("The cash given is less than the total.");
+    if (!receivedValid) return setNote("Type the amount received as a whole number.");
     const bought = lines.map(({ item, quantity }) => ({ productId: item.id, quantity }));
+    // A discount below what the goods cost only warns. Pressing Complete sale again sells anyway.
+    const key = `${receivedAmount}:${JSON.stringify(bought)}`;
+    if (receivedAmount !== null && receivedAmount < total && warned !== key) {
+      const check = await counterApi.belowCost(receivedAmount, bought);
+      if (check.ok && check.data) {
+        setWarned(key);
+        return setNote("This is below what the items cost. Press Complete sale again to sell anyway.");
+      }
+    }
     await run(
-      () => counterApi.sell(pay, pay === "Cash" && givenAmount > 0 ? givenAmount : null, bought),
+      () => counterApi.sell(pay, receivedAmount, bought),
       sale => {
         setItems(current => current.map(item => ({ ...item, stock: item.stock - (cart[item.id] ?? 0) })));
         setSales(current => [...current, sale]);
@@ -216,13 +231,15 @@ export function useCounter() {
     setClosed(true);
   });
 
+  const lockDay = () => run(() => counterApi.lockDay(), () => setLocked(true));
+
   return {
     status, reload: load, refresh, problem, dismissProblem: () => setProblem(""), busy,
-    items, lines, total, pay, setPay, given, setGiven, change, add, scan, setQuantity, completeSale, clearSale, note,
+    items, lines, total, pay, setPay, received, setReceived, adjustment, add, scan, setQuantity, completeSale, clearSale, note,
     sales, salesToday, byPay, voidSale, receipt, closeReceipt: () => setReceipt(null), openReceipt: setReceipt,
     bottles, refillsToday, refillsAll, openBottle, addRefill, undoRefill, finishBottle,
     opening, setOpening, saveOpening, cashOuts, addCashOut, removeCashOut, cashOutTotal, expenses, expensesTotal, drawerExpensesTotal, addExpense, removeExpense, expectedCash,
-    closed, closing, closeDay,
+    closed, locked, closing, closeDay, lockDay,
   };
 }
 

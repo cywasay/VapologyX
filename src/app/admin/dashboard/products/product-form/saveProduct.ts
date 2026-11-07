@@ -13,6 +13,7 @@ export type ProductFields = {
   variants: Variety[];
   fits: string[];
   badge: string | null;
+  compare_price: number | null;
   is_published: boolean;
   barcode: string | null;
 };

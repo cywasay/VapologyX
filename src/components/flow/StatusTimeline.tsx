@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { ORDER_STEPS, statusLabel, statusNote, type Order } from "@/lib/orders";
 
 // How far along the order is. A cancelled order skips the steps and says so plainly.
@@ -10,10 +11,10 @@ export function StatusTimeline({ order }: { order: Order }) {
   const finished = order.status === "delivered";
   return <div className="panel-light checkout-card">
     <p className="timeline-note" role="status">{statusNote(order.status, method)}</p>
-    <ol className="timeline" aria-label="Order progress">
+    <ol className="timeline keep-motion" aria-label="Order progress">
       {ORDER_STEPS.map((step, index) => {
         const done = index < current || (finished && index === current);
-        return <li key={step} className={done ? "is-done" : index === current ? "is-current" : ""} aria-current={index === current ? "step" : undefined}>
+        return <li key={step} style={{ "--n": index } as CSSProperties} className={done ? "is-done" : index === current ? "is-current" : ""} aria-current={index === current ? "step" : undefined}>
           <span className="timeline-dot" aria-hidden="true">{done ? "✓" : index + 1}</span>
           <span>{statusLabel(step, method)}</span>
         </li>;

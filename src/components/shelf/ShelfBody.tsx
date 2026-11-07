@@ -1,5 +1,5 @@
 import { ProductGrid } from "@/components/product/ProductGrid";
-import { Loader } from "@/components/loader/Loader";
+import { ProductGridSkeleton } from "@/components/product/ProductGridSkeleton";
 import type { Product } from "@/lib/products";
 import { ShelfLinks } from "./ShelfLinks";
 import type { ShelfResults } from "./useShelfResults";
@@ -19,7 +19,7 @@ export function ShelfBody({ results, idle, searching, text, filtered, emptyText,
 
   if (idle) return <div className="shelf-empty"><p>Type a name above, or pick a shelf.</p><ShelfLinks /></div>;
   if (failed) return <div className="shelf-empty"><p role="alert">We couldn&apos;t load these products.</p><button type="button" className="button button-primary" onClick={retry}>Try again</button></div>;
-  if (!page) return <Loader label="Loading products" />;
+  if (!page) return <ProductGridSkeleton />;
   if (page.items.length === 0 && !stale) {
     return <div className="shelf-empty">
       <p>{searching ? `Nothing matches “${text}”${filtered ? " with these filters" : ""}.` : filtered ? "No products match these filters." : emptyText}</p>

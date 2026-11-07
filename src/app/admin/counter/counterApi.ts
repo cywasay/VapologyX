@@ -6,6 +6,7 @@ export type CounterState = {
   day: string;
   opening: number;
   closed: boolean;
+  locked: boolean;
   closing: { counted: number; expected: number; difference: number } | null;
   items: CounterItem[];
   sales: Sale[];
@@ -23,7 +24,9 @@ export type Reply<T> = { ok: true; data: T } | { ok: false; error: string };
 function friendly(message: string) {
   const [code, detail = ""] = message.split(": ");
   switch (code) {
-    case "day_closed": return "The day is closed. Nothing can change until tomorrow.";
+    case "day_closed":
+    case "day_locked": return "Today is locked. Nothing can change.";
+    case "close_first": return "Close the day first, then lock it.";
     case "out_of_stock": return `${detail || "That item"} doesn't have enough left in stock.`;
     case "unavailable": return "That item can't be sold from here.";
     case "no_cost": return `${detail || "That bottle"} has no cost set yet. Add its cost first, then open it.`;
@@ -45,7 +48,9 @@ async function call<T>(fn: string, args?: Record<string, unknown>): Promise<Repl
 
 export const counterApi = {
   state: () => call<CounterState>("counter_state"),
-  sell: (pay: Pay, given: number | null, lines: { productId: string; quantity: number }[]) => call<Sale>("counter_sell", { draft: { pay, given, lines } }),
+  sell: (pay: Pay, received: number | null, lines: { productId: string; quantity: number }[]) => call<Sale>("counter_sell", { draft: { pay, received: received === null ? null : String(received), lines } }),
+  belowCost: (received: number, lines: { productId: string; quantity: number }[]) => call<boolean>("counter_below_cost", { draft: { received: String(received), lines } }),
+  lockDay: () => call<{ locked: boolean }>("counter_lock_day"),
   voidSale: (id: string) => call<Sale>("counter_void", { p_sale: id, p_reason: "" }),
   openBottle: (productId: string) => call<Bottle>("counter_open_bottle", { p_product: productId }),
   addRefill: (bottleId: string, amount: number) => call<Bottle>("counter_add_refill", { p_bottle: bottleId, p_amount: amount }),

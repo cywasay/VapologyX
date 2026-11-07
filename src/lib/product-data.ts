@@ -49,6 +49,14 @@ export async function getLinkedCoils(): Promise<Product[]> {
   return (checked(await products().eq("category", "coil").neq("fits", "{}").limit(200)) ?? []) as unknown as Product[];
 }
 
+// Every published product's address and last change, for the sitemap.
+export async function getSitemapProducts(): Promise<{ slug: string; updated_at: string }[]> {
+  "use cache";
+  cacheTag("products");
+  cacheLife("hours");
+  return (checked(await publicClient().from("products").select("slug,updated_at").eq("is_published", true).order("position").limit(1000)) ?? []) as { slug: string; updated_at: string }[];
+}
+
 export async function getTypes(category: Category): Promise<string[]> {
   "use cache";
   cacheTag("products");

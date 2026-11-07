@@ -1,7 +1,7 @@
 import { money } from "@/lib/products";
 import type { Counter } from "../useCounter";
 import type { Pay } from "../types";
-import { CashGiven } from "./CashGiven";
+import { Received } from "./Received";
 
 const payments: Pay[] = ["Cash", "Bank", "Wallet"];
 
@@ -25,8 +25,8 @@ export function SalePanel({ counter }: { counter: Counter }) {
     <div className="ct-pay" role="group" aria-label="Payment">
       {payments.map(method => <button key={method} className={counter.pay === method ? "is-current" : ""} aria-pressed={counter.pay === method} onClick={() => counter.setPay(method)}>{method}</button>)}
     </div>
-    {counter.pay === "Cash" && <CashGiven counter={counter} />}
-    <button className="ct-complete" onClick={counter.completeSale} disabled={counter.closed || counter.busy}>{counter.closed ? "Day is closed" : "Complete sale"}</button>
+    {counter.lines.length > 0 && <Received counter={counter} />}
+    <button className="ct-complete" onClick={counter.completeSale} disabled={counter.locked || counter.busy}>{counter.locked ? "Today is locked" : "Complete sale"}</button>
     <p className="ct-note" role="status">{counter.note}</p>
   </aside>;
 }

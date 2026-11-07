@@ -7,7 +7,7 @@ export const GRAPHITE = "#6f7176";
 export const SILVER = "#c7cac5";
 
 export const PAGE_SIZE = 24;
-export const PRODUCT_COLUMNS = "id,slug,name,category,type,price,description,specs,fits,variants,image_url,images,color,badge,is_published,stock";
+export const PRODUCT_COLUMNS = "id,slug,name,category,type,price,description,specs,fits,variants,image_url,images,color,badge,is_published,stock,compare_price";
 // Most photos one product can have. The database enforces the same limit.
 export const MAX_PHOTOS = 8;
 // A product with this many left or fewer gets an "Only N left" label.
@@ -35,6 +35,8 @@ export type Product = {
   images: string[];
   color: string;
   badge: string | null;
+  // While the product is on sale: its normal price. price is then the sale price. null when not on sale.
+  compare_price: number | null;
   is_published: boolean;
   // How many are on the shelf. null means stock isn't counted, and 0 means sold out.
   stock: number | null;
@@ -51,6 +53,9 @@ export const shelves: { category: Category; name: string; singular: string; href
 export const shelfOf = (category: Category) => shelves.find(shelf => shelf.category === category) ?? shelves[0];
 export const money = (value: number) => `Rs ${value.toLocaleString("en-US")}`;
 export const productHref = (product: Pick<Product, "slug">) => `/products/${product.slug}`;
+// "20% off" while a product is on sale, otherwise empty.
+export const saleTag = (product: Pick<Product, "price" | "compare_price">) => product.compare_price ? `${Math.round((1 - product.price / product.compare_price) * 100)}% off` : "";
+
 export const varietyPrice = (product: Pick<Product, "price">, variety: Variety | null) => variety?.price ?? product.price;
 // Products made before the photo list existed only have image_url.
 export const photosOf = (product: Pick<Product, "image_url" | "images">) => product.images.length > 0 ? product.images : product.image_url ? [product.image_url] : [];

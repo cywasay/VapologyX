@@ -21,7 +21,7 @@ export function DetailInfo({ item, slug, variety, onVariety, coilCount, phone }:
     {soldOut
       ? <p className="stock-note is-sold">Sold out right now. <Link href="/contact">Ask the store</Link> when it&apos;s back.</p>
       : few ? <p className="stock-note">Only {few} left in stock</p> : phone && <p className="stock-note">In stock</p>}
-    <strong>{money(varietyPrice(item, variety))}</strong>
+    <strong>{money(varietyPrice(item, variety))}{item.compare_price && !variety?.price ? <s className="price-was"><span className="sr-only">, was </span>{money(item.compare_price)}</s> : null}</strong>
     {!phone && <AddToCart item={item} variety={variety} />}
   </div>;
   const coils = coilCount > 0 && <a key="coils" className="text-link" href={`#${slug}-coils`}>{coilCount} compatible {coilCount === 1 ? "coil" : "coils"}</a>;

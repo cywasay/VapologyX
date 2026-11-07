@@ -14,11 +14,13 @@ import { SpecsField } from "./SpecsField";
 import { usePrivateFields } from "./usePrivateFields";
 
 // The side panel for adding a product or editing one.
-export function ProductForm({ product, defaultCategory, onClose, onSaved }: {
+export function ProductForm({ product, defaultCategory, onClose, onSaved, onDelete }: {
   product: Product | null;
   defaultCategory: Category;
   onClose: () => void;
   onSaved: (message: string) => void;
+  // When given, deleting hands the product to the page, which waits a few seconds so the delete can be undone.
+  onDelete?: (product: Product) => void;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const confirmDialog = useRef<HTMLDialogElement>(null);
@@ -26,7 +28,10 @@ export function ProductForm({ product, defaultCategory, onClose, onSaved }: {
   const [name, setName] = useState(product?.name ?? "");
   const [category, setCategory] = useState<Category>(product?.category ?? defaultCategory);
   const [type, setType] = useState(product?.type ?? "");
-  const [price, setPrice] = useState(product ? String(product.price) : "");
+  // The price field always holds the normal price. While on sale, the shop price is worked out from the percent off.
+  const [price, setPrice] = useState(product ? String(product.compare_price ?? product.price) : "");
+  const [onSale, setOnSale] = useState(product?.compare_price != null);
+  const [percentOff, setPercentOff] = useState(product?.compare_price ? String(Math.round((1 - product.price / product.compare_price) * 100)) : "");
   const [stock, setStock] = useState(product?.stock == null ? "" : String(product.stock));
   const [description, setDescription] = useState(product?.description ?? "");
   const [specs, setSpecs] = useState<Spec[]>(product?.specs ?? templateFor(defaultCategory));
@@ -47,6 +52,9 @@ export function ProductForm({ product, defaultCategory, onClose, onSaved }: {
 
   useEffect(() => { dialog.current?.showModal(); }, []);
 
+  const percent = Number(percentOff);
+  const salePrice = onSale && Number.isInteger(percent) && percent >= 1 && percent <= 90 && price.trim() !== "" ? Math.round(Number(price) * (100 - percent) / 100) : null;
+
   function changeCategory(next: Category) {
     setCategory(next);
     if (specs.every(spec => !spec.value.trim())) setSpecs(templateFor(next));
@@ -56,6 +64,7 @@ export function ProductForm({ product, defaultCategory, onClose, onSaved }: {
     if (!name.trim()) return "Please enter a product name.";
     const amount = Number(price);
     if (price.trim() === "" || !Number.isInteger(amount) || amount < 0 || amount > MAX_PRICE) return "Please enter the price in whole rupees.";
+    if (onSale && (salePrice === null || salePrice >= amount)) return "For a sale, type a percent off from 1 to 90.";
     if (stock.trim() !== "" && (!Number.isInteger(Number(stock)) || Number(stock) < 0 || Number(stock) > MAX_STOCK)) return "Stock must be a whole number, or empty if you don't count it.";
     if (cost.trim() !== "" && (!Number.isFinite(Number(cost)) || Number(cost) < 0 || Number(cost) > MAX_PRICE)) return "The cost must be a number of rupees, or empty.";
     if (barcode.trim().length > 64) return "The barcode is too long.";
@@ -80,7 +89,8 @@ export function ProductForm({ product, defaultCategory, onClose, onSaved }: {
       name: name.trim(),
       category,
       type: category === "device" || category === "bottle" ? type.trim() : shelfOf(category).singular,
-      price: Number(price),
+      price: salePrice ?? Number(price),
+      compare_price: salePrice === null ? null : Number(price),
       stock: stock.trim() === "" ? null : Number(stock),
       description: description.trim(),
       specs: specs.map(spec => ({ label: spec.label.trim(), value: spec.value.trim() })).filter(spec => spec.label && spec.value),
@@ -106,6 +116,11 @@ export function ProductForm({ product, defaultCategory, onClose, onSaved }: {
 
   async function remove() {
     if (!product) return;
+    if (onDelete) {
+      confirmDialog.current?.close();
+      onDelete(product);
+      return;
+    }
     setBusy(true);
     setError("");
     const failure = await deleteProduct(product);
@@ -169,7 +184,12 @@ export function ProductForm({ product, defaultCategory, onClose, onSaved }: {
         <div className="product-form-checks">
           <label><input type="checkbox" checked={isPublished} onChange={event => setIsPublished(event.target.checked)} />Visible in the shop</label>
           <label><input type="checkbox" checked={isNew} onChange={event => setIsNew(event.target.checked)} />Show a &ldquo;New&rdquo; label</label>
+          <label><input type="checkbox" checked={onSale} onChange={event => setOnSale(event.target.checked)} />On sale</label>
         </div>
+        {onSale && <div className="product-form-row">
+          <label className="field">Percent off<input type="number" inputMode="numeric" min="1" max="90" step="1" value={percentOff} onChange={event => setPercentOff(event.target.value)} /></label>
+          <p className="admin-caption">{salePrice === null ? "Type 1 to 90." : `Sale price: Rs ${salePrice.toLocaleString("en-PK")} (normal Rs ${Number(price).toLocaleString("en-PK")}). Option prices are not changed.`}</p>
+        </div>}
       </div>
 
       <div className="product-form-foot">

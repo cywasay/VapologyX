@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import type { OrderLine, OrderStatus } from "@/lib/orders";
 import { createClient } from "@/utils/supabase/client";
+import { ADMIN_PAGE_SIZE } from "../../_shared/Pager";
 
-export const ORDERS_PAGE_SIZE = 25;
+export const ORDERS_PAGE_SIZE = ADMIN_PAGE_SIZE;
 
 // An order as the admin reads it from the database.
 export type AdminOrder = {

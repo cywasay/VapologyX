@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FlowSkeleton } from "@/components/flow/FlowSkeleton";
 import { FlowSteps } from "@/components/flow/FlowSteps";
+import { OrderCelebration } from "@/components/flow/OrderCelebration";
 import { OrderDetails } from "@/components/flow/OrderDetails";
 import { OrderNumber } from "@/components/flow/OrderNumber";
 import { OrderSummary } from "@/components/flow/OrderSummary";
@@ -30,6 +31,7 @@ export function OrderView({ number }: { number: string }) {
   return <section className="shell flow" aria-labelledby="order-title">
     <div className="flow-head">
       <FlowSteps current={3} />
+      <OrderCelebration number={order.number} />
       <h1 id="order-title">Thank you, {order.customer.name.split(" ")[0]}.</h1>
       <p>Your order is in. This is your order number:</p>
       <OrderNumber number={order.number} />

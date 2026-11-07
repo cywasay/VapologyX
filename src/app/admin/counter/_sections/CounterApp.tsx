@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader } from "@/components/loader/Loader";
 import type { Mode } from "../types";
 import { useCounter } from "../useCounter";
@@ -16,6 +16,24 @@ import { SellPanel } from "./SellPanel";
 export function CounterApp() {
   const [mode, setMode] = useState<Mode>("sell");
   const counter = useCounter();
+  // Dark mode for long days at the till. Remembered on this device only.
+  const [dark, setDark] = useState(() => { try { return localStorage.getItem("vx-counter-dark") === "1"; } catch { return false; } });
+  useEffect(() => {
+    const frame = document.querySelector(".ct");
+    frame?.classList.toggle("is-dark", dark);
+    try { localStorage.setItem("vx-counter-dark", dark ? "1" : "0"); } catch {}
+    return () => frame?.classList.remove("is-dark");
+  }, [dark]);
+  // Full screen for the till, where the browser allows it. null means this browser can't, so the button is hidden.
+  const [full, setFull] = useState<boolean | null>(null);
+  useEffect(() => {
+    if (!document.fullscreenEnabled) return;
+    const sync = () => setFull(Boolean(document.fullscreenElement));
+    sync();
+    document.addEventListener("fullscreenchange", sync);
+    return () => document.removeEventListener("fullscreenchange", sync);
+  }, []);
+  const toggleFull = () => { if (document.fullscreenElement) void document.exitFullscreen(); else void document.documentElement.requestFullscreen().catch(() => undefined); };
 
   if (counter.status === "loading") return <Loader label="Opening the counter" />;
   if (counter.status === "failed") return <div className="ct-failed" role="alert">
@@ -24,7 +42,7 @@ export function CounterApp() {
   </div>;
 
   return <>
-    <CounterTopBar mode={mode} onMode={setMode} counter={counter} />
+    <CounterTopBar mode={mode} onMode={setMode} counter={counter} dark={dark} onDark={() => setDark(value => !value)} full={full} onFull={toggleFull} />
     {counter.problem && <p className="ct-alert" role="alert">{counter.problem}<button className="ct-link" onClick={counter.dismissProblem}>Dismiss</button></p>}
     <main className="ct-main">
       {mode === "sell" && <SellPanel counter={counter} />}

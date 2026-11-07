@@ -13,6 +13,9 @@ export function Footer() {
         <Link href="/about">About</Link>
         <Link href="/contact">Contact</Link>
         <Link href="/track">Track order</Link>
+        <Link href="/shipping">Shipping</Link>
+        <Link href="/faq">FAQ</Link>
+        <Link href="/privacy">Privacy</Link>
         <Link href="/terms">Terms &amp; conditions</Link>
       </nav>
       <span className="footer-age">{MINIMUM_AGE}+ only</span>

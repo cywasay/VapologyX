@@ -12,9 +12,10 @@ import { SearchDialog } from "./_shell/SearchDialog";
 export default function StoreLayout({ children }: { children: ReactNode }) {
   return <StoreProvider>
     <div className="store-frame">
+      <a className="skip-link" href="#main">Skip to content</a>
       <NoticeBar />
       <Header />
-      <main className="store-main">{children}</main>
+      <main id="main" tabIndex={-1} className="store-main">{children}</main>
       <Footer />
     </div>
     <ButtonOrigin />
