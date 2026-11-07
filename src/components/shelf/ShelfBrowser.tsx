@@ -55,7 +55,7 @@ export function ShelfBrowser({ category, initial, types = [], typeLabel = "Type"
   const summary = idle || !page ? "" : stale ? "Updating…" : `${page.total} ${page.total === 1 ? "product" : "products"}`;
 
   return <>
-    <ShelfTools query={query} searching={searching} idle={idle} choice={choice} filtered={filtered} summary={summary} onUpdate={update} onClear={clear} />
+    <ShelfTools query={query} searching={searching} idle={idle} choice={choice} deviceName={devices.find(device => device.id === query.fits)?.name} filtered={filtered} summary={summary} onUpdate={update} onClear={clear} />
     <ShelfBody results={results} idle={idle} searching={searching} text={query.text} filtered={filtered} emptyText={emptyText} metaFor={metaFor} onClear={clear} />
   </>;
 }

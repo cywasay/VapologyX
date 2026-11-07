@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState, type CSSProperties, type FocusEvent } from "react";
 import { useAgeVerified } from "@/components/age-gate";
 import { BottleArt, CoilArt, DeviceArt, DisposableArt } from "@/components/art";
+import { usePhoneLayout } from "@/lib/phone-layout";
 import { LIME, type Category } from "@/lib/products";
 
 export type ShelfCounts = Record<Category, number>;
@@ -21,10 +22,12 @@ const STAGE_TIME = 3800;
 // One shape that morphs into a new form for each shelf, with the product swapping inside it.
 export function HeroStage({ counts }: { counts: ShelfCounts }) {
   const verified = useAgeVerified();
+  const phone = usePhoneLayout();
   const [move, setMove] = useState<Move>({ active: 0, previous: null, forward: true });
   const [held, setHeld] = useState(false);
-  const running = verified && !held;
-  const stage = STAGES[move.active];
+  const running = !phone && verified && !held;
+  const active = phone ? 0 : move.active;
+  const stage = STAGES[active];
 
   useEffect(() => {
     if (!running) return;
@@ -36,11 +39,11 @@ export function HeroStage({ counts }: { counts: ShelfCounts }) {
   const hold = (event: FocusEvent<HTMLDivElement>) => { if (event.target.matches(":focus-visible")) setHeld(true); };
   const release = (event: FocusEvent<HTMLDivElement>) => { if (!event.currentTarget.contains(event.relatedTarget)) setHeld(false); };
 
-  return <div className={`stage ${move.forward ? "is-moving-forward" : "is-moving-back"}`} data-shape={move.active} style={{ "--active": move.active } as CSSProperties} onFocus={hold} onBlur={release}>
+  return <div className={`stage ${move.forward ? "is-moving-forward" : "is-moving-back"}`} data-shape={active} style={{ "--active": active } as CSSProperties} onFocus={hold} onBlur={release}>
     <div className="stage-frame" aria-hidden="true">
       <span className="stage-ring" />
       <span className="stage-shape" />
-      {STAGES.map((item, index) => <div key={item.category} className={`stage-art ${index === move.active ? "is-active" : index === move.previous ? "is-leaving" : ""}`}>{item.art}</div>)}
+      {STAGES.map((item, index) => <div key={item.category} className={`stage-art ${index === active ? "is-active" : index === move.previous ? "is-leaving" : ""}`}>{item.art}</div>)}
       <span className="stage-index">0{move.active + 1}<i>/0{STAGES.length}</i></span>
     </div>
     <div className="stage-switch" role="group" aria-label="Choose a shelf to preview">

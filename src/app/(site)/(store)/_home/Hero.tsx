@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SearchGlyph } from "@/components/art";
 import { BRAND, MINIMUM_AGE, shelves } from "@/lib/products";
 import { CountUp } from "./CountUp";
 import { getShelfCounts } from "./getShelfCounts";
@@ -24,6 +25,16 @@ export async function Hero() {
         </dl>
       </div>
       <HeroStage counts={counts} />
+      <div className="phone-only home-quick-shop">
+        <form action="/search" method="get" role="search" className="home-quick-search">
+          <input type="search" name="q" placeholder="Search products" aria-label="Search products" enterKeyHint="search" maxLength={80} required />
+          <button type="submit" aria-label="Submit product search"><SearchGlyph /></button>
+        </form>
+        <nav aria-label="Shop by category">
+          {shelves.map(shelf => <Link key={shelf.href} href={shelf.href} prefetch={false}>{shelf.name}</Link>)}
+        </nav>
+        {counts.device > 0 && <a className="home-quick-coil" href="#coil-finder">Find my coil <span aria-hidden="true">↗</span></a>}
+      </div>
     </div>
   </section>;
 }

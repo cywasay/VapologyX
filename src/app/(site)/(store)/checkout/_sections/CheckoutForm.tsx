@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useStore } from "@/components/store/store-context";
 import { lineUnitPrice, type CartLine } from "@/lib/cart-store";
+import { usePhoneLayout } from "@/lib/phone-layout";
 import { FREE_DELIVERY_FROM, isStockProblem, normalizePhone, orderTotals, placeOrder, type DeliveryMethod } from "@/lib/orders";
 import { CheckoutSummary } from "./CheckoutSummary";
 import { DRAFT_KEY, FIELD_ORDER, readDraft, toOrderLine, validate, without, type Errors, type Field, type SetValue, type Values } from "./checkoutDraft";
@@ -12,10 +13,13 @@ import { DeliveryCard } from "./DeliveryCard";
 import { DetailsCard } from "./DetailsCard";
 import { PaymentCard } from "./PaymentCard";
 
+const PHONE_FIELD_ORDER: Field[] = ["address", "city", "name", "phone", "email", "age"];
+
 // The checkout form. It remembers the details in this browser and places the order when it is sent.
 export function CheckoutForm({ lines, locked, onPlaced }: { lines: CartLine[]; locked: boolean; onPlaced: (lines: CartLine[]) => void }) {
   const router = useRouter();
   const { clear } = useStore();
+  const phone = usePhoneLayout();
   const [values, setValues] = useState<Values>(readDraft);
   const [errors, setErrors] = useState<Errors>({});
   const [formError, setFormError] = useState("");
@@ -51,7 +55,7 @@ export function CheckoutForm({ lines, locked, onPlaced }: { lines: CartLine[]; l
     if (Object.keys(found).length > 0) {
       setErrors(found);
       setFormError("Please check the highlighted fields.");
-      const first = FIELD_ORDER.find(field => found[field]);
+      const first = (phone ? PHONE_FIELD_ORDER : FIELD_ORDER).find(field => found[field]);
       if (first) document.getElementById(`checkout-${first}`)?.focus();
       return;
     }
@@ -75,12 +79,16 @@ export function CheckoutForm({ lines, locked, onPlaced }: { lines: CartLine[]; l
     }
   }
 
+  const details = <DetailsCard key="contact" values={values} errors={errors} set={set} />;
+  const delivery = <DeliveryCard key="delivery" values={values} errors={errors} set={set} deliveryFree={deliveryFree} onMethod={chooseMethod} />;
+  const summary = <CheckoutSummary key="summary" lines={lines} subtotal={subtotal} totals={totals} pickup={pickup} deliveryFree={deliveryFree} phone={phone} />;
+  const error = formError && <p className="flow-error" role="alert">{formError}</p>;
+
   return <form className="checkout" onSubmit={submit} noValidate>
-    {formError && <p className="flow-error" role="alert">{formError}</p>}
-    <DetailsCard values={values} errors={errors} set={set} />
-    <DeliveryCard values={values} errors={errors} set={set} deliveryFree={deliveryFree} onMethod={chooseMethod} />
+    {!phone && error}
+    {phone ? [summary, delivery, details] : [details, delivery]}
     <PaymentCard values={values} set={set} />
-    <CheckoutSummary lines={lines} subtotal={subtotal} totals={totals} pickup={pickup} deliveryFree={deliveryFree} />
-    <ConfirmCard values={values} errors={errors} set={set} pickup={pickup} total={totals.total} busy={busy || locked} />
+    {!phone && summary}
+    <ConfirmCard values={values} errors={errors} set={set} pickup={pickup} total={totals.total} busy={busy || locked} submitError={phone ? error : null} />
   </form>;
 }

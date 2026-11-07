@@ -20,7 +20,7 @@ export function DeliveryCard({ values, errors, set, deliveryFree, onMethod }: { 
         <TextField id="address" label="Address" value={values.address} error={errors.address} hint="House or flat number, street and area." autoComplete="street-address" onValue={value => set("address", value)} />
         <TextField id="city" label="City" value={values.city} error={errors.city} suggestions={[...CITIES]} onValue={value => set("city", value)} />
       </>}
-    <div className="field">
+    <div className="field field-optional">
       <label htmlFor="checkout-notes">{pickup ? "Note for the store" : "Delivery note"}<span> (optional)</span></label>
       <textarea id="checkout-notes" name="notes" rows={3} maxLength={300} value={values.notes} onChange={event => set("notes", event.target.value)} />
     </div>

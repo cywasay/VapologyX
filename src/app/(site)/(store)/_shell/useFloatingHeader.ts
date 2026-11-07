@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePhoneLayout } from "@/lib/phone-layout";
 
 // On the home page the header shrinks into a floating pill once the hero scrolls away.
-export function useFloatingHeader(enabled: boolean) {
+export function useFloatingHeader(home: boolean) {
+  const phone = usePhoneLayout();
+  const enabled = home && !phone;
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {

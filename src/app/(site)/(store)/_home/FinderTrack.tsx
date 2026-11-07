@@ -9,7 +9,7 @@ const COILS_SHOWN = 2;
 // The chosen device tile with its coils dealt out beside it.
 export function FinderTrack({ device, coils, round, seen, leaving }: { device: Product; coils: Product[]; round: number; seen: boolean; leaving: boolean }) {
   const fitting = coils.slice(0, COILS_SHOWN);
-  return <div className={`finder-track ${seen ? "is-seen" : ""} ${leaving ? "is-leaving" : ""}`}>
+  return <div className={`finder-track ${seen ? "is-seen" : ""} ${leaving ? "is-leaving" : ""}`} data-updated={round > 0 || undefined}>
     <Link href={productHref(device)} className="finder-device" aria-label={`View ${device.name}`}>
       <div className="finder-device-inner" key={`${device.id}-${round}`}>
         <span className="finder-device-tag">Your device</span>

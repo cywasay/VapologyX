@@ -8,7 +8,7 @@ type TextFieldProps = { id: Field | "notes"; label: string; error?: string; hint
 export function TextField({ id, label, error, hint, optional, suggestions, onValue, ...input }: TextFieldProps) {
   const describedBy = error ? `checkout-${id}-error` : hint ? `checkout-${id}-hint` : undefined;
   const shared = { id: `checkout-${id}`, name: id, "aria-invalid": error ? true : undefined, "aria-describedby": describedBy } as const;
-  return <div className="field">
+  return <div className={optional ? "field field-optional" : "field"}>
     <label htmlFor={`checkout-${id}`}>{label}{optional && <span> (optional)</span>}</label>
     {suggestions
       ? <ComboInput {...input} {...shared} value={String(input.value ?? "")} suggestions={suggestions} onValue={onValue} />

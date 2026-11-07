@@ -22,6 +22,7 @@ export function CartDrawer() {
             <b>{line.quantity}</b>
             <button onClick={() => cart.setQuantity(line.key, line.quantity + 1)} disabled={line.quantity >= lineLimit(lines, line)} aria-label={`Add one ${lineName(line)}`}>+</button>
           </div>
+          <button className="phone-only cart-drawer-remove" type="button" onClick={() => cart.remove(line.key)} aria-label={`Remove ${lineName(line)} from your cart`}>Remove</button>
         </li>)}
       </ul>
       <div className="cart-total"><span>Subtotal</span><strong>{money(subtotal)}</strong></div>

@@ -12,27 +12,33 @@ const SWAP_TIME = 440;
 // Pick a device and its coils slide out from underneath the device tile, like drawers.
 // Changing device pulls the old coils back in first, then deals the new ones.
 export function CoilFinder({ devices, coils }: { devices: Product[]; coils: Record<string, Product[]> }) {
-  const [ref, seen] = useSeen<HTMLDivElement>();
+  const [ref, seen, phone] = useSeen<HTMLDivElement>();
   const [selected, setSelected] = useState(0);
   const [shown, setShown] = useState(0);
   const [round, setRound] = useState(0);
   const [leaving, setLeaving] = useState(false);
-  const device = devices[shown];
+  const device = devices[phone ? selected : shown];
 
   useEffect(() => {
-    if (!leaving) return;
+    if (phone || !leaving) return;
     const timer = setTimeout(() => {
       setShown(selected);
       setRound(current => current + 1);
       setLeaving(false);
     }, SWAP_TIME);
     return () => clearTimeout(timer);
-  }, [leaving, selected]);
+  }, [phone, leaving, selected]);
 
   function choose(index: number) {
     if (index === selected) return;
     setSelected(index);
-    setLeaving(true);
+    if (phone) {
+      setShown(index);
+      setLeaving(false);
+      setRound(current => current + 1);
+    } else {
+      setLeaving(true);
+    }
   }
 
   return <div ref={ref} className="finder">
@@ -45,8 +51,8 @@ export function CoilFinder({ devices, coils }: { devices: Product[]; coils: Reco
       <FinderDeviceList devices={devices} coils={coils} selected={selected} onChoose={choose} />
     </div>
     <div className="finder-main">
-      <p className="sr-only" role="status">{leaving ? "" : `Showing coils for ${device.name}`}</p>
-      <FinderTrack device={device} coils={coils[device.id] ?? []} round={round} seen={seen} leaving={leaving} />
+      <p className="sr-only" role="status">{!phone && leaving ? "" : `Showing coils for ${device.name}`}</p>
+      <FinderTrack key={phone ? device.id : undefined} device={device} coils={coils[device.id] ?? []} round={round} seen={seen} leaving={!phone && leaving} />
       <Link className="finder-all" href={`/coils?fits=${device.id}`} prefetch={false}>See every coil for {device.name} <i aria-hidden="true">→</i></Link>
     </div>
   </div>;

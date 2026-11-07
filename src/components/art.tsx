@@ -1,4 +1,5 @@
-import Image from "next/image";
+import Image, { getImageProps } from "next/image";
+import { PHONE_MEDIA } from "@/lib/phone-media";
 import type { Product } from "@/lib/products";
 
 export function Wordmark() {
@@ -76,8 +77,17 @@ export function BottleArt({ color }: { color: string }) {
 type ArtProduct = Pick<Product, "name" | "category" | "type" | "color" | "image_url">;
 
 // Shows the real photo when there is one, and a drawing until then.
-export function ProductArt({ item, sizes = "(max-width: 768px) 50vw, 25vw", alt = "" }: { item: ArtProduct; sizes?: string; alt?: string }) {
-  if (item.image_url) return <Image className="art art-photo" src={item.image_url} alt={alt} width={800} height={800} sizes={sizes} />;
+export function ProductArt({ item, sizes = "(max-width: 768px) 50vw, 25vw", alt = "", phoneSizes }: { item: ArtProduct; sizes?: string; alt?: string; phoneSizes?: string }) {
+  if (item.image_url) {
+    const props = { src: item.image_url, width: 800, height: 800 };
+    const image = <Image className="art art-photo" {...props} alt={alt} sizes={sizes} />;
+    if (!phoneSizes) return image;
+    const { props: { srcSet } } = getImageProps({ ...props, alt, sizes: phoneSizes });
+    return <picture className="art-picture">
+      <source media={PHONE_MEDIA} sizes={phoneSizes} srcSet={srcSet} />
+      {image}
+    </picture>;
+  }
   if (item.category === "device") {
     const kind = item.type.toLowerCase();
     return <DeviceArt kind={kind === "box" || kind === "pen" ? kind : "pod"} color={item.color} />;
