@@ -148,7 +148,7 @@
 .ct-sales-list .is-voided { opacity: .5; }
 .ct-sales-list .is-voided strong { text-decoration: line-through; }
 
-.ct-closing { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; align-items: start; }
+.ct-closing { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 12px; align-items: start; }
 .ct-card { display: grid; gap: 10px; }
 .ct-card .ct-section-title { margin-bottom: 0; }
 .ct-subtitle { font-family: var(--font-display); font-size: 14px; }
@@ -175,3 +175,33 @@
 .ct-alert .ct-link { color: inherit; }
 .ct-failed { display: grid; justify-items: center; gap: 12px; padding: 64px 16px; text-align: center; }
 .ct-failed p { margin: 0; }
+.ct-stock-form, .ct-history { max-width: 640px; }
+.ct-stock-form form { display: grid; gap: 10px; }
+.ct-back { margin-bottom: 2px; }
+.ct-picker { position: relative; }
+.ct-picker > input, .ct-history-search { width: 100%; min-height: 40px; padding: 0 14px; font-size: 14px; color: var(--ink); background: var(--surface); border: 0; border-radius: var(--radius-pill); }
+.ct-picker > input:focus-visible, .ct-history-search:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.ct-picker ul { display: grid; gap: 2px; margin: 6px 0 0; padding: 6px; list-style: none; background: var(--surface); border-radius: 16px; }
+.ct-picker li button { display: flex; width: 100%; align-items: baseline; justify-content: space-between; gap: 12px; padding: 8px 10px; text-align: left; font-size: 14px; border-radius: 10px; }
+.ct-picker li button:hover { background: var(--accent); }
+.ct-picker small, .ct-picked small { font-size: 12px; color: var(--muted); }
+.ct-picked { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 14px; background: var(--surface); border-radius: var(--radius-pill); }
+.ct-picked span { display: grid; }
+.ct-history-table { overflow-x: auto; }
+.ct-history-table table { width: 100%; min-width: 520px; border-collapse: collapse; font-size: 13px; }
+.ct-history-table th { padding-block: 8px; text-align: left; font-size: 12px; font-weight: 600; color: var(--muted); border-bottom: 1px solid var(--line); }
+.ct-history-table td { padding-block: 7px; vertical-align: top; border-bottom: 1px solid var(--line); }
+.ct-history-table td small { display: block; color: var(--muted); }
+.ct-history-table .is-up { font-weight: 700; }
+.ct-history-table .is-down { font-weight: 700; color: var(--error); }
+.ct-item small { font-size: 11px; font-weight: 600; color: var(--muted); }
+.ct-expense-form { display: grid; gap: 8px; }
+.ct-expense-form > input { min-height: 40px; padding: 0 14px; font-size: 14px; color: var(--ink); background: var(--surface); border: 0; border-radius: var(--radius-pill); }
+.ct-expense-form > input:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.ct-check { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.ct-check input { width: 18px; height: 18px; accent-color: var(--ink); }
+.ct-outs small { display: block; font-size: 12px; color: var(--muted); }
+.ct-open-find { min-height: 40px; padding: 0 14px; font-size: 14px; color: var(--ink); background: var(--surface); border: 0; border-radius: var(--radius-pill); }
+.ct-open-find:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.ct-custom input { min-width: 0; }
+.ct-custom input:nth-child(2) { flex: 1; }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { money } from "@/lib/products";
 import type { Counter } from "../useCounter";
+import { ExpensesCard } from "./ExpensesCard";
 
 const toNumber = (text: string) => Number(text.replace(/[,\s]/g, "")) || 0;
 
@@ -13,14 +14,14 @@ export function ClosingPanel({ counter }: { counter: Counter }) {
   const [outNote, setOutNote] = useState("");
   const [confirming, setConfirming] = useState(false);
   const difference = counted.trim() === "" ? null : toNumber(counted) - counter.expectedCash;
-  const rows: [string, number][] = [["Cash sales", counter.byPay("Cash")], ["Card sales", counter.byPay("Card")], ["Wallet sales", counter.byPay("Wallet")], ["Refills (cash)", counter.refillsToday]];
+  const rows: [string, number][] = [["Cash sales", counter.byPay("Cash")], ["Bank sales", counter.byPay("Bank")], ["Wallet sales", counter.byPay("Wallet")], ["Refills (cash)", counter.refillsToday]];
 
   return <div className="ct-closing">
     <section className="ct-card" aria-labelledby="ct-day-title">
       <h2 id="ct-day-title" className="ct-section-title">Today&apos;s money</h2>
       <dl className="ct-money">
         {rows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{money(value)}</dd></div>)}
-        <div className="is-total"><dt>Everything taken today</dt><dd>{money(counter.byPay("Cash") + counter.byPay("Card") + counter.byPay("Wallet") + counter.refillsToday)}</dd></div>
+        <div className="is-total"><dt>Everything taken today</dt><dd>{money(counter.byPay("Cash") + counter.byPay("Bank") + counter.byPay("Wallet") + counter.refillsToday)}</dd></div>
       </dl>
       <p className="ct-note">Voided sales are not counted.</p>
     </section>
@@ -41,6 +42,7 @@ export function ClosingPanel({ counter }: { counter: Counter }) {
         <button type="submit" className="ct-primary">Add</button>
       </form>}
       <dl className="ct-money">
+        {counter.drawerExpensesTotal > 0 && <div><dt>Expenses paid from the drawer</dt><dd>−{money(counter.drawerExpensesTotal)}</dd></div>}
         <div><dt>Cash that should be in the drawer</dt><dd>{money(counter.expectedCash)}</dd></div>
       </dl>
       <label className="ct-field">Cash you counted
@@ -54,5 +56,7 @@ export function ClosingPanel({ counter }: { counter: Counter }) {
         ? <div className="ct-confirm-row">Close the day? Sales will be switched off. <button className="ct-primary" onClick={() => counter.closeDay(toNumber(counted))}>Yes, close the day</button><button className="ct-link" onClick={() => setConfirming(false)}>Cancel</button></div>
         : <button className="ct-complete" disabled={difference === null} onClick={() => setConfirming(true)}>{difference === null ? "Count the drawer to close" : "Close the day"}</button>}
     </section>
+
+    <ExpensesCard counter={counter} />
   </div>;
 }

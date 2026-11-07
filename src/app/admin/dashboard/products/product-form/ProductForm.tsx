@@ -9,8 +9,9 @@ import { FitsField } from "./FitsField";
 import { OptionsField, type OptionRow } from "./OptionsField";
 import { PhotosField } from "./PhotosField";
 import { MAX_PRICE, MAX_STOCK, templateFor, type Photo } from "./productFormHelpers";
-import { deleteProduct, saveProduct } from "./saveProduct";
+import { COST_FAILED, deleteProduct, saveProduct } from "./saveProduct";
 import { SpecsField } from "./SpecsField";
+import { usePrivateFields } from "./usePrivateFields";
 
 // The side panel for adding a product or editing one.
 export function ProductForm({ product, defaultCategory, onClose, onSaved }: {
@@ -34,6 +35,12 @@ export function ProductForm({ product, defaultCategory, onClose, onSaved }: {
   const [isNew, setIsNew] = useState(Boolean(product?.badge));
   const [isPublished, setIsPublished] = useState(product?.is_published ?? true);
   const [photos, setPhotos] = useState<Photo[]>(() => product ? photosOf(product).map(url => ({ key: url, src: url, file: null })) : []);
+  // Cost and barcode stay private. Until the owner edits one, it shows what is saved.
+  const saved = usePrivateFields(product?.id ?? null);
+  const [costEdit, setCostEdit] = useState<string | null>(null);
+  const [barcodeEdit, setBarcodeEdit] = useState<string | null>(null);
+  const cost = costEdit ?? saved.cost;
+  const barcode = barcodeEdit ?? saved.barcode;
   const [busy, setBusy] = useState(false);
   const [preparing, setPreparing] = useState(false);
   const [error, setError] = useState("");
@@ -50,6 +57,8 @@ export function ProductForm({ product, defaultCategory, onClose, onSaved }: {
     const amount = Number(price);
     if (price.trim() === "" || !Number.isInteger(amount) || amount < 0 || amount > MAX_PRICE) return "Please enter the price in whole rupees.";
     if (stock.trim() !== "" && (!Number.isInteger(Number(stock)) || Number(stock) < 0 || Number(stock) > MAX_STOCK)) return "Stock must be a whole number, or empty if you don't count it.";
+    if (cost.trim() !== "" && (!Number.isFinite(Number(cost)) || Number(cost) < 0 || Number(cost) > MAX_PRICE)) return "The cost must be a number of rupees, or empty.";
+    if (barcode.trim().length > 64) return "The barcode is too long.";
     const named = options.filter(option => option.name.trim() || option.price.trim());
     if (named.some(option => !option.name.trim())) return "Every option needs a name.";
     if (new Set(named.map(option => option.name.trim().toLowerCase())).size !== named.length) return "Each option needs a different name.";
@@ -79,8 +88,13 @@ export function ProductForm({ product, defaultCategory, onClose, onSaved }: {
       fits: category === "coil" ? fits : [],
       badge: isNew ? "New" : null,
       is_published: isPublished,
+      barcode: barcode.trim() === "" ? null : barcode.trim(),
     };
-    const failure = await saveProduct(product, photos, fields);
+    const failure = await saveProduct(product, photos, fields, { cost: cost.trim() === "" ? null : Number(cost) });
+    if (failure === COST_FAILED) {
+      onSaved(COST_FAILED);
+      return;
+    }
     if (failure) {
       setError(failure);
       setBusy(false);
@@ -131,6 +145,17 @@ export function ProductForm({ product, defaultCategory, onClose, onSaved }: {
           <small className="field-hint">Leave it empty if you don&apos;t count stock. Enter 0 to mark the product as sold out.</small>
         </label>
 
+        <div className="product-form-row">
+          <label className="field">Cost per unit (Rs)
+            <input type="number" inputMode="decimal" min="0" step="any" value={cost} onChange={event => setCostEdit(event.target.value)} />
+            <small className="field-hint">Only you can see this. It never appears in the shop.</small>
+          </label>
+          <label className="field">Barcode (optional)
+            <input value={barcode} maxLength={64} onChange={event => setBarcodeEdit(event.target.value)} />
+            <small className="field-hint">Scanned at the counter to add the item.</small>
+          </label>
+        </div>
+
         {showType && <label className="field">{category === "device" ? "Type" : "Flavor group"}
           <ComboInput value={type} suggestions={category === "device" ? ["Pod", "Box", "Pen"] : []} placeholder={category === "device" ? "Pod, Box or Pen" : "For example, Menthol"} onValue={setType} />
         </label>}
@@ -152,7 +177,7 @@ export function ProductForm({ product, defaultCategory, onClose, onSaved }: {
         <div>
           {product && <button type="button" className="button button-outline product-form-delete" disabled={busy} onClick={() => confirmDialog.current?.showModal()}>Delete</button>}
           <button type="button" className="button button-outline" disabled={busy} onClick={() => dialog.current?.close()}>Cancel</button>
-          <button type="submit" className="button button-primary" disabled={busy || preparing}>{busy ? "Saving…" : product ? "Save changes" : "Add product"}</button>
+          <button type="submit" className="button button-primary" disabled={busy || preparing || !saved.ready}>{busy ? "Saving…" : product ? "Save changes" : "Add product"}</button>
         </div>
       </div>
     </form>

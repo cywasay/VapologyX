@@ -1,5 +1,5 @@
 import { createClient } from "@/utils/supabase/client";
-import type { Bottle, CashOut, CounterItem, Pay, Sale } from "./types";
+import type { Bottle, CashOut, CounterItem, Expense, ExpenseKind, Pay, Sale } from "./types";
 
 // Everything the counter screen needs when it opens.
 export type CounterState = {
@@ -13,6 +13,7 @@ export type CounterState = {
   refillsToday: number;
   refillsAll: number;
   cashOuts: CashOut[];
+  expenses: Expense[];
 };
 
 export type Closing = { counted: number; expected: number; difference: number };
@@ -30,6 +31,8 @@ function friendly(message: string) {
     case "already_voided": return "That sale is already voided.";
     case "old_entry": return "That refill was made on an earlier day, so it can't be taken back.";
     case "not_found": return "That record is gone. Reload the page and try again.";
+    case "invalid_expense": return "Pick what the expense was for and enter an amount of 1 or more.";
+    case "invalid_stock": return detail === "note" ? "Please say why the stock is being removed." : "Enter a whole number of 1 or more.";
     case "invalid_sale": return detail === "given" ? "The cash given is less than the total." : "That sale couldn't be saved.";
     default: return "Something went wrong. Please try again.";
   }
@@ -51,5 +54,9 @@ export const counterApi = {
   setOpening: (amount: number) => call<number>("counter_set_opening", { p_amount: amount }),
   addCashOut: (amount: number, note: string) => call<CashOut>("counter_add_cash_out", { p_amount: amount, p_note: note }),
   removeCashOut: (id: string) => call<null>("counter_remove_cash_out", { p_id: id }),
+  addExpense: (kind: ExpenseKind, amount: number, note: string, fromDrawer: boolean) => call<Expense>("counter_add_expense", { p_kind: kind, p_amount: amount, p_note: note, p_from_drawer: fromDrawer }),
+  removeExpense: (id: string) => call<null>("counter_remove_expense", { p_id: id }),
+  restock: (productId: string, quantity: number, note: string) => call<number>("counter_restock", { p_product: productId, p_quantity: quantity, p_note: note }),
+  writeOff: (productId: string, quantity: number, note: string) => call<number>("counter_write_off", { p_product: productId, p_quantity: quantity, p_note: note }),
   closeDay: (counted: number) => call<Closing>("counter_close_day", { p_counted: counted }),
 };

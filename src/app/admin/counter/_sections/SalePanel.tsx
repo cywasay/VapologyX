@@ -3,7 +3,7 @@ import type { Counter } from "../useCounter";
 import type { Pay } from "../types";
 import { CashGiven } from "./CashGiven";
 
-const payments: Pay[] = ["Cash", "Card", "Wallet"];
+const payments: Pay[] = ["Cash", "Bank", "Wallet"];
 
 // The sale being rung up: its items, the total, how it is paid and the Complete sale button.
 export function SalePanel({ counter }: { counter: Counter }) {

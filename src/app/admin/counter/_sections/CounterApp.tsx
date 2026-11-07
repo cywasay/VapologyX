@@ -31,7 +31,7 @@ export function CounterApp() {
       {mode === "refill" && <RefillPanel counter={counter} />}
       {mode === "sales" && <SalesPanel counter={counter} />}
       {mode === "closing" && <ClosingPanel counter={counter} />}
-      {mode === "restock" && <RestockPanel />}
+      {mode === "restock" && <RestockPanel onChanged={counter.refresh} />}
     </main>
     {counter.receipt && <ReceiptDialog key={counter.receipt.id} sale={counter.receipt} onClose={counter.closeReceipt} />}
   </>;

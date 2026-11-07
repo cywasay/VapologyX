@@ -14,11 +14,17 @@ export type ProductFields = {
   fits: string[];
   badge: string | null;
   is_published: boolean;
+  barcode: string | null;
 };
+
+// Cost is owner-only, so it is saved in its own table and never sits on the product the shop reads. null leaves it as it is.
+export type PrivateFields = { cost: number | null };
+// The product itself was saved but its cost was not. The form closes as saved and tells the owner to add the cost again.
+export const COST_FAILED = "The product was saved, but its cost couldn't be. Open it and add the cost again.";
 
 // Uploads any new photos, then saves the product. Returns a plain-words problem, or an empty text when all went well.
 // If saving fails, the photos uploaded for it are taken down again, and once it works, photos that were taken off the product are removed.
-export async function saveProduct(product: Product | null, photos: Photo[], fields: ProductFields): Promise<string> {
+export async function saveProduct(product: Product | null, photos: Photo[], fields: ProductFields, secret: PrivateFields): Promise<string> {
   const supabase = createClient();
   const uploaded: string[] = [];
   const urls: string[] = [];
@@ -40,8 +46,10 @@ export async function saveProduct(product: Product | null, photos: Photo[], fiel
   }
 
   const row = { ...fields, images: urls, image_url: urls[0] ?? null };
-  let saveError: { code?: string } | null = null;
+  let saveError: { code?: string; message?: string } | null = null;
   let savedRows = 0;
+  let savedId = product?.id ?? "";
+  const barcodeClash = () => saveError?.code === "23505" && /barcode/i.test(saveError.message ?? "");
   if (product) {
     const { data, error } = await supabase.from("products").update(row).eq("id", product.id).select("id");
     saveError = error;
@@ -52,13 +60,20 @@ export async function saveProduct(product: Product | null, photos: Photo[], fiel
       const { data, error } = await supabase.from("products").insert({ ...row, slug }).select("id");
       saveError = error;
       savedRows = data?.length ?? 0;
-      if (error?.code !== "23505") break;
+      savedId = data?.[0]?.id ?? "";
+      if (error?.code !== "23505" || barcodeClash()) break;
     }
   }
 
   if (saveError || savedRows === 0) {
     await takeDown();
+    if (barcodeClash()) return "That barcode is already on another product.";
     return saveError?.code === "42501" || (!saveError && savedRows === 0) ? "Your account doesn't have permission to change products." : "The product couldn't be saved. Please try again.";
+  }
+
+  if (secret.cost !== null) {
+    const { error } = await supabase.from("product_costs").upsert({ product_id: savedId, unit_cost: secret.cost });
+    if (error) return COST_FAILED;
   }
 
   const kept = new Set(urls);

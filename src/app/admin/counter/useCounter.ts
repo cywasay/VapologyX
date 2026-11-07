@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { counterApi, type Closing, type CounterState, type Reply } from "./counterApi";
-import type { Bottle, CashOut, CounterItem, Pay, Sale } from "./types";
+import type { Bottle, CashOut, CounterItem, Expense, ExpenseKind, Pay, Sale } from "./types";
 
 export const earnedFrom = (bottle: Bottle) => bottle.entries.reduce((sum, amount) => sum + amount, 0);
 
@@ -23,6 +23,7 @@ export function useCounter() {
   const [refillsAll, setRefillsAll] = useState(0);
   const [opening, setOpening] = useState(0);
   const [cashOuts, setCashOuts] = useState<CashOut[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
   const [closed, setClosed] = useState(false);
   const [closing, setClosing] = useState<Closing | null>(null);
   const [note, setNote] = useState("");
@@ -38,6 +39,7 @@ export function useCounter() {
     setRefillsAll(state.refillsAll);
     setOpening(state.opening);
     setCashOuts(state.cashOuts);
+    setExpenses(state.expenses);
     setClosed(state.closed);
     setClosing(state.closing);
   }, []);
@@ -47,6 +49,12 @@ export function useCounter() {
     if (!reply.ok) return setStatus("failed");
     apply(reply.data);
     setStatus("ready");
+  }, [apply]);
+
+  // Reloads the figures quietly, without the full-screen loader or an error screen.
+  const refresh = useCallback(async () => {
+    const reply = await counterApi.state();
+    if (reply.ok) apply(reply.data);
   }, [apply]);
 
   useEffect(() => {
@@ -71,7 +79,7 @@ export function useCounter() {
     setBusy(false);
     if (!reply.ok) {
       (onError ?? setProblem)(reply.error);
-      load();
+      refresh();
       return false;
     }
     onDone(reply.data);
@@ -85,8 +93,10 @@ export function useCounter() {
   const salesToday = { total: kept.reduce((sum, sale) => sum + sale.total, 0), count: kept.length };
   const byPay = (method: Pay) => kept.filter(sale => sale.pay === method).reduce((sum, sale) => sum + sale.total, 0);
   const cashOutTotal = cashOuts.reduce((sum, entry) => sum + entry.amount, 0);
-  // The cash that should be in the drawer: what it started with, cash sales, refills and cash taken out.
-  const expectedCash = opening + byPay("Cash") + refillsToday - cashOutTotal;
+  const expensesTotal = expenses.reduce((sum, entry) => sum + entry.amount, 0);
+  const drawerExpensesTotal = expenses.filter(entry => entry.fromDrawer).reduce((sum, entry) => sum + entry.amount, 0);
+  // The cash that should be in the drawer: what it started with, cash sales and refills, less cash taken out and expenses paid from the till.
+  const expectedCash = opening + byPay("Cash") + refillsToday - cashOutTotal - drawerExpensesTotal;
 
   const givenAmount = Number(given.replace(/[,\s]/g, "")) || 0;
   const change = pay === "Cash" && givenAmount > 0 ? givenAmount - total : null;
@@ -188,6 +198,13 @@ export function useCounter() {
     await run(() => counterApi.addCashOut(amount, text), entry => setCashOuts(current => [...current, entry]));
   }
 
+  async function addExpense(kind: ExpenseKind, amount: number, text: string, fromDrawer: boolean) {
+    if (!Number.isInteger(amount) || amount < 1) return false;
+    return run(() => counterApi.addExpense(kind, amount, text, fromDrawer), entry => setExpenses(current => [...current, entry]));
+  }
+
+  const removeExpense = (id: string) => run(() => counterApi.removeExpense(id), () => setExpenses(current => current.filter(entry => entry.id !== id)));
+
   const removeCashOut = (id: string) => run(() => counterApi.removeCashOut(id), () => setCashOuts(current => current.filter(entry => entry.id !== id)));
 
   // Saves the opening cash again first, so the closing sum always uses the figure on screen.
@@ -200,11 +217,11 @@ export function useCounter() {
   });
 
   return {
-    status, reload: load, problem, dismissProblem: () => setProblem(""), busy,
+    status, reload: load, refresh, problem, dismissProblem: () => setProblem(""), busy,
     items, lines, total, pay, setPay, given, setGiven, change, add, scan, setQuantity, completeSale, clearSale, note,
     sales, salesToday, byPay, voidSale, receipt, closeReceipt: () => setReceipt(null), openReceipt: setReceipt,
     bottles, refillsToday, refillsAll, openBottle, addRefill, undoRefill, finishBottle,
-    opening, setOpening, saveOpening, cashOuts, addCashOut, removeCashOut, cashOutTotal, expectedCash,
+    opening, setOpening, saveOpening, cashOuts, addCashOut, removeCashOut, cashOutTotal, expenses, expensesTotal, drawerExpensesTotal, addExpense, removeExpense, expectedCash,
     closed, closing, closeDay,
   };
 }

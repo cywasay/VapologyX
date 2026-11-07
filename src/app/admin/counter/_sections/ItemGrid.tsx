@@ -14,6 +14,8 @@ export function ItemGrid({ counter, shelf, onShelf, search, onSearch }: { counte
   const [scanned, setScanned] = useState("");
   const text = search.trim().toLowerCase();
   const shown = counter.items.filter(item => (shelf === "all" || item.shelf === shelf) && (item.name.toLowerCase().includes(text) || item.code.includes(text)));
+  // Two products can share a name on different shelves (a coil and a device), so those tiles also say which shelf they are on.
+  const sharedNames = new Set(counter.items.filter((item, index) => counter.items.findIndex(other => other.name === item.name) !== index).map(item => item.name));
   const inSale = (id: string) => counter.lines.find(line => line.item.id === id)?.quantity ?? 0;
 
   function enter() {
@@ -39,6 +41,7 @@ export function ItemGrid({ counter, shelf, onShelf, search, onSearch }: { counte
         return <button key={item.id} className={`ct-item ${left <= 0 ? "is-out" : ""}`} onClick={() => counter.add(item.id)} disabled={left <= 0}>
           <span className="ct-item-art"><ProductArt item={{ name: item.name, category: item.shelf, type: item.type, color: LIME, image_url: null }} sizes="96px" /></span>
           <strong>{item.name}</strong>
+          {sharedNames.has(item.name) && <small>{shelves.find(entry => entry.category === item.shelf)?.singular}</small>}
           <span>{money(item.price)}</span>
           <em>{left <= 0 ? "Sold out" : left <= 2 ? `Only ${left} left` : `${left} in stock`}</em>
           {inSale(item.id) > 0 && <b className="ct-badge">{inSale(item.id)}</b>}
