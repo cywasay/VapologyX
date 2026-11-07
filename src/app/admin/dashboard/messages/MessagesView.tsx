@@ -19,6 +19,19 @@ const short = (iso: string) => {
   const date = new Date(iso);
   return date.toDateString() === new Date().toDateString() ? date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : date.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 };
+// Tries again a couple of times before giving up. A reload fired right when a message arrives can collide with the other
+// requests the page makes at that moment, and a second try a moment later goes through.
+const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+async function withRetry<T>(run: () => PromiseLike<{ data: T | null; error: unknown }>): Promise<T | null> {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (attempt > 0) await wait(500 * attempt);
+    try {
+      const { data, error } = await run();
+      if (!error && data) return data;
+    } catch { /* try again */ }
+  }
+  return null;
+}
 const initial = (name: string) => name.trim().slice(0, 1).toUpperCase() || "?";
 
 // The shop's inbox. Every email that has written in is one conversation; follow-ups join the same one.
@@ -42,11 +55,11 @@ export function MessagesView() {
 
   useEffect(() => {
     let stale = false;
-    Promise.resolve(createClient().rpc("message_threads", { p_offset: page * ADMIN_PAGE_SIZE, p_limit: ADMIN_PAGE_SIZE, p_unread_only: filter === "unread" })).then(({ data, error }) => {
+    // A reload caused by a new message waits a moment, so it does not collide with the bell updating itself.
+    wait(arrivals > 0 ? 400 : 0).then(() => withRetry(() => createClient().rpc("message_threads", { p_offset: page * ADMIN_PAGE_SIZE, p_limit: ADMIN_PAGE_SIZE, p_unread_only: filter === "unread" }))).then(data => {
       if (stale) return;
-      if (error || !data) return setFailed(true);
-      setFailed(false);
-      setList(data as Page);
+      // If a background reload fails, the list already on screen stays; the error only shows when there is nothing to show.
+      if (data) { setFailed(false); setList(data as Page); } else setFailed(true);
     });
     return () => { stale = true; };
   }, [page, filter, version, arrivals]);
@@ -57,7 +70,7 @@ export function MessagesView() {
 
   return <>
     <h1 className="admin-title is-small">Messages</h1>
-    {failed && <p className="form-status is-error" role="alert">We couldn&apos;t load the messages. Please refresh the page.</p>}
+    {failed && !list && <p className="form-status is-error" role="alert">We couldn&apos;t load the messages. Please refresh the page.</p>}
     {!failed && !list && <p className="admin-caption">Loading…</p>}
     {list && list.total === 0 && filter === "all" && !open && <EmptyState icon="messages" title="No messages yet">Messages sent from the Contact page will appear here, and you&apos;ll get a notification the moment one arrives.</EmptyState>}
     {list && (list.total > 0 || filter !== "all" || open) && <div className={`inbox ${open ? "has-open" : ""}`}>
@@ -95,10 +108,13 @@ function Conversation({ email, onClose, onChanged }: { email: string; onClose: (
   useEffect(() => {
     let stale = false;
     const supabase = createClient();
-    Promise.resolve(supabase.from("contact_messages").select("id,name,message,created_at,read_at").eq("email", email).order("created_at")).then(async ({ data }) => {
+    wait(arrivals > 0 ? 400 : 0).then(() => withRetry(() => supabase.from("contact_messages").select("id,name,message,created_at,read_at").eq("email", email).order("created_at"))).then(async data => {
       if (stale) return;
-      const rows = (data as Message[] | null) ?? [];
+      // A failed reload keeps what is already on screen instead of blanking the conversation.
+      if (!data) return setProblem("We couldn't refresh this conversation. Please reload the page.");
+      const rows = data as Message[];
       setMessages(rows);
+      setProblem("");
       // Opening a conversation marks it read.
       if (rows.some(row => !row.read_at)) {
         await supabase.rpc("message_thread_read", { p_email: email, p_read: true });
