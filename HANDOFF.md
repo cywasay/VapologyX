@@ -1,7 +1,7 @@
 # VapologyX shop – handoff notes
 
 Read this first in any new Claude session ("Read HANDOFF.md first, then continue").
-Last updated: 2026-11-07.
+Last updated: 2026-11-17.
 
 ## 1. Who / what
 - Freelancer (git user `cywasay`) builds a custom web shop + admin for **VapologyX**, a vape shop in Pakistan (flagship store). Brand names (Oxva, Vaporesso, Uwell…) are authorized. Site is in testing.
@@ -24,7 +24,7 @@ Last updated: 2026-11-07.
 - The local `main` is clean. Pushing needs a **force-push**, only after the user has secured their GitHub account (password, 2FA, tokens, deploy keys) and says yes explicitly. Tell them to rotate secrets (Supabase keys) if anything built from the bad commit.
 
 ## 4. Stack / how things work
-- Next.js 16 (App Router, `cacheComponents`, Turbopack), React 19. Read `node_modules/next/dist/docs/` before using Next APIs (AGENTS.md).
+- Next.js 16.4.6 (upgraded 2026-11-17 for security advisory GHSA-mfr8-8qww-v76h; App Router, `cacheComponents`, Turbopack), React 19. Read `node_modules/next/dist/docs/` before using Next APIs (AGENTS.md).
 - Supabase project `gurpmbtkyquwcqimwxfr`. Admin = `app_metadata.role === "admin"`. There is **one role only** (no owner/staff split).
 - DB logic lives in security-definer functions that call `public.require_admin()`; migrations in `supabase/migrations/`.
 - Shop day = Asia/Karachi (`shop_day()`, `day_start()`).
@@ -55,10 +55,17 @@ Sheet "Inventory": Brand - Model, Qty, Rate (cost), Total, Price. Match check: S
 - **Closing** a day or month keeps it editable (fixes flow into later months). A separate **Lock** makes it read-only forever (no unlock).
 - Anyone with admin login can close/lock.
 - Dropped Claude's own suggestions (separate "sale markdowns" line, editable rent amounts, etc.).
-- The counter's opening cash / drawer count is not in the Excel; user has not said to remove it.
+- The counter's opening cash / drawer count is not in the Excel; **user said keep it as it is** (2026-11-17: count still needed to close the day).
+
+### Decisions 2026-11-17
+- **Paid for restock** = the restock amount, automatic from Restock records (as built). Confirmed.
+- **Online orders count** in the month's sales and profit, but shown **separately** from the shop counter. An order counts in the month it is **delivered** (`orders.delivered_at`).
+- **Delivery fee:** under Rs 10,000 the customer pays it and it counts as online sales/profit (not a separate line outside profit). Over Rs 10,000 the shop pays the courier and that cost should come off profit. User (2026-11-17): the shop pays it **from profit, not from restock/stock money**. So staff enter it at the counter as a **"Ship"** expense (goes into Shop Expense → Net Profit only). Do NOT use "Shipping": that one is purchase cost in For Cash Adjustment and changes Amount For Restock. No code change needed.
+- **Charity %** is adjustable per month on the closing page (starts at last month's %, first month 1.5%).
+- Missing coil fits don't matter: the inventory is mock; real stock will be uploaded later.
 
 ## 7. Built so far
-See section 8 for the newest work. Commits: 805b507 (Excel import, product_costs, stock_moves), 9a72a84 (counter DB), 09ed65d (restock/write-off/history/expenses), 7cfa595 (phone tweaks), 824c4c0 (local only: shop dropdown animation, button bloom, coil finder, coil fit rules). A large set of later work is **uncommitted** (admin pagination, cart bump, delivery bar, skeletons, order celebration, privacy/shipping/faq/404 pages, sitemap/robots/OG image, dashboard stats + chart, undo delete, counter dark mode/fullscreen/compact tiles/print receipt).
+See section 8 for the newest work. Commits: 805b507 (Excel import, product_costs, stock_moves), 9a72a84 (counter DB), 09ed65d (restock/write-off/history/expenses), 7cfa595 (phone tweaks), 824c4c0 (local only: shop dropdown animation, button bloom, coil finder, coil fit rules). Everything up to a680b74 is committed (section 8 notes saying "uncommitted" predate that). Older note: a large set of later work was **uncommitted** (admin pagination, cart bump, delivery bar, skeletons, order celebration, privacy/shipping/faq/404 pages, sitemap/robots/OG image, dashboard stats + chart, undo delete, counter dark mode/fullscreen/compact tiles/print receipt).
 
 ## 8. Newest work and where to test it (2026-11-07, uncommitted)
 Migration `supabase/migrations/20261107220000_discounts_locks_month_closing.sql` (applied to the live DB). Tested with a rolled-back SQL run as admin: discount, extra, below-cost check, close + re-close, lock (day and month refuse changes after), assets, match. Type-check, lint and `next build` pass. **Not yet clicked through in a real admin login.**
@@ -77,11 +84,16 @@ How the month figures are worked out (from the sheet, plus the user's answers):
 - Counter sale lines split into Hardware (device + disposable), Bottles, Coils. A discounted/extra sale's lines are scaled to what was actually received.
 - "For Cash Adjustment" (part of Hardware): refills in; Shipping + CMC Tax + Elite Tax expenses and the cost of refill bottles opened that month out.
 - Shop Expense = other counter expenses + stock written off (at cost) + "taken out of profit".
-- Charity = 1.5% of total profit, deducted. Rent 15000 / Electric 10000 / Pay 5000 fixed in the DB function.
-- "Paid for restock" is taken automatically from Restock records (quantity × cost). **Assumption – confirm with the user.**
+- Charity = the month's charity % (default 1.5%) of total profit, deducted. Rent 15000 / Electric 10000 / Pay 5000 fixed in the DB function.
+- "Paid for restock" is taken automatically from Restock records (quantity × cost). Confirmed by the user 2026-11-17.
 - Old Amount: typed only for the first month; later months use last month's Amount For Restock.
 - Stock in the match check is the stock value right now (a locked month keeps its saved value).
-- Online orders are shown but **not** included in the month totals (sheet has no online sales) – **ask the user**.
+- Online orders (delivered that month): goods + customer delivery fee as sales, goods cost (`orders.cost`, saved at order time) as cost. Added into Total Sales / Total Profit, shown as their own block under the shop counter.
+
+### 8d. Online in monthly closing + charity % (2026-11-17, uncommitted)
+- Migration `20261117100000_online_closing_charity.sql` – **applied to the live DB 2026-11-17** and tested with a rolled-back run as admin (order cost saved, delivered date set, online block + shop add up, charity % saved and carried to next month, 150% refused, order JSON never shows cost). Adds `orders.cost` (trigger on insert; old orders back-filled at today's cost), `orders.delivered_at` (trigger on status change; old delivered orders use updated_at), `month_closings.charity_percent`, and new `month_figures` / `month_save` / `first_month`.
+- Closing page: "Shop counter" and "Online orders" blocks in the sales table, charity % box in "Typed in for this month". Months locked earlier keep their old saved layout (no online block).
+- Checked with a temporary fake-data page (deleted). Type-check and lint pass. Not yet clicked through in a real admin login.
 
 ### 8a. Phone layout + Contact → Messages (2026-11-07, uncommitted)
 - Counter phone layout was broken by my own later CSS overriding the phone rules (sale panel overlapped the items); fixed at the end of `counter/counter.css`, plus a sticky "Current sale · N items · Rs X" bar on phones (`.ct-jump`). Closing cards no longer overflow.
@@ -98,12 +110,8 @@ How the month figures are worked out (from the sheet, plus the user's answers):
 - Tested: contact send + follow-up in the real database and browser; inbox/bell layout with fake data at desktop and 375px. **Not tested with a real admin login or a real live toast** (realtime needs a signed-in admin).
 
 ## 8b. Questions to ask the user next
-1. Should "Paid for restock" come automatically from Restock records (as built), or be typed?
-2. Should online orders count in the monthly sales/profit? (Order lines don't store cost yet.)
-3. Keep the counter's opening cash / drawer count? (not in the Excel)
-4. Charity above 1.5%: waiting for instructions.
+1. Email/WhatsApp alert for new messages when no admin tab is open? (not answered yet)
 
 ## 9. Still open
-- Extra charity above 1.5%: on hold.
-- Coil fits missing for: Pava Horiz Stick, Pava Ultra Koko, Smoke 40 Kit, Smoke 50 Kit, Voopoo Vthru.
+- Coil fits missing for 5 devices – ignore until the real inventory is uploaded.
 - Commit the work when the user asks; push only after section 3 is cleared.
