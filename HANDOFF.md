@@ -19,6 +19,7 @@ Last updated: 2026-11-17.
 
 ## 3. SECURITY – GitHub repo was compromised (2026-11-07)
 **Resolved 2026-11-07:** the user secured GitHub and approved a force-push; origin/main is now the clean commit a91a1da and GitHub has no other branches or tags. Normal pushes are fine again. Keep the history below in mind if anything odd reappears.
+- **It happened again (found 2026-11-17):** origin/main was a fake copy `1e09926` of a680b74 adding `init` and changing package.json, eslint.config.mjs, .gitignore. The user approved a force-push the same day, so clean `799894b` is on GitHub again. GitHub was **not yet re-secured** at that point, so the attacker may still have access: always `git fetch` and compare before pushing, and never pull an unexpected commit.
 - `origin/main` was force-replaced by commit `166805d` (fake copy of `7cfa595`) that adds obfuscated malware: an `init` file, `package.json` scripts `node init && …`, a payload appended to `eslint.config.mjs`, `.env*` removed from `.gitignore`, a `config.bat`.
 - **Never `git pull`, merge, reset to or run anything from origin/main.**
 - The local `main` is clean. Pushing needs a **force-push**, only after the user has secured their GitHub account (password, 2FA, tokens, deploy keys) and says yes explicitly. Tell them to rotate secrets (Supabase keys) if anything built from the bad commit.
