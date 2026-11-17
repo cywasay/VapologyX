@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 60" role="img" aria-labelledby="title">
+  <title id="title">Vapology X</title>
+  <g fill="none" stroke="#141518" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m7 15 10.5 24L28 15"/>
+    <path d="M48.5 21v18m0-9a8.5 9 0 1 1-17 0 8.5 9 0 0 1 17 0Z"/>
+    <path d="M57 21v26m0-17a8.7 9 0 1 1 17.4 0A8.7 9 0 0 1 57 30Z"/>
+    <path d="M99.2 30a8.8 9 0 1 1-17.6 0 8.8 9 0 0 1 17.6 0Z"/>
+    <path d="M107.5 14v20c0 3.2 1.5 5 4.5 5"/>
+    <path d="M137.4 30a8.8 9 0 1 1-17.6 0 8.8 9 0 0 1 17.6 0Z"/>
+    <path d="M162 21v16.8c0 6.1-3.6 9.2-9.2 9.2-3 0-5.5-.8-7.4-2.4M162 29.5a8.6 8.5 0 1 1-17.2 0 8.6 8.5 0 0 1 17.2 0Z"/>
+    <path d="m170 21 8.5 17.5M187.5 21l-9.8 21.7c-1.5 3.3-3.2 4.5-6.4 4.5"/>
+  </g>
+  <g transform="translate(200 8)">
+    <rect width="44" height="44" rx="12" fill="#e8f78b"/>
+    <path d="M10 33 27 11h7L17 33Zm0-22h7l3.7 4.8-3.5 4.5Zm16.8 12.7L34 33h-7l-3.7-4.8Z" fill="#141518"/>
+  </g>
+</svg>
