@@ -5,20 +5,23 @@ export type Section = { sales: number; cost: number; profit: number };
 export type MonthInputs = {
   oldAmount: number | null; personalInvestment: number; investmentReturn: number; withdrawalProfit: number;
   cash: number; bank: number; rentPaid: number; electricPaid: number; matchAmount: number | null;
+  charityPercent?: number;
 };
+export type Online = { sales: number; goods: number; deliveryFees: number; cost: number; profit: number; count: number; waiting: number; waitingCount: number };
 export type MonthReport = {
   month: string;
   inputs: MonthInputs;
   firstMonth: boolean;
   sections: { hardware: Section; bottles: Section; coils: Section; cashAdjustment: { sales: number; cost: number; refills: number; taxes: number; bottlesOpened: number } };
-  salesTotal: number; profit: number; rent: number; electric: number; pay: number; charity: number;
+  // shop, online and charityPercent are missing from months locked before 2026-11-17.
+  shop?: Section; online?: Online;
+  salesTotal: number; profit: number; rent: number; electric: number; pay: number; charity: number; charityPercent?: number;
   directExpenses: number; writeOffs: number; shopExpense: number; netProfit: number;
   oldAmount: number; paidRestock: number; restockAmount: number; diff: number;
   stockValue: number; assets: number; matchTotal: number; matchDiff: number | null;
   discounts: { total: number; count: number; lastMonth: number };
   extra: { total: number; count: number; lastMonth: number };
   adjustedSales: { number: number; date: string; listTotal: number; total: number; items: string }[];
-  onlineOrders: number;
   closed: boolean; closedOn: string | null; locked: boolean;
 };
 export type Asset = { id: string; name: string; value: number };
@@ -27,6 +30,7 @@ export type Reply<T> = { ok: true; data: T } | { ok: false; error: string };
 function friendly(message: string) {
   if (message.includes("month_locked")) return "This month is locked. Nothing can change.";
   if (message.includes("close_first")) return "Close the month first, then lock it.";
+  if (message.includes("invalid_percent")) return "Charity % must be a number from 0 to 100.";
   if (message.includes("invalid")) return "Please type whole rupees in every box.";
   return "Something went wrong. Please try again.";
 }

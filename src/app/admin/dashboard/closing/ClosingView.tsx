@@ -70,9 +70,10 @@ export function ClosingView() {
   const locked = report?.locked ?? false;
   const cleaned = () => Object.fromEntries(Object.entries(text).map(([key, value]) => {
     const clean = value.replace(/[,\s]/g, "");
-    return [key, clean === "" && key !== "oldAmount" && key !== "matchAmount" ? "0" : clean];
+    return [key, clean === "" && key !== "oldAmount" && key !== "matchAmount" && key !== "charityPercent" ? "0" : clean];
   }));
   const s = report?.sections;
+  const on = report?.online;
 
   return <>
     <div className="admin-page-head">
@@ -92,15 +93,23 @@ export function ClosingView() {
         <table className="cl-table">
           <thead><tr><th></th><th>Sales</th><th>Cost</th><th>Profit</th></tr></thead>
           <tbody>
+            {on && <tr className="cl-group"><th colSpan={4}>Shop counter</th></tr>}
             <tr><th>Hardware</th><td>{rs(s.hardware.sales)}</td><td>{rs(s.hardware.cost)}</td><td>{rs(s.hardware.profit)}</td></tr>
             <tr className="cl-sub"><th>incl. For Cash Adjustment</th><td>{rs(s.cashAdjustment.sales)}</td><td>{rs(s.cashAdjustment.cost)}</td><td>{rs(s.cashAdjustment.sales - s.cashAdjustment.cost)}</td></tr>
             <tr><th>Bottles</th><td>{rs(s.bottles.sales)}</td><td>{rs(s.bottles.cost)}</td><td>{rs(s.bottles.profit)}</td></tr>
             <tr><th>Coils</th><td>{rs(s.coils.sales)}</td><td>{rs(s.coils.cost)}</td><td>{rs(s.coils.profit)}</td></tr>
+            {on && report.shop && <>
+              <tr className="cl-subtotal"><th>Shop counter total</th><td>{rs(report.shop.sales)}</td><td>{rs(report.shop.cost)}</td><td>{rs(report.shop.profit)}</td></tr>
+              <tr className="cl-group"><th colSpan={4}>Online orders</th></tr>
+              <tr><th>Goods ({on.count} delivered)</th><td>{rs(on.goods)}</td><td>{rs(on.cost)}</td><td>{rs(on.goods - on.cost)}</td></tr>
+              <tr><th>Delivery fees paid by customers</th><td>{rs(on.deliveryFees)}</td><td>{rs(0)}</td><td>{rs(on.deliveryFees)}</td></tr>
+              <tr className="cl-subtotal"><th>Online total</th><td>{rs(on.sales)}</td><td>{rs(on.cost)}</td><td>{rs(on.profit)}</td></tr>
+            </>}
           </tbody>
           <tfoot><tr><th>Total</th><td>{rs(report.salesTotal)}</td><td>{rs(report.salesTotal - report.profit)}</td><td>{rs(report.profit)}</td></tr></tfoot>
         </table>
         <p className="cl-muted">For Cash Adjustment: refills {rs(s.cashAdjustment.refills)} in; Shipping, CMC Tax and Elite Tax {rs(s.cashAdjustment.taxes)} and refill bottles opened {rs(s.cashAdjustment.bottlesOpened)} out.</p>
-        {report.onlineOrders > 0 && <p className="cl-muted">Online orders this month: {rs(report.onlineOrders)}. They are not in these totals.</p>}
+        {on && <p className="cl-muted">Online orders count in the month they are delivered.{on.waitingCount > 0 ? ` ${on.waitingCount} order${on.waitingCount === 1 ? "" : "s"} placed this month (${rs(on.waiting)}) ${on.waitingCount === 1 ? "is" : "are"} not delivered yet, so not counted.` : ""}</p>}
       </section>
 
       <section className="admin-card cl-card" aria-labelledby="cl-net">
@@ -111,7 +120,7 @@ export function ClosingView() {
           <Row label="Electric bill" value={-report.electric} />
           <Row label="Pay" value={-report.pay} />
           <Row label={`Shop Expense (expenses ${rs(report.directExpenses)}, stock written off ${rs(report.writeOffs)}, taken from profit ${rs(report.inputs.withdrawalProfit)})`} value={-report.shopExpense} />
-          <Row label="Charity (1.5% of total profit)" value={-report.charity} />
+          <Row label={`Charity (${report.charityPercent ?? 1.5}% of total profit)`} value={-report.charity} />
           <Row label="Net profit" value={report.netProfit} strong />
         </dl>
       </section>
@@ -139,6 +148,7 @@ export function ClosingView() {
         <form className="cl-inputs" onSubmit={event => { event.preventDefault(); void act(() => closingApi.save(`${month}-01`, cleaned()), "Saved."); }}>
           {report.firstMonth && <label className="field">Old Amount (first month only)<input inputMode="decimal" value={text.oldAmount ?? ""} disabled={locked} onChange={event => setText({ ...text, oldAmount: event.target.value })} /></label>}
           {fields.map(([key, label]) => <label key={key} className="field">{label}<input inputMode="numeric" value={text[key] ?? ""} disabled={locked} onChange={event => setText({ ...text, [key]: event.target.value })} /></label>)}
+          {report.inputs.charityPercent !== undefined && <label className="field">Charity % (of total profit)<input inputMode="decimal" value={text.charityPercent ?? ""} disabled={locked} onChange={event => setText({ ...text, charityPercent: event.target.value })} /></label>}
           {!locked && <button className="button button-black" type="submit" disabled={busy}>Save</button>}
         </form>
       </section>
