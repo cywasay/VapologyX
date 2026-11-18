@@ -121,8 +121,13 @@ How the month figures are worked out (from the sheet, plus the user's answers):
 - Leaked password protection needs Supabase Pro (project is on Free).
 - npm audit 2026-11-18: shop's production deps clean; safe lint-tool fixes applied (eac702c); 14 dev-only warnings remain from picomatch (no fixed release yet; `--force` would downgrade eslint-config-next to 14, don't).
 
+### 8f. Delivery settings + per-person contact limit (2026-11-18)
+- Migration `20261118120000_store_settings_and_contact_limits.sql` (applied, tested in a rolled-back run). Table `store_settings` (one row: `delivery_fee` 250, `free_delivery_from` 10000; everyone can read, admins save via `store_settings_save`). `place_order` now reads it.
+- Admin → Settings → **Delivery** card (`settings/DeliveryCard.tsx`); saving calls `refreshSettings` (`lib/settings-actions.ts`, clears cache tag "settings"). Shop reads it through `getDeliveryRules` (`lib/store-settings.ts`, "use cache") in the store layout → `DeliveryProvider`/`useDelivery` (`components/store/delivery-context.tsx`), used by the cart, free-delivery bar, checkout and Shipping page. Falls back to 250 / 10000 if the row can't be read.
+- Contact form: max 5 messages an hour per email, 10 per connection (IP kept only as an md5 hash in `contact_messages.sender_hash`), 300 an hour for the whole shop as a flood guard.
+- Delivery card not yet seen with a real admin login.
+
 ## 9. Still open
-- Make the delivery fee rule (Rs 250 under Rs 10,000) an admin setting; contact form limit is 40/hour for the whole shop, should be per person.
 - Before real customers: Supabase Pro + Vercel Pro.
 - Coil fits missing for 5 devices – ignore until the real inventory is uploaded.
 - Commit the work when the user asks; push only after section 3 is cleared.

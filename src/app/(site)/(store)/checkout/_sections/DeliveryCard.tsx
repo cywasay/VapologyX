@@ -1,5 +1,6 @@
 import { StoreDetails } from "@/components/StoreDetails";
-import { CITIES, DELIVERY_FEE, type DeliveryMethod } from "@/lib/orders";
+import { useDelivery } from "@/components/store/delivery-context";
+import { CITIES, type DeliveryMethod } from "@/lib/orders";
 import { money } from "@/lib/products";
 import { ChoiceRadio } from "./ChoiceRadio";
 import type { Errors, SetValue, Values } from "./checkoutDraft";
@@ -7,11 +8,12 @@ import { TextField } from "./TextField";
 
 export function DeliveryCard({ values, errors, set, deliveryFree, onMethod }: { values: Values; errors: Errors; set: SetValue; deliveryFree: boolean; onMethod: (method: DeliveryMethod) => void }) {
   const pickup = values.method === "pickup";
+  const { fee } = useDelivery();
   return <section className="panel-light checkout-card" aria-labelledby="checkout-delivery">
     <h2 id="checkout-delivery">Delivery</h2>
     <fieldset className="choice-group">
       <legend className="sr-only">How would you like to get your order?</legend>
-      <ChoiceRadio name="method" value="delivery" selected={!pickup} onSelect={() => onMethod("delivery")} title="Home delivery" note="We bring it to your door." aside={deliveryFree ? "Free" : money(DELIVERY_FEE)} />
+      <ChoiceRadio name="method" value="delivery" selected={!pickup} onSelect={() => onMethod("delivery")} title="Home delivery" note="We bring it to your door." aside={deliveryFree ? "Free" : money(fee)} />
       <ChoiceRadio name="method" value="pickup" selected={pickup} onSelect={() => onMethod("pickup")} title="Store pickup" note="Collect it from the store when it's ready." aside="Free" />
     </fieldset>
     {pickup

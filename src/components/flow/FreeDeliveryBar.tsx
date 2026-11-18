@@ -1,10 +1,13 @@
-import { FREE_DELIVERY_FROM } from "@/lib/orders";
+"use client";
+
+import { useDelivery } from "@/components/store/delivery-context";
 import { money } from "@/lib/products";
 import type { CSSProperties } from "react";
 
 // How close the cart is to free delivery. The bar fills as items are added, and turns into a "you've got it" state at the line.
 // The fill is a scaled bar, so growing it costs the phone almost nothing.
 export function FreeDeliveryBar({ subtotal }: { subtotal: number }) {
+  const { freeFrom: FREE_DELIVERY_FROM } = useDelivery();
   const left = FREE_DELIVERY_FROM - subtotal;
   const done = left <= 0;
   return <div className={`delivery-bar keep-motion ${done ? "is-done" : ""}`}>

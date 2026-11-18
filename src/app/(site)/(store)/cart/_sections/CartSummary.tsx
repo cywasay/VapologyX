@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { FreeDeliveryBar } from "@/components/flow/FreeDeliveryBar";
 import { PhoneBottomBar } from "@/components/store/PhoneBottomBar";
-import { DELIVERY_FEE, FREE_DELIVERY_FROM } from "@/lib/orders";
+import { useDelivery } from "@/components/store/delivery-context";
 import { usePhoneLayout } from "@/lib/phone-layout";
 import { money } from "@/lib/products";
 
 export function CartSummary({ subtotal }: { subtotal: number }) {
   const phone = usePhoneLayout();
+  const { fee, freeFrom } = useDelivery();
   return <aside className="summary" aria-label="Order summary">
     <h2>Summary</h2>
     <dl>
@@ -20,6 +21,6 @@ export function CartSummary({ subtotal }: { subtotal: number }) {
       <Link className="button button-lime" href="/checkout" prefetch={false}>Checkout</Link>
     </PhoneBottomBar>}
     <Link className="summary-link" href="/devices">Keep shopping</Link>
-    <p className="summary-note">Delivery is {money(DELIVERY_FEE)}, and free over {money(FREE_DELIVERY_FROM)}. Picking up from the store is always free.</p>
+    <p className="summary-note">Delivery is {money(fee)}, and free from {money(freeFrom)}. Picking up from the store is always free.</p>
   </aside>;
 }

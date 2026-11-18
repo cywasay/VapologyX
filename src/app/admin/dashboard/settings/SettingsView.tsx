@@ -2,6 +2,7 @@
 
 import { Loader } from "@/components/loader/Loader";
 import { useAccount } from "../../_shared/account";
+import { DeliveryCard } from "./DeliveryCard";
 import { PasswordCard } from "./PasswordCard";
 import { ProfileCard } from "./ProfileCard";
 
@@ -12,5 +13,6 @@ export function SettingsView() {
   return <div className="settings-grid">
     <ProfileCard account={account} onAvatarChange={setAvatar} />
     <PasswordCard account={account} />
+    <DeliveryCard />
   </div>;
 }

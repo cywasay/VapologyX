@@ -1,9 +1,10 @@
 import { publicClient } from "@/utils/supabase/public";
 import type { Category } from "./products";
 
-// Placeholder shop rules. The same numbers are in the place_order database function, so change both. A Store settings page will replace them later.
-export const DELIVERY_FEE = 250;
-export const FREE_DELIVERY_FROM = 10000;
+// Delivery rules come from the store_settings table (admin → Settings → Delivery). place_order reads the same row.
+// The defaults are only used if that row can't be read.
+export type DeliveryRules = { fee: number; freeFrom: number };
+export const DEFAULT_DELIVERY: DeliveryRules = { fee: 250, freeFrom: 10000 };
 
 export const DELIVERY_METHODS = [
   { id: "delivery", label: "Home delivery" },
@@ -68,8 +69,8 @@ export type Order = {
 
 export type OrderDraft = Pick<Order, "customer" | "delivery" | "payment" | "lines">;
 
-export function orderTotals(subtotal: number, method: DeliveryMethod) {
-  const deliveryFee = method === "delivery" && subtotal > 0 && subtotal < FREE_DELIVERY_FROM ? DELIVERY_FEE : 0;
+export function orderTotals(subtotal: number, method: DeliveryMethod, rules: DeliveryRules) {
+  const deliveryFee = method === "delivery" && subtotal > 0 && subtotal < rules.freeFrom ? rules.fee : 0;
   return { subtotal, deliveryFee, total: subtotal + deliveryFee };
 }
 

@@ -2,10 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useDelivery } from "@/components/store/delivery-context";
 import { useStore } from "@/components/store/store-context";
 import { lineUnitPrice, type CartLine } from "@/lib/cart-store";
 import { usePhoneLayout } from "@/lib/phone-layout";
-import { FREE_DELIVERY_FROM, isStockProblem, normalizePhone, orderTotals, placeOrder, type DeliveryMethod } from "@/lib/orders";
+import { isStockProblem, normalizePhone, orderTotals, placeOrder, type DeliveryMethod } from "@/lib/orders";
 import { CheckoutSummary } from "./CheckoutSummary";
 import { DRAFT_KEY, FIELD_ORDER, readDraft, toOrderLine, validate, without, type Errors, type Field, type SetValue, type Values } from "./checkoutDraft";
 import { ConfirmCard } from "./ConfirmCard";
@@ -20,6 +21,7 @@ export function CheckoutForm({ lines, locked, onPlaced }: { lines: CartLine[]; l
   const router = useRouter();
   const { clear } = useStore();
   const phone = usePhoneLayout();
+  const rules = useDelivery();
   const [values, setValues] = useState<Values>(readDraft);
   const [errors, setErrors] = useState<Errors>({});
   const [formError, setFormError] = useState("");
@@ -27,8 +29,8 @@ export function CheckoutForm({ lines, locked, onPlaced }: { lines: CartLine[]; l
   // Set the moment the button is pressed, so a double click can't place the order twice before the page redraws.
   const sending = useRef(false);
   const subtotal = lines.reduce((sum, line) => sum + lineUnitPrice(line) * line.quantity, 0);
-  const totals = orderTotals(subtotal, values.method);
-  const deliveryFree = subtotal >= FREE_DELIVERY_FROM;
+  const totals = orderTotals(subtotal, values.method, rules);
+  const deliveryFree = subtotal >= rules.freeFrom;
   const pickup = values.method === "pickup";
 
   useEffect(() => {

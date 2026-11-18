@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { ButtonOrigin } from "@/components/store/ButtonOrigin";
+import { DeliveryProvider } from "@/components/store/delivery-context";
 import { StoreProvider } from "@/components/store/store-context";
+import { getDeliveryRules } from "@/lib/store-settings";
 import { CartDrawer } from "./_shell/CartDrawer";
 import { CartToast } from "./_shell/CartToast";
 import { Footer } from "./_shell/Footer";
@@ -9,8 +11,9 @@ import { NoticeBar } from "./_shell/NoticeBar";
 import { SearchDialog } from "./_shell/SearchDialog";
 
 // The frame shared by every shop page: header, footer, and the cart and search windows.
-export default function StoreLayout({ children }: { children: ReactNode }) {
-  return <StoreProvider>
+export default async function StoreLayout({ children }: { children: ReactNode }) {
+  const rules = await getDeliveryRules();
+  return <DeliveryProvider rules={rules}><StoreProvider>
     <div className="store-frame">
       <a className="skip-link" href="#main">Skip to content</a>
       <NoticeBar />
@@ -22,5 +25,5 @@ export default function StoreLayout({ children }: { children: ReactNode }) {
     <CartToast />
     <CartDrawer />
     <SearchDialog />
-  </StoreProvider>;
+  </StoreProvider></DeliveryProvider>;
 }
