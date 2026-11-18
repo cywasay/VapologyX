@@ -19,6 +19,12 @@ export function FinderTrack({ device, coils, round, seen, leaving }: { device: P
       </div>
     </Link>
     {fitting.map((coil, index) => <ProductCard key={`${device.id}-${round}-${coil.id}`} item={coil} meta={`Fits ${device.name}`} style={{ "--k": index + 1 } as CSSProperties} />)}
+    {fitting.length === 1 && <Link key={`${device.id}-${round}-more`} href="/coils" className="finder-more-tile">
+      <span className="finder-device-tag">All coils</span>
+      <strong>Need a different coil?</strong>
+      <span>Browse every coil we stock, or pick another device on the left.</span>
+      <em>Shop all coils <i aria-hidden="true">→</i></em>
+    </Link>}
     {fitting.length === 0 && <p key={`${device.id}-${round}`} className="finder-empty">No coils are listed for {device.name} yet.</p>}
   </div>;
 }

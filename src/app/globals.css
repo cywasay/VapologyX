@@ -261,11 +261,12 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
 .stage-highlight { position: absolute; top: 4px; bottom: 4px; left: calc(4px + var(--active) * (100% - 8px) / 4); right: calc(4px + (3 - var(--active)) * (100% - 8px) / 4); background: var(--accent); border-radius: var(--radius-pill); }
 .stage.is-moving-forward .stage-highlight { transition: right 300ms cubic-bezier(.3, .7, .2, 1), left 480ms cubic-bezier(.6, 0, .2, 1) 40ms; }
 .stage.is-moving-back .stage-highlight { transition: left 300ms cubic-bezier(.3, .7, .2, 1), right 480ms cubic-bezier(.6, 0, .2, 1) 40ms; }
-.stage-link { display: grid; gap: 2px; padding-left: 8px; }
+.stage-link { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 12px 12px 20px; color: var(--on-dark); background: var(--ink-raised); border-radius: var(--radius-pill); transition: background var(--motion); }
+.stage-link:hover { background: #2a2c31; }
 .stage-link b { font-family: var(--font-display); font-size: 20px; font-weight: 700; letter-spacing: -.02em; animation: rise 400ms ease-out; }
-.stage-link span { font-size: 14px; font-weight: 500; color: var(--muted-on-dark); transition: color var(--motion); }
+.stage-link span { flex-shrink: 0; padding: 8px 16px; font-size: 14px; font-weight: 700; color: var(--ink); background: var(--accent); border-radius: var(--radius-pill); }
 .stage-link i { display: inline-block; font-style: normal; transition: translate var(--motion); }
-.stage-link:hover span { color: var(--accent); }
+
 .stage-link:hover i { translate: 4px 0; }
 
 /* Shelves: narrow pills side by side. The one under the pointer opens into a panel, like the sidebar. */
@@ -331,12 +332,34 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
 .finder-track.is-leaving .product { translate: calc(var(--k) * (-100% - var(--gap))) 0; transition: translate 360ms cubic-bezier(.55, 0, .75, .3) calc((2 - var(--k)) * 70ms), transform var(--motion), box-shadow var(--motion); animation: none; pointer-events: none; }
 .finder-track.is-leaving .finder-device-inner { opacity: 0; transform: perspective(900px) rotateY(70deg) scale(.92); transition: transform 300ms cubic-bezier(.55, 0, .75, .3), opacity 260ms ease-in; animation: none; }
 .finder-track.is-leaving .finder-empty { opacity: 0; transition: opacity 200ms ease-in; animation: none; }
+.finder-more-tile { display: flex; flex-direction: column; gap: 8px; padding: var(--space-inner); color: var(--on-dark); border: 1.5px solid var(--line-dark); border-radius: var(--radius-card); transition: border-color var(--motion), background var(--motion); }
+.finder-more-tile:hover { background: var(--ink-raised); border-color: var(--accent); }
+.finder-more-tile .finder-device-tag { color: var(--ink); background: var(--accent); }
+.finder-more-tile strong { margin-top: auto; font-family: var(--font-display); font-size: 22px; font-weight: 700; line-height: 1.1; letter-spacing: -.02em; }
+.finder-more-tile > span:not(.finder-device-tag) { font-size: 14px; line-height: 1.45; color: var(--muted-on-dark); }
+.finder-more-tile em { margin-top: 6px; font-size: 14px; font-style: normal; font-weight: 600; color: var(--accent); }
+.finder-more-tile em i { display: inline-block; font-style: normal; transition: translate var(--motion); }
+.finder-more-tile:hover em i { translate: 4px 0; }
+.finder-track:not(.is-seen) .finder-more-tile { opacity: 0; }
+.finder-track.is-seen .finder-more-tile { animation: rise 500ms ease-out 520ms backwards; }
+.finder-track.is-leaving .finder-more-tile { opacity: 0; transition: opacity 200ms ease-in; animation: none; }
 .finder-all { display: inline-flex; gap: 8px; justify-self: start; font-size: 14px; font-weight: 600; color: var(--accent); }
 .finder-all i { font-style: normal; transition: translate var(--motion); }
 .finder-all:hover i { translate: 4px 0; }
 .finder-all:hover { text-decoration: underline; text-underline-offset: 3px; }
 
 .home-visit { padding-top: var(--space-section); }
+.home-perks { padding-top: var(--space-inner); }
+.home-perks ul { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-inner); margin: 0; padding: 0; list-style: none; }
+.home-perks a { display: flex; align-items: flex-start; gap: 12px; height: 100%; padding: 18px 20px; background: var(--white); border-radius: var(--radius-card); transition: background var(--motion); }
+.home-perks a:hover { background: var(--accent); }
+.home-perks i { flex-shrink: 0; width: 10px; height: 10px; margin-top: 6px; background: var(--accent); border: 2px solid var(--ink); border-radius: var(--radius-pill); }
+.home-perks span { display: grid; gap: 2px; min-width: 0; }
+.home-perks b { font-family: var(--font-display); font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
+.home-perks small { font-size: 13px; line-height: 1.4; color: var(--muted); }
+.home-perks a:hover small { color: var(--ink); }
+@media (max-width: 900px) { .home-perks ul { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .home-perks ul { gap: 8px; } .home-perks a { padding: 12px; } .home-perks b { font-size: 15px; } .home-perks small { font-size: 12px; } }
 .home-visit-panel { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); grid-template-areas: "copy map" "details map"; gap: var(--space-group) 48px; padding: 48px; overflow: clip; background: var(--accent); border-radius: var(--radius-panel); }
 .home-visit-copy { grid-area: copy; display: grid; justify-items: start; gap: var(--space-inner); }
 .home-visit-copy h2 { font-size: clamp(34px, 4vw, 56px); line-height: 1; letter-spacing: -.04em; }

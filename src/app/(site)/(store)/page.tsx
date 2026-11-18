@@ -2,6 +2,7 @@ import { CoilFinderSection } from "./_home/CoilFinderSection";
 import { FeaturedDevices } from "./_home/FeaturedDevices";
 import { Hero } from "./_home/Hero";
 import { HomeMotion } from "./_home/HomeMotion";
+import { HomePerks } from "./_home/HomePerks";
 import { PopularBottles } from "./_home/PopularBottles";
 import { Shelves } from "./_home/Shelves";
 import { StoreVisit } from "./_home/StoreVisit";
@@ -10,6 +11,7 @@ import { StoreVisit } from "./_home/StoreVisit";
 export default function Home() {
   return <HomeMotion>
     <Hero />
+    <HomePerks />
     <Shelves />
     <FeaturedDevices />
     <CoilFinderSection />

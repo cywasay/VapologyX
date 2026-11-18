@@ -62,4 +62,11 @@ export const photosOf = (product: Pick<Product, "image_url" | "images">) => prod
 export const isSoldOut = (product: Pick<Product, "stock">) => product.stock === 0;
 // The number left, but only once it's low enough to be worth telling the customer.
 export const fewLeft = (product: Pick<Product, "stock">) => product.stock != null && product.stock > 0 && product.stock <= LOW_STOCK ? product.stock : null;
+// Order for home page showcases: products with a real photo first, then ones with plenty in stock, sold out last.
+// Ties keep the shop's own order.
+export function showcaseOrder<T extends Pick<Product, "image_url" | "images" | "stock">>(items: T[]): T[] {
+  const score = (item: T) => item.stock === 0 ? -1 : (photosOf(item).length > 0 ? 2 : 0) + (item.stock == null || item.stock > LOW_STOCK ? 1 : 0);
+  return items.map((item, index) => ({ item, index, score: score(item) })).sort((a, b) => b.score - a.score || a.index - b.index).map(entry => entry.item);
+}
+
 export const orderLimit = (product: Pick<Product, "stock">) => Math.min(MAX_LINE_QUANTITY, product.stock ?? MAX_LINE_QUANTITY);
