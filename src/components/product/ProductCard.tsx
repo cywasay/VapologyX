@@ -24,7 +24,7 @@ export function ProductCard({ item, meta, style }: { item: Product; meta?: strin
   const optionAction = item.category === "bottle" || item.category === "disposable" ? "Choose flavor" : "Choose options";
   const added = toast?.kind === "added" && toast.key === item.id;
   return <article className={`product ${soldOut ? "is-sold-out" : ""}`} style={style}>
-    <Link href={href} className="product-image" aria-label={`View ${item.name}`} tabIndex={-1}>
+    <Link href={href} className={`product-image ${item.image_url ? "has-photo" : ""}`} aria-label={`View ${item.name}`} tabIndex={-1}>
       {soldOut ? <span className="badge is-sold">Sold out</span> : saleTag(item) ? <span className="badge is-sale">{saleTag(item)}</span> : item.badge && <span className="badge">{item.badge}</span>}
       <ProductArt item={item} phoneSizes="calc(38vw - 27px)" />
     </Link>

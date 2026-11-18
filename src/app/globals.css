@@ -194,7 +194,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
 .store-error p { color: var(--muted); }
 .product { display: flex; flex-direction: column; padding: var(--space-inner); color: var(--ink); background: var(--white); border-radius: var(--radius-card); transition: transform var(--motion), box-shadow var(--motion); }
 .product:hover { transform: translateY(-4px); box-shadow: 0 16px 32px #1415181f; }
-.product-image { position: relative; display: block; aspect-ratio: 1; padding: 4% 12% 2%; margin-bottom: var(--space-inner); }
+.product-image { position: relative; display: block; aspect-ratio: 4 / 5; padding: 8% 12% 4%; margin-bottom: var(--space-inner); }
 .badge { position: absolute; top: 0; left: 0; z-index: 1; padding: 4px 12px; font-size: 12px; font-weight: 600; color: var(--ink); background: var(--accent); border-radius: var(--radius-pill); }
 .product-meta { font-size: 13px; color: var(--muted); }
 .product h3 { margin-top: 4px; font-size: 20px; font-weight: 600; line-height: 1.15; letter-spacing: -.02em; }
@@ -1023,6 +1023,19 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
 .detail-slide { position: absolute; inset: var(--space-group); display: grid; opacity: 0; pointer-events: none; transition: opacity 260ms ease; }
 .detail-slide.is-active { opacity: 1; pointer-events: auto; }
 .detail-image .detail-slide .art { height: 100%; }
+/* Real photos fill their frame edge to edge, so a photo's own background never looks pasted onto the card.
+   The frame is square and the photo is cropped to fit (centred), so tall or wide photos never spill out. */
+.detail-image.has-photos { aspect-ratio: 4 / 5; min-height: 0; padding: 0; overflow: hidden; background: var(--surface); }
+.detail-image.has-photos .detail-slide { inset: 0; }
+.detail-image.has-photos .detail-slide .art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.detail-image.has-photos .badge { z-index: 2; }
+.detail-thumbs button:has(.art-photo) { padding: 0; overflow: hidden; }
+.detail-thumbs .art-photo { object-fit: cover; }
+.product-image.has-photo { padding: 0; overflow: hidden; background: var(--surface); border-radius: 14px; }
+.product-image.has-photo .art-photo { object-fit: cover; transition: scale 400ms cubic-bezier(.2, .8, .2, 1); }
+.product:hover .product-image.has-photo .art-photo { scale: 1.04; }
+.product-image.has-photo .badge { top: 8px; left: 8px; z-index: 1; }
+@media (max-width: 768px) { .product-image.has-photo { border-radius: 10px; } .product:hover .product-image.has-photo .art-photo { scale: 1; } }
 .detail-nav { position: absolute; top: 50%; z-index: 2; display: grid; place-items: center; width: 44px; height: 44px; margin-top: -22px; background: var(--white); border-radius: var(--radius-pill); box-shadow: 0 6px 18px #14151826; transition: background var(--motion); }
 .detail-nav:hover { background: var(--accent); }
 .detail-nav svg { width: 14px; height: 14px; fill: none; stroke: var(--ink); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
@@ -1041,7 +1054,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
   .shelf-filter-toggle { display: inline-flex; }
   .shelf-tools-extra:not(.is-open) > .shelf-filter-fields { display: none; }
   .shelf-count { flex-basis: 100%; margin-left: 0; }
-  .detail-image.has-photos { aspect-ratio: 1; }
+  .detail-image.has-photos { aspect-ratio: 4 / 5; }
   .detail-slide { inset: var(--space-related); }
   .detail-nav { width: 40px; height: 40px; margin-top: -20px; }
 }
@@ -1278,7 +1291,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
   .detail-bar, .detail-info .detail-add { display: none; }
   .detail-grid { gap: 10px; scroll-margin-top: 0; }
   .detail-image { padding: 12px; }
-  .detail-image.has-photos { aspect-ratio: 5 / 4; }
+  .detail-image.has-photos { aspect-ratio: 1; }
   .detail-image .art { height: clamp(180px, 57vw, 300px); }
   .detail-slide { inset: 12px; transition: opacity 150ms ease; }
   .detail-slide:not(.is-active) { display: none; }
