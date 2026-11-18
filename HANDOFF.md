@@ -111,8 +111,18 @@ How the month figures are worked out (from the sheet, plus the user's answers):
 - Tested: contact send + follow-up in the real database and browser; inbox/bell layout with fake data at desktop and 375px. **Not tested with a real admin login or a real live toast** (realtime needs a signed-in admin).
 
 ## 8b. Questions to ask the user next
-1. Email/WhatsApp alert for new messages when no admin tab is open? (not answered yet)
+1. Owner text for the placeholder pages (About, shelf headers, Contact, FAQ returns, Shipping, Privacy, opening hours).
+2. Unconfirmed Excel details: refill name columns, refill bottle spanning months, Shop Expense L10 vs Direct Exp I15, O5/N6/N7, Old Amount carry-forward, Match Amount invariant.
+
+### 8e. Email alert for new contact messages (2026-11-18)
+- User chose **email**. Migration `20261118100000_message_email_alert.sql` (applied): enables `pg_net`; trigger `contact_message_alert` on `contact_messages` posts to Resend's API. Plain-text email, reply-to = customer, link to `/admin/dashboard/messages?c=email` when `site_url` is set. A follow-up from the same email within 10 minutes sends no second email. Any failure only logs a warning; the message is always saved.
+- **Does nothing until the user adds Vault secrets** (Supabase → Project Settings → Vault): `resend_api_key` and `alert_email_to` (required), `alert_email_from` and `site_url` (optional). Without a verified domain in Resend, mail can only go to the Resend account's own email, from onboarding@resend.dev. Claude must never enter the API key itself.
+- Tested in a rolled-back transaction with a fake key (queued request body checked; no key = nothing queued; follow-up = no second email). Not yet tested with a real Resend key.
+- Leaked password protection needs Supabase Pro (project is on Free).
+- npm audit 2026-11-18: shop's production deps clean; safe lint-tool fixes applied (eac702c); 14 dev-only warnings remain from picomatch (no fixed release yet; `--force` would downgrade eslint-config-next to 14, don't).
 
 ## 9. Still open
+- Make the delivery fee rule (Rs 250 under Rs 10,000) an admin setting; contact form limit is 40/hour for the whole shop, should be per person.
+- Before real customers: Supabase Pro + Vercel Pro.
 - Coil fits missing for 5 devices – ignore until the real inventory is uploaded.
 - Commit the work when the user asks; push only after section 3 is cleared.
