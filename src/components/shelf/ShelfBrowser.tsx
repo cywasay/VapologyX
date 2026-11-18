@@ -48,7 +48,8 @@ export function ShelfBrowser({ category, initial, types = [], typeLabel = "Type"
   const metaFor = category === "coil" && devices.length > 0
     ? (item: Product) => {
       const names = devices.filter(device => item.fits.includes(device.id)).map(device => device.name);
-      return names.length ? `Fits ${names.join(", ")}` : undefined;
+      // One name and a count, so a coil that fits many devices still reads as one short line.
+      return names.length ? `Fits ${names[0]}${names.length > 1 ? ` + ${names.length - 1} more` : ""}` : undefined;
     }
     : undefined;
 
