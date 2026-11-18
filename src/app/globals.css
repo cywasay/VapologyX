@@ -440,11 +440,31 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
 .variety-picker label.is-active, .variety-picker label.is-active:hover { color: var(--on-dark); background: var(--ink); }
 .variety-picker label:has(input:focus-visible) { outline: 2px solid var(--ink); outline-offset: 2px; }
 .variety-picker input { position: absolute; opacity: 0; pointer-events: none; }
-.detail-buy { display: grid; gap: var(--space-inner); margin-top: auto; padding-top: var(--space-group); }
+.detail-buy { display: grid; gap: var(--space-inner); padding-top: var(--space-group); }
 .detail-buy strong { font-family: var(--font-display); font-size: 32px; font-weight: 700; letter-spacing: -.03em; }
 .detail-add { width: 100%; min-height: 52px; }
 .detail-info .text-link { align-self: flex-start; margin-top: var(--space-inner); color: var(--muted); }
 .detail-info .text-link:hover { color: var(--ink); }
+/* Coils that fit, and the shop facts, inside the buy panel. The facts sit at the bottom and take up the leftover height. */
+.detail-panel-title { margin: 0 0 8px; font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.detail-coils { margin-top: var(--space-group); }
+.detail-coils ul { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.detail-coils li { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 8px 10px 8px 8px; background: var(--white); border-radius: var(--radius-input); }
+.detail-coil-art { display: block; width: 56px; height: 56px; padding: 6px; overflow: hidden; background: var(--surface); border-radius: 10px; }
+.detail-coil-art:has(.art-photo) { padding: 0; }
+.detail-coil-art .art-photo { object-fit: cover; }
+.detail-coils li div { display: grid; gap: 2px; min-width: 0; }
+.detail-coils li div a { overflow: hidden; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; }
+.detail-coils li div a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.detail-coils li div span { font-size: 14px; color: var(--muted); }
+.detail-coil-sold { font-size: 13px; color: var(--muted); }
+.detail-facts { display: grid; margin: auto 0 0; padding-top: var(--space-group); }
+.detail-facts div { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 12px; padding: 10px 0; font-size: 14px; line-height: 1.4; border-top: 1px solid var(--line); }
+.detail-facts dt { font-weight: 600; }
+.detail-facts dd { margin: 0; color: var(--muted); }
+.detail-facts a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+/* With a photo the two columns are even, so the photo is not much taller than the panel. */
+@media (min-width: 769px) { .detail-grid:has(.detail-image.has-photos) { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
 .detail-highlights { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-inner); padding-top: var(--space-inner); }
 .detail-highlights .tile { display: grid; gap: 4px; padding: var(--space-related); background: var(--surface); }
 .detail-highlights .tile:first-child { background: var(--accent); }
@@ -1018,7 +1038,8 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
 .search-results b { font-size: 15px; white-space: nowrap; }
 .search-all { width: 100%; margin-top: 12px; }
 
-.detail-media { display: grid; align-content: start; gap: 8px; min-width: 0; }
+.detail-media { display: grid; grid-template-rows: minmax(0, 1fr); gap: 8px; min-width: 0; }
+.detail-media .detail-image.has-photos { align-self: start; }
 .detail-image.has-photos { touch-action: pan-y; }
 .detail-slide { position: absolute; inset: var(--space-group); display: grid; opacity: 0; pointer-events: none; transition: opacity 260ms ease; }
 .detail-slide.is-active { opacity: 1; pointer-events: auto; }

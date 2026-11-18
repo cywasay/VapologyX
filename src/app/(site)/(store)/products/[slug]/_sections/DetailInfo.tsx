@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { AddToCart } from "@/components/product/AddToCart";
 import { fewLeft, isSoldOut, money, shelfOf, varietyPrice, type Product, type Variety } from "@/lib/products";
+import { DetailCoils } from "./DetailCoils";
+import { DetailFacts } from "./DetailFacts";
 
-// The right-hand box: name, text, option picker, price and the add-to-cart button.
-export function DetailInfo({ item, slug, variety, onVariety, coilCount, phone }: { item: Product; slug: string; variety: Variety | null; onVariety: (variety: Variety) => void; coilCount: number; phone: boolean }) {
+// The right-hand box: name, text, option picker, price, add-to-cart, the coils that fit, and the shop's delivery and payment facts.
+export function DetailInfo({ item, slug, variety, onVariety, coils, phone }: { item: Product; slug: string; variety: Variety | null; onVariety: (variety: Variety) => void; coils: Product[]; phone: boolean }) {
   const soldOut = isSoldOut(item);
   const few = fewLeft(item);
   const description = item.description && <p key="description" className="detail-text">{item.description}</p>;
@@ -24,11 +26,12 @@ export function DetailInfo({ item, slug, variety, onVariety, coilCount, phone }:
     <strong>{money(varietyPrice(item, variety))}{item.compare_price && !variety?.price ? <s className="price-was"><span className="sr-only">, was </span>{money(item.compare_price)}</s> : null}</strong>
     {!phone && <AddToCart item={item} variety={variety} />}
   </div>;
-  const coils = coilCount > 0 && <a key="coils" className="text-link" href={`#${slug}-coils`}>{coilCount} compatible {coilCount === 1 ? "coil" : "coils"}</a>;
+  const fits = <DetailCoils key="coils" slug={slug} coils={coils} />;
+  const facts = <DetailFacts key="facts" price={varietyPrice(item, variety)} />;
 
   return <div className="tile detail-info">
     <h1>{item.name}</h1>
     <p className="detail-tagline">{item.type || shelfOf(item.category).singular}</p>
-    {phone ? [buy, options, coils, description] : [description, options, buy, coils]}
+    {phone ? [buy, options, fits, description, facts] : [description, options, buy, fits, facts]}
   </div>;
 }

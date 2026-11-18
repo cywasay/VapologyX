@@ -12,7 +12,7 @@ import { DetailSpecs } from "./DetailSpecs";
 import { ProductGallery } from "./ProductGallery";
 
 // The top of a product page. It keeps the chosen option, because the bar and the buy box both show its price.
-export function ProductDetail({ item, fitDevices, coilCount }: { item: Product; fitDevices: Product[]; coilCount: number }) {
+export function ProductDetail({ item, fitDevices, coils }: { item: Product; fitDevices: Product[]; coils: Product[] }) {
   const [variety, setVariety] = useState(item.variants[0] ?? null);
   const phone = usePhoneLayout();
   const price = varietyPrice(item, variety);
@@ -24,7 +24,7 @@ export function ProductDetail({ item, fitDevices, coilCount }: { item: Product; 
     <DetailBar item={item} slug={slug} price={price} hasSpecs={hasSpecs} />
     <section className="shell detail-grid" id={`${slug}-overview`} aria-label={`${item.name} overview`}>
       <ProductGallery item={item} soldOut={isSoldOut(item)} />
-      <DetailInfo item={item} slug={slug} variety={variety} onVariety={setVariety} coilCount={coilCount} phone={phone} />
+      <DetailInfo item={item} slug={slug} variety={variety} onVariety={setVariety} coils={coils} phone={phone} />
       {phone && <PhoneBottomBar label="Purchase options">
         <div>
           <strong>{money(price)}</strong>

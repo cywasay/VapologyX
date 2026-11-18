@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getCoilsFor, getProductBySlug, getProductsByIds, getStaticSlugs } from "@/lib/product-data";
 import { CompatibleCoils } from "./_sections/CompatibleCoils";
+import { PANEL_COILS } from "./_sections/DetailCoils";
 import { MoreProducts } from "./_sections/MoreProducts";
 import { ProductBreadcrumb } from "./_sections/ProductBreadcrumb";
 import { ProductDetail } from "./_sections/ProductDetail";
@@ -33,8 +34,8 @@ export default async function ProductPage(props: PageProps<"/products/[slug]">) 
 
   return <>
     <ProductBreadcrumb item={item} />
-    <ProductDetail item={item} fitDevices={fittingDevices} coilCount={fittingCoils.length} />
-    <CompatibleCoils slug={slug} coils={fittingCoils} />
+    <ProductDetail item={item} fitDevices={fittingDevices} coils={fittingCoils} />
+    {fittingCoils.length > PANEL_COILS && <CompatibleCoils slug={slug} coils={fittingCoils} />}
     <WorksWith slug={slug} devices={fittingDevices} />
     <MoreProducts item={item} />
   </>;
