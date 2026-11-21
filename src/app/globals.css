@@ -370,6 +370,11 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
 .home-visit-panel .store-details { grid-area: details; }
 .home-map { grid-area: map; position: relative; min-height: 320px; overflow: hidden; background: var(--ink); border-radius: var(--radius-card); }
 .home-map svg { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; }
+.home-map { display: block; }
+.home-map iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; pointer-events: none; }
+.home-map-open { position: absolute; right: 12px; bottom: 12px; padding: 8px 14px; font-size: 13px; font-weight: 700; color: var(--on-dark); background: var(--ink); border-radius: var(--radius-pill); transition: background var(--motion), color var(--motion); }
+.home-map-open i { font-style: normal; }
+.home-map:hover .home-map-open { color: var(--ink); background: var(--white); }
 .home-map-streets path { stroke: #ffffff1f; stroke-width: 10; stroke-dasharray: 100; }
 .home-map-route { stroke: var(--accent); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 100; }
 .home-pin-shape { fill: var(--accent); }
@@ -1266,7 +1271,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
     animation: none;
   }
   .home-pin-ripple { display: none; }
-  .home-map { min-height: 148px; }
+  .home-map { min-height: 240px; }
 
   /* Listing cards and the disclosure above the results. */
   .page-head-copy { padding: 16px; }

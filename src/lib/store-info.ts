@@ -7,4 +7,6 @@ export const STORE = {
   phoneLink: "tel:+923101550635",
   whatsappLink: "https://wa.me/923101550635",
   mapLink: "https://share.google/oDdeoPXlmd19LPZyu",
+  // Google's free embed (no API key), centred on the shop's Google listing (VapologyX, 33.5162842, 73.1564332).
+  mapEmbed: "https://maps.google.com/maps?q=33.5162842,73.1564332&z=17&output=embed",
 };
