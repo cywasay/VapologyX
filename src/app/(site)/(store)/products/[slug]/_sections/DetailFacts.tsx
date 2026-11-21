@@ -11,7 +11,7 @@ export function DetailFacts({ price }: { price: number }) {
   const facts: [string, ReactNode][] = [
     ["Delivery", price >= freeFrom ? "Free delivery on this item" : `${money(fee)}, free on orders from ${money(freeFrom)}`],
     ["Pickup", "Free from the store"],
-    ["Payment", "Cash on delivery, bank transfer or mobile wallet"],
+    ["Payment", "Cash on delivery or bank transfer"],
     ["Questions?", <Link key="ask" href="/contact">Ask the store</Link>],
   ];
   return <dl className="detail-facts" aria-label="Good to know">

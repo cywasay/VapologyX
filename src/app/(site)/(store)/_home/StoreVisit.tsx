@@ -9,7 +9,7 @@ export function StoreVisit() {
       <div className="home-visit-copy">
         <span className="home-chip is-light">Flagship store</span>
         <h2 id="visit-title">Come see every shelf in person.</h2>
-        <p>Store visit text goes here. Replace it with what customers can expect in the shop.</p>
+        <p>Get personal advice and product recommendations based on what you like, so you can explore our range with confidence.</p>
         <Link className="button button-dark" href="/contact">Contact the store</Link>
       </div>
       <StoreMap />

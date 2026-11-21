@@ -13,7 +13,7 @@ export const DELIVERY_METHODS = [
 
 export const PAYMENT_METHODS = [
   { id: "cod", label: "Cash on delivery" },
-  { id: "transfer", label: "Bank transfer or mobile wallet" },
+  { id: "transfer", label: "Bank transfer" },
 ] as const;
 
 export const CITIES = ["Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad", "Multan", "Peshawar", "Quetta", "Hyderabad", "Sialkot", "Gujranwala"];

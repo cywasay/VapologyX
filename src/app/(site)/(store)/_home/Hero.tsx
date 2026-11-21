@@ -13,7 +13,7 @@ export async function Hero() {
       <div className="home-hero-copy">
         <span className="home-chip"><i aria-hidden="true" />The {BRAND} flagship store</span>
         <h1 id="hero-title" className="home-title"><span><span>Every device.</span></span><span><span>Every coil.</span></span><span><span><em>Every flavor.</em></span></span></h1>
-        <p>Short store introduction goes here. Replace this text with the real message from the shop.</p>
+        <p>Your trusted destination for quality vaping devices, pods, coils and a wide variety of flavours. Find everything you need under one roof.</p>
         <div className="hero-actions">
           <Link className="button button-lime" href="/devices">Shop devices</Link>
           <Link className="button button-outline" href="/contact">Visit the store</Link>

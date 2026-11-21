@@ -9,7 +9,7 @@ export function HomePerks() {
   const { fee, freeFrom } = useDelivery();
   const perks = [
     { title: `Delivery ${money(fee)}`, text: `Free on orders from ${money(freeFrom)}`, href: "/shipping" },
-    { title: "Cash on delivery", text: "Or pay by bank transfer or mobile wallet", href: "/shipping" },
+    { title: "Cash on delivery", text: "Or pay by bank transfer", href: "/shipping" },
     { title: "Free store pickup", text: "Order online, collect from the shop", href: "/shipping" },
     { title: "Coils that fit", text: "Pick your device, see only its coils", href: "/coils" },
   ];

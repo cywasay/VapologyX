@@ -1,7 +1,7 @@
 const points = [
-  { title: "Every device", text: "Placeholder text. Say something about the range of devices in the shop." },
-  { title: "Every coil", text: "Placeholder text. Say something about coils and compatibility." },
-  { title: "Every flavor", text: "Placeholder text. Say something about the flavor selection." },
+  { title: "Every device", text: "Refillable pod systems, rechargeable devices and disposables." },
+  { title: "Every coil", text: "Different coil options, and help choosing the right coil for your device." },
+  { title: "Every flavor", text: "Fruit, ice, menthol, dessert and tobacco flavours, in different brands and nicotine strengths." },
 ];
 
 export function AboutPoints() {

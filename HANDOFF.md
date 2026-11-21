@@ -127,6 +127,14 @@ How the month figures are worked out (from the sheet, plus the user's answers):
 - Contact form: max 5 messages an hour per email, 10 per connection (IP kept only as an md5 hash in `contact_messages.sender_hash`), 300 an hour for the whole shop as a flood guard.
 - Delivery card not yet seen with a real admin login.
 
+### 8g. Owner's content and answers (2026-11-21)
+- All "Placeholder text" on the shop replaced with the owner's wording: home intro and visit text, About, shelf headings, Contact, Shipping (Bykea/inDrive in Isb/Rwp ~1 day; TCS/Leopards elsewhere 2-3 working days), FAQ, Terms, Privacy (couriers named, records kept 1 year). Store details live in `src/lib/store-info.ts` (address, hours, phone 0310 1550635, WhatsApp, Google Maps link) and `StoreDetails` shows them everywhere.
+- Returns: none; damaged/faulty case by case; refunds as store credit. Orders confirmed by WhatsApp/phone before dispatch. ID checked in store.
+- Payment: owner listed **bank transfer** only, so "mobile wallet" was removed from the site. Cash on delivery was not asked about and is still offered: **confirm with the owner**.
+- Demo notice (top bar, footer, site description) **kept**: owner said remove it only once products, prices and policies are final.
+- Excel answers: see memory/excel-closing-inventory. Built from them: Match Amount carries forward (migration `20261121100000_match_amount_carry_forward.sql`, applied + tested). Not built: N6/N7 daily-profit tracking.
+- **November 2026 is locked in month_closings** (user locked it on 18 Nov while testing mock data). Locks can't be undone in the app; before launch the test data (sales, orders, month closings) should be cleared with the user's OK.
+
 ## 9. Still open
 - Before real customers: Supabase Pro + Vercel Pro.
 - Coil fits missing for 5 devices – ignore until the real inventory is uploaded.
