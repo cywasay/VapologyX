@@ -8,11 +8,12 @@ import { AboutValues } from "./_sections/AboutValues";
 export const metadata: Metadata = { title: "About us" };
 
 export default function AboutPage() {
-  return <>
+  // "motion" keeps the scroll animations on even when the device asks for less motion, like the home page (the user asked for this).
+  return <div className="about motion">
     <AboutHead />
     <AboutStory />
     <AboutValues />
     <AboutPoints />
     <StoreVisit />
-  </>;
+  </div>;
 }

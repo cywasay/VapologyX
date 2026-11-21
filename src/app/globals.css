@@ -435,20 +435,59 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
 .store-frame { display: flex; flex-direction: column; min-height: 100dvh; }
 .store-main { position: relative; z-index: 1; flex: 1 0 auto; padding-bottom: var(--space-group); background: var(--background); }
 .site-footer { position: sticky; bottom: 0; z-index: 0; color: var(--on-dark); background: var(--ink); }
-.footer-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-inner) var(--space-group); padding-block: 16px 10px; }
-.footer-brand .wordmark { font-size: 22px; }
-.footer-links { display: flex; flex-wrap: wrap; gap: 4px var(--space-related); font-size: 14px; font-weight: 500; }
-.footer-links a { position: relative; padding-block: 6px; color: var(--muted-on-dark); transition: color var(--motion); }
-.footer-links a::after { content: ""; position: absolute; right: 0; bottom: 2px; left: 0; height: 1.5px; background: var(--accent); scale: 0 1; transform-origin: left; transition: scale 260ms cubic-bezier(.2, .8, .2, 1); }
-.footer-links a:hover { color: var(--accent); }
-.footer-links a:hover::after { scale: 1 1; }
+/* Footer: a moving band, link columns, the visit details and a giant wordmark that rises in as the footer comes into view. */
+.footer-band { overflow: hidden; padding-block: 14px; color: var(--ink); background: var(--accent); }
+.footer-band-track { display: flex; width: max-content; animation: footer-band 38s linear infinite; }
+.footer-band-track > span { display: flex; flex-shrink: 0; }
+.footer-band b { display: inline-flex; align-items: center; gap: 22px; padding-right: 22px; font-family: var(--font-display); font-size: 20px; font-weight: 700; letter-spacing: -.01em; white-space: nowrap; }
+.footer-band i { font-size: 14px; font-style: normal; }
+.site-footer:hover .footer-band-track { animation-play-state: paused; }
+@keyframes footer-band { to { translate: -50% 0; } }
+.footer-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) repeat(3, minmax(0, 1fr)); gap: var(--space-group); padding-block: 48px 8px; }
+.footer-cta h2 { font-size: clamp(26px, 2.6vw, 34px); line-height: 1.05; letter-spacing: -.03em; }
+.footer-cta p { margin-top: 10px; max-width: 22rem; line-height: 1.5; color: var(--muted-on-dark); }
+.footer-whatsapp { margin-top: var(--space-related); }
+.footer-whatsapp i { font-style: normal; }
+.footer-col { display: grid; align-content: start; justify-items: start; gap: 4px; font-size: 14px; }
+.footer-col h3 { margin-bottom: 8px; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.footer-col a { position: relative; padding-block: 5px; color: var(--muted-on-dark); transition: color var(--motion), translate var(--motion); }
+.footer-col a::before { content: "→"; position: absolute; left: -18px; color: var(--accent); opacity: 0; translate: -6px 0; transition: opacity var(--motion), translate var(--motion); }
+.footer-col a:hover { color: var(--on-dark); translate: 14px 0; }
+.footer-col a:hover::before { opacity: 1; translate: 0 0; }
+.footer-visit p { line-height: 1.5; color: var(--muted-on-dark); }
+.footer-visit p + p { margin-top: 6px; }
+.footer-visit a { color: var(--on-dark); text-decoration: underline; text-underline-offset: 3px; }
+.footer-giant { display: flex; justify-content: space-between; padding-block: 12px 0; overflow: hidden; font-family: var(--font-display); font-size: clamp(64px, 15.2vw, 232px); font-weight: 800; line-height: .82; letter-spacing: -.05em; color: #f6f7f30f; user-select: none; }
+.footer-giant span { display: inline-block; transition: color 300ms ease; }
+.footer-giant span.is-x { color: var(--accent); }
+.footer-giant:hover span { color: #f6f7f324; }
+.footer-giant:hover span.is-x { color: var(--accent); }
+.footer-legal { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px var(--space-inner); padding-block: 14px 16px; font-size: 12px; line-height: 1.5; color: var(--muted-on-dark); border-top: 1px solid var(--line-dark); }
+.footer-legal p { flex: 1 1 28rem; max-width: 46rem; }
+.footer-legal-links { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; }
+.footer-legal-links a { color: var(--muted-on-dark); transition: color var(--motion); }
+.footer-legal-links a:hover { color: var(--accent); }
 .footer-age { padding: 4px 12px; font-size: 13px; font-weight: 700; color: var(--ink); background: var(--accent); border-radius: var(--radius-pill); }
-.footer-legal { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px var(--space-inner); padding-block: 10px 12px; font-size: 12px; line-height: 1.5; color: var(--muted-on-dark); border-top: 1px solid var(--line-dark); }
-.footer-legal p { max-width: 56rem; }
 .footer-up { display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 2px 14px; font-size: 13px; font-weight: 600; color: var(--on-dark); background: var(--ink-raised); border-radius: var(--radius-pill); transition: color var(--motion), background var(--motion); }
 .footer-up i { font-style: normal; transition: translate var(--motion); }
 .footer-up:hover { color: var(--ink); background: var(--accent); }
 .footer-up:hover i { translate: 0 -3px; }
+/* The giant letters rise one after another as the footer scrolls into view. Browsers without scroll timelines just show them. */
+@supports (animation-timeline: view()) {
+  .footer-giant span { animation: footer-letter linear both; animation-timeline: view(); animation-range: entry calc(var(--i) * 4%) entry calc(55% + var(--i) * 4%); }
+}
+@keyframes footer-letter { from { opacity: 0; translate: 0 70%; rotate: 8deg; } }
+@media (max-width: 900px) {
+  .footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); padding-block: 36px 4px; }
+  .footer-cta { grid-column: 1 / -1; }
+  .footer-visit { grid-column: 1 / -1; }
+}
+@media (max-width: 600px) {
+  .footer-band { padding-block: 10px; }
+  .footer-band b { gap: 16px; padding-right: 16px; font-size: 16px; }
+  .footer-col a:hover { translate: 0 0; }
+  .footer-col a::before { display: none; }
+}
 
 /* Product page: jump bar, large product tile, headline numbers, then full specs. */
 .breadcrumb { display: flex; flex-wrap: wrap; gap: 8px; padding-block: 8px var(--space-inner); font-size: 13px; color: var(--muted); }
@@ -576,6 +615,21 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
 .about-range-card em { margin-top: 8px; font-size: 14px; font-style: normal; font-weight: 700; }
 .about-range-card em i { display: inline-block; font-style: normal; transition: translate var(--motion); }
 .about-range-card:hover em i { translate: 4px 0; }
+/* About page motion, driven by scrolling: the timeline line draws across, cards rise in one after another,
+   the value rows slide in, and the shelf drawings float up. Browsers without scroll timelines just show everything. */
+@supports (animation-timeline: view()) {
+  .about .about-story ol::before { transform-origin: left; animation: about-draw linear both; animation-timeline: view(); animation-range: entry 20% cover 45%; }
+  .about :is(.about-story li, .about-range-card) { animation: rise-in linear both; animation-timeline: view(); animation-range: entry 0% entry 75%; }
+  .about :is(.about-story li, .about-range-card):nth-child(2) { animation-range: entry 8% entry 83%; }
+  .about :is(.about-story li, .about-range-card):nth-child(3) { animation-range: entry 16% entry 91%; }
+  .about .about-values { animation: about-open linear both; animation-timeline: view(); animation-range: entry 0% entry 60%; }
+  .about .about-values li { animation: about-slide linear both; animation-timeline: view(); animation-range: entry 10% entry 70%; }
+  .about .about-range-art { animation: about-float linear both; animation-timeline: view(); animation-range: entry 20% cover 50%; }
+}
+@keyframes about-draw { from { scale: 0 1; } }
+@keyframes about-open { from { clip-path: inset(0 6% round var(--radius-panel)); opacity: .4; } }
+@keyframes about-slide { from { opacity: 0; translate: 48px 0; } }
+@keyframes about-float { from { translate: 0 40px; rotate: 10deg; opacity: 0; } }
 @media (max-width: 900px) {
   .about-story ol, .about-range { grid-template-columns: minmax(0, 1fr); }
   .about-story ol::before { display: none; }
@@ -585,6 +639,8 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
 }
 @media (max-width: 600px) {
   .about-range-card:hover, .about-range-card:hover .about-range-art .art { transform: none; rotate: 0deg; translate: 0 0; }
+  /* Clipping repaints on every scroll step, so phones skip it and keep only the cheap slide and fade. */
+  .about .about-values { animation: none; }
 }
 
 .panel-light { background: var(--white); border-radius: var(--radius-panel); }
@@ -605,9 +661,26 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
 .field input:focus, .field textarea:focus { border-color: var(--ink); outline: none; box-shadow: 0 0 0 3px var(--accent); }
 .form-status { min-height: 20px; font-size: 13px; line-height: 1.5; color: var(--muted); }
 .form-status.is-error { font-weight: 600; color: var(--error); }
-.contact-grid { display: grid; grid-template-columns: 7fr 5fr; gap: var(--space-inner); align-items: start; }
+.contact-grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--space-inner); align-items: start; }
+.contact-grid > .form-panel { min-height: 100%; }
+.contact-side { display: grid; gap: var(--space-inner); min-width: 0; }
+.contact-side .home-map { grid-area: auto; min-height: 280px; }
 .contact-details { padding: var(--space-group); background: var(--accent); }
 .contact-details h2 { margin-bottom: var(--space-related); font-size: 28px; }
+/* Quick ways to reach the shop, above the form. */
+.contact-quick { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-inner); padding-top: var(--space-inner); }
+.contact-card { display: grid; align-content: start; gap: 4px; min-height: 148px; padding: 20px 22px; border-radius: var(--radius-card); transition: transform var(--motion), box-shadow var(--motion); }
+a.contact-card:hover { transform: translateY(-4px); box-shadow: 0 16px 32px #1415181f; }
+.contact-card.is-lime { color: var(--ink); background: var(--accent); }
+.contact-card.is-dark { color: var(--on-dark); background: var(--ink); }
+.contact-card.is-light, .contact-card.is-hours { color: var(--ink); background: var(--white); }
+.contact-card-label { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; opacity: .7; }
+.contact-card strong { margin-top: auto; font-family: var(--font-display); font-size: 24px; font-weight: 700; line-height: 1.1; letter-spacing: -.02em; }
+.contact-card small { font-size: 13px; opacity: .75; }
+.contact-card small i { display: inline-block; font-style: normal; transition: translate var(--motion); }
+a.contact-card:hover small i { translate: 3px -3px; }
+@media (max-width: 900px) { .contact-quick { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .contact-quick { gap: 8px; } .contact-card { min-height: 112px; padding: 14px; } .contact-card strong { font-size: 18px; } a.contact-card:hover { transform: none; box-shadow: none; } }
 
 .terms { display: grid; gap: var(--space-related); padding: 48px; list-style: none; counter-reset: terms; }
 .terms li { display: grid; grid-template-columns: 48px 1fr; max-width: 48rem; counter-increment: terms; }
@@ -976,9 +1049,6 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
   .info-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 960px) {
-  .footer-brand { order: 1; }
-  .footer-age { order: 2; }
-  .footer-links { order: 3; flex-basis: 100%; }
 }
 @media (max-width: 860px) {
   :root { --space-section: 64px; }
