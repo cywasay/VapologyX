@@ -24,6 +24,9 @@ export type AdminOrder = {
   subtotal: number;
   delivery_fee: number;
   total: number;
+  points_base: number | null;
+  points_used: number;
+  points_earned: number;
   created_at: string;
 };
 

@@ -1,6 +1,7 @@
 import { money } from "@/lib/products";
 import type { Counter } from "../useCounter";
 import type { Pay } from "../types";
+import { LoyaltyBox } from "./LoyaltyBox";
 import { Received } from "./Received";
 
 const payments: Pay[] = ["Cash", "Bank", "Wallet"];
@@ -22,6 +23,8 @@ export function SalePanel({ counter }: { counter: Counter }) {
       {counter.lines.length === 0 && <li className="ct-hint">Tap an item or scan a barcode to start a sale.</li>}
     </ul>
     <div className="ct-total"><span>Total</span><strong>{money(counter.total)}</strong></div>
+    {counter.lines.length > 0 && <LoyaltyBox counter={counter} />}
+    {counter.pointsUsed > 0 && <div className="ct-total is-due"><span>To pay after points</span><strong>{money(counter.payable)}</strong></div>}
     <div className="ct-pay" role="group" aria-label="Payment">
       {payments.map(method => <button key={method} className={counter.pay === method ? "is-current" : ""} aria-pressed={counter.pay === method} onClick={() => counter.setPay(method)}>{method}</button>)}
     </div>

@@ -6,6 +6,7 @@ const sections = [
   { title: "Orders and payment", text: "Every order is confirmed by WhatsApp or phone call before it is sent. You can pay in cash on delivery or pickup, or by bank transfer; bank details are sent after you order." },
   { title: "Delivery", text: "Islamabad and Rawalpindi by Bykea or inDrive (about 1 day). Other cities by TCS or Leopards Courier (about 2–3 working days). Normal parcel delivery terms apply." },
   { title: "Returns and refunds", text: "We don't accept returns or exchanges. Damaged or faulty items are reviewed case by case. Any approved refund is given as store credit." },
+  { title: "Loyalty Club", text: "Give your mobile number in the shop or order online to collect VapologyX Loyalty Club points: 1 point for every Rs 100 paid on full-price items (not discounted or sale items, refills or delivery). 1 point = Rs 1. Points can be used once you have 1,000, for up to 20% of a bill. Shop points and online points are separate and can't be combined. Online points are added when your order is delivered. Points expire 12 months after they are earned, have no cash value, and the rules may change with notice." },
   { title: "Privacy", text: "We keep your name, number, address and order details to confirm and deliver your order, and share them only with the delivery service. Order records are kept for 1 year. See the Privacy page for more." },
   { title: "Contact", text: `Questions about these terms? Call or WhatsApp us on ${STORE.phone}.` },
 ];

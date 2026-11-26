@@ -65,6 +65,10 @@ export type Order = {
   subtotal: number;
   deliveryFee: number;
   total: number;
+  // Loyalty Club: points taken off this order, points it earned (once delivered), and the online balance (order tracking only).
+  pointsUsed?: number;
+  pointsEarned?: number;
+  pointsBalance?: number;
 };
 
 export type OrderDraft = Pick<Order, "customer" | "delivery" | "payment" | "lines">;

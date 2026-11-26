@@ -1,5 +1,5 @@
 import { createClient } from "@/utils/supabase/client";
-import type { Bottle, CashOut, CounterItem, Expense, ExpenseKind, Pay, Sale } from "./types";
+import type { Bottle, CashOut, CounterItem, Expense, ExpenseKind, Member, Pay, Sale } from "./types";
 
 // Everything the counter screen needs when it opens.
 export type CounterState = {
@@ -37,6 +37,12 @@ function friendly(message: string) {
     case "invalid_expense": return "Pick what the expense was for and enter an amount of 1 or more.";
     case "invalid_stock": return detail === "note" ? "Please say why the stock is being removed." : "Enter a whole number of 1 or more.";
     case "invalid_sale": return detail === "given" ? "The cash given is less than the total." : "That sale couldn't be saved.";
+    case "invalid_phone": return "That mobile number doesn't look right. Use the 03XX XXXXXXX format.";
+    case "invalid_points": return "Type the points as a whole number.";
+    case "points_need_phone": return "Enter the customer's mobile number to use their points.";
+    case "points_minimum": return "Points can be used once the customer has 1,000 or more.";
+    case "points_balance": return "The customer doesn't have that many points.";
+    case "points_limit": return "Points can pay at most 20% of the bill.";
     default: return "Something went wrong. Please try again.";
   }
 }
@@ -48,7 +54,9 @@ async function call<T>(fn: string, args?: Record<string, unknown>): Promise<Repl
 
 export const counterApi = {
   state: () => call<CounterState>("counter_state"),
-  sell: (pay: Pay, received: number | null, lines: { productId: string; quantity: number }[]) => call<Sale>("counter_sell", { draft: { pay, received: received === null ? null : String(received), lines } }),
+  sell: (pay: Pay, received: number | null, lines: { productId: string; quantity: number }[], loyalty: { phone: string; name: string; points: number }) =>
+    call<Sale>("counter_sell_points", { draft: { pay, received: received === null ? null : String(received), lines, phone: loyalty.phone, name: loyalty.name, points: String(loyalty.points) } }),
+  lookup: (phone: string) => call<Member>("loyalty_lookup", { p_phone: phone }),
   belowCost: (received: number, lines: { productId: string; quantity: number }[]) => call<boolean>("counter_below_cost", { draft: { received: String(received), lines } }),
   lockDay: () => call<{ locked: boolean }>("counter_lock_day"),
   voidSale: (id: string) => call<Sale>("counter_void", { p_sale: id, p_reason: "" }),

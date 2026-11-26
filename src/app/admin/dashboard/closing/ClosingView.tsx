@@ -139,6 +139,7 @@ export function ClosingView() {
                 <tr className="cl-group"><th colSpan={4} scope="rowgroup">Online orders</th></tr>
                 <Line label={`Goods (${on.count} delivered)`} sales={on.goods} cost={on.cost} profit={on.goods - on.cost} />
                 <Line label="Delivery fees" sales={on.deliveryFees} cost={0} profit={on.deliveryFees} />
+                {(on.pointsUsed ?? 0) > 0 && <Line label="Loyalty points used" sales={-(on.pointsUsed ?? 0)} cost={0} profit={-(on.pointsUsed ?? 0)} />}
                 <Line label="Online total" sales={on.sales} cost={on.cost} profit={on.profit} kind="subtotal" />
               </tbody>}
               <tfoot><tr><th scope="row">Total</th><td data-label="Sales">{rs(report.salesTotal)}</td><td data-label="Cost">{rs(report.salesTotal - report.profit)}</td><td data-label="Profit">{rs(report.profit)}</td></tr></tfoot>
@@ -196,6 +197,18 @@ export function ClosingView() {
               {!locked && <button className="button button-black" type="submit" disabled={busy}>Save</button>}
             </form>
           </section>
+
+          {report.points && <section className="admin-card cl-card" aria-labelledby="cl-points">
+            <h2 id="cl-points" className="cl-title">Loyalty Club</h2>
+            <dl className="cl-rows">
+              <div><dt>Points used in the shop</dt><dd>{rs(report.points.shopUsed)}</dd></div>
+              <div><dt>Points used online</dt><dd>{rs(report.points.onlineUsed)}</dd></div>
+              <div className="is-sub"><dt>Already taken off sales above (1 point = Rs 1). Not counted as discounts.</dt><dd></dd></div>
+              <div><dt>Points earned this month</dt><dd>{(report.points.shopEarned + report.points.onlineEarned).toLocaleString("en-US")}</dd></div>
+              <div className="is-total"><dt>Points customers still hold</dt><dd>{rs(report.points.shopOut + report.points.onlineOut)}</dd></div>
+              <div className="is-sub"><dt>Shop {report.points.shopOut.toLocaleString("en-US")} · Online {report.points.onlineOut.toLocaleString("en-US")}</dt><dd></dd></div>
+            </dl>
+          </section>}
 
           <AssetsCard onChanged={load} />
 

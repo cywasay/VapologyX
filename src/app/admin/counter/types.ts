@@ -9,7 +9,14 @@ export type CounterItem = { id: string; code: string; name: string; shelf: Shelf
 export type Bottle = { id: string; flavor: string; openedOn: string; cost: number | null; entries: number[]; finished: boolean };
 
 export type SaleLine = { itemId: string; name: string; price: number; quantity: number };
-export type Sale = { id: string; number: number; time: string; date?: string; lines: SaleLine[]; listTotal: number; total: number; pay: Pay; given: number | null; voided: boolean };
+export type Sale = {
+  id: string; number: number; time: string; date?: string; lines: SaleLine[]; listTotal: number; total: number; pay: Pay; given: number | null; voided: boolean;
+  // Loyalty Club: points used on this bill, points it earned, the customer, and their shop balance right after the sale.
+  pointsUsed?: number; pointsEarned?: number; customer?: { phone: string; name: string } | null; pointsBalance?: number;
+};
+
+// A Loyalty Club member found by mobile number while ringing up a sale.
+export type Member = { phone: string; found: boolean; name: string; shop: number; online: number };
 
 export type CashOut = { id: string; amount: number; note: string };
 

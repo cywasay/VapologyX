@@ -7,7 +7,7 @@ export function Received({ counter }: { counter: Counter }) {
   const { adjustment } = counter;
   return <div className="ct-cash">
     <div className="ct-cash-row">
-      <input inputMode="numeric" placeholder={`Received (${money(counter.total)})`} aria-label="Amount received" value={counter.received} onChange={event => counter.setReceived(event.target.value)} />
+      <input inputMode="numeric" placeholder={`Received (${money(counter.payable)})`} aria-label="Amount received" value={counter.received} onChange={event => counter.setReceived(event.target.value)} />
       {counter.received !== "" && <button onClick={() => counter.setReceived("")}>Full price</button>}
     </div>
     {adjustment !== 0 && <p className={adjustment < 0 ? "ct-change is-short" : "ct-change"}>{adjustment < 0 ? `Discount: ${money(-adjustment)}` : `Extra charged: ${money(adjustment)}`}</p>}

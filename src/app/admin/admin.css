@@ -222,6 +222,10 @@
 .order-totals { display: grid; gap: 4px; margin: 8px 0 0; padding-top: 8px; font-size: 14px; border-top: 1px solid var(--line); }
 .order-totals > div { display: flex; justify-content: space-between; }
 .order-totals > div:last-child { font-weight: 700; }
+.order-points-use { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; margin-top: 10px; }
+.order-points-use input { min-width: 0; min-height: 44px; padding: 0 14px; font-size: 15px; background: var(--white); border: 1.5px solid #a8aba4; border-radius: var(--radius-input); }
+.admin-link-button { justify-self: start; margin-top: 8px; font-size: 13px; text-decoration: underline; color: var(--muted); background: none; }
+@media (max-width: 600px) { .order-points-use { grid-template-columns: 1fr 1fr; } .order-points-use input { grid-column: 1 / -1; } }
 .order-totals dd { margin: 0; }
 
 /* Import from Excel */
@@ -473,3 +477,22 @@
   .convo-actions .button { flex: 1 1 auto; }
   .msg-toast { right: 12px; bottom: 12px; }
 }
+
+/* Loyalty Club: customers page and member dialog. */
+.loyalty-expiring { padding: 2px 8px; font-size: 13px; font-weight: 700; background: var(--accent); border-radius: var(--radius-pill); }
+.loyalty-balances { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+.loyalty-balances button { display: grid; gap: 2px; padding: 14px 16px; text-align: left; background: var(--white); border: 2px solid transparent; border-radius: var(--radius-card); transition: border-color var(--motion); }
+.loyalty-balances button.is-current { border-color: var(--ink); }
+.loyalty-balances span { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.loyalty-balances strong { font-family: var(--font-display); font-size: 28px; letter-spacing: -.02em; }
+.loyalty-balances small { font-size: 12px; color: var(--muted); }
+.product-form .loyalty-adjust { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; height: auto; }
+.loyalty-adjust .button { justify-self: start; }
+.loyalty-adjust .field input { background: var(--white); }
+.loyalty-history { display: grid; margin: 0; padding: 0; list-style: none; }
+.loyalty-history li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.loyalty-history li > div { display: grid; gap: 2px; min-width: 0; }
+.loyalty-history small { font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.loyalty-history small.is-expired { color: var(--danger); }
+.loyalty-history strong { flex-shrink: 0; font-family: var(--font-display); font-size: 17px; }
+.loyalty-history .is-plus { color: #3f6212; }

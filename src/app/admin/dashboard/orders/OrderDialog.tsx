@@ -6,6 +6,7 @@ import { paymentLabel, type OrderStatus } from "@/lib/orders";
 import { money } from "@/lib/products";
 import { createClient } from "@/utils/supabase/client";
 import { STATUSES, statusName } from "./orderStatuses";
+import { OrderPoints } from "./OrderPoints";
 import { formatDate } from "./OrdersTable";
 import type { AdminOrder } from "./useOrderList";
 
@@ -41,7 +42,8 @@ export function OrderDialog({ order, onClose, onChanged }: { order: AdminOrder; 
       <section className="product-form-group">
         <h3 className="admin-subtitle">Status</h3>
         <Select value={status} options={STATUSES.map(item => ({ value: item, label: statusName[item] }))} onChange={next => setStatus(next as OrderStatus)} aria-label="Order status" />
-        {status === "cancelled" && order.status !== "cancelled" && <p>Cancelling puts the items back in stock.</p>}
+        {status === "cancelled" && order.status !== "cancelled" && <p>Cancelling puts the items back in stock{order.points_used > 0 ? " and gives the customer back their points" : ""}.</p>}
+        {status === "delivered" && order.status !== "delivered" && <p>Marking it delivered adds the customer&apos;s Loyalty Club points.</p>}
       </section>
 
       <section className="product-form-group">
@@ -55,9 +57,12 @@ export function OrderDialog({ order, onClose, onChanged }: { order: AdminOrder; 
         <dl className="order-totals">
           <div><dt>Subtotal</dt><dd>{money(order.subtotal)}</dd></div>
           <div><dt>{pickup ? "Pickup" : "Delivery"}</dt><dd>{order.delivery_fee === 0 ? "Free" : money(order.delivery_fee)}</dd></div>
+          {order.points_used > 0 && <div><dt>Loyalty points</dt><dd>−{money(order.points_used)}</dd></div>}
           <div><dt>Total</dt><dd>{money(order.total)}</dd></div>
         </dl>
       </section>
+
+      <OrderPoints order={order} onChanged={onChanged} />
 
       <section className="product-form-group">
         <h3 className="admin-subtitle">Customer</h3>

@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { counterApi, type Closing, type CounterState, type Reply } from "./counterApi";
-import type { Bottle, CashOut, CounterItem, Expense, ExpenseKind, Pay, Sale } from "./types";
+import { maxPointsFor, pointsFor } from "@/lib/loyalty";
+import type { Bottle, CashOut, CounterItem, Expense, ExpenseKind, Member, Pay, Sale } from "./types";
 
 export const earnedFrom = (bottle: Bottle) => bottle.entries.reduce((sum, amount) => sum + amount, 0);
 
@@ -17,6 +18,12 @@ export function useCounter() {
   const [pay, setPay] = useState<Pay>("Cash");
   const [received, setReceivedText] = useState("");
   const [warned, setWarned] = useState("");
+  // Loyalty Club: the customer's mobile, their name (for new members), what was found, and the points to use on this bill.
+  const [phone, setPhoneText] = useState("");
+  const [memberName, setMemberName] = useState("");
+  const [member, setMember] = useState<Member | null>(null);
+  const [pointsText, setPointsText] = useState("");
+  const [lookingUp, setLookingUp] = useState(false);
   const [bottles, setBottles] = useState<Bottle[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
   const [receipt, setReceipt] = useState<Sale | null>(null);
@@ -91,6 +98,13 @@ export function useCounter() {
 
   const lines = items.filter(item => cart[item.id]).map(item => ({ item, quantity: cart[item.id] }));
   const total = lines.reduce((sum, line) => sum + line.item.price * line.quantity, 0);
+  // Sale items (shown with a was-price) earn no points.
+  const fullPrice = lines.filter(line => line.item.wasPrice === null).reduce((sum, line) => sum + line.item.price * line.quantity, 0);
+  const pointsMax = member ? maxPointsFor(total, member.shop) : 0;
+  const pointsWanted = pointsText.trim() === "" ? 0 : Number(pointsText.replace(/[,\s]/g, ""));
+  const pointsValid = Number.isInteger(pointsWanted) && pointsWanted >= 0 && pointsWanted <= pointsMax;
+  const pointsUsed = pointsValid ? pointsWanted : 0;
+  const payable = total - pointsUsed;
 
   const kept = sales.filter(sale => !sale.voided);
   const salesToday = { total: kept.reduce((sum, sale) => sum + sale.total, 0), count: kept.length };
@@ -104,7 +118,23 @@ export function useCounter() {
   // What the shop kept for this sale, after any change was given back. Empty means the full bill.
   const receivedAmount = received.trim() === "" ? null : Number(received.replace(/[,\s]/g, ""));
   const receivedValid = receivedAmount === null || (Number.isInteger(receivedAmount) && receivedAmount >= 0);
-  const adjustment = receivedAmount === null || !receivedValid ? 0 : receivedAmount - total;
+  const adjustment = receivedAmount === null || !receivedValid ? 0 : receivedAmount - payable;
+  // Points this bill will earn: none when the bill is discounted.
+  const pointsToEarn = adjustment < 0 ? 0 : pointsFor(fullPrice - pointsUsed);
+
+  // Looks the customer up once a full mobile number is typed.
+  async function setPhone(text: string) {
+    setPhoneText(text);
+    setMember(null);
+    setPointsText("");
+    const digits = text.replace(/\D/g, "");
+    if (!/^(0|92)?3\d{9}$/.test(digits)) return;
+    setLookingUp(true);
+    const reply = await counterApi.lookup(text);
+    setLookingUp(false);
+    if (reply.ok) { setMember(reply.data); if (reply.data.found) setMemberName(reply.data.name); }
+  }
+  const setPoints = (text: string) => { setPointsText(text); setWarned(""); };
   const setReceived = (text: string) => { setReceivedText(text); setWarned(""); };
 
   function add(id: string) {
@@ -136,16 +166,22 @@ export function useCounter() {
   function clearSale() {
     setCart({});
     setReceived("");
+    setPhoneText("");
+    setMemberName("");
+    setMember(null);
+    setPointsText("");
   }
 
   async function completeSale() {
     if (locked) return setNote("Today is locked. Sales are switched off.");
     if (total === 0) return setNote("Tap an item to start a sale.");
     if (!receivedValid) return setNote("Type the amount received as a whole number.");
+    if (!pointsValid) return setNote(pointsMax === 0 ? "This customer can't use points on this bill yet." : `Use between 0 and ${pointsMax.toLocaleString("en-US")} points.`);
+    if (phone.trim() !== "" && !member && !lookingUp) return setNote("Check the customer's mobile number, or clear it to sell without points.");
     const bought = lines.map(({ item, quantity }) => ({ productId: item.id, quantity }));
     // A discount below what the goods cost only warns. Pressing Complete sale again sells anyway.
     const key = `${receivedAmount}:${JSON.stringify(bought)}`;
-    if (receivedAmount !== null && receivedAmount < total && warned !== key) {
+    if (receivedAmount !== null && receivedAmount < payable && warned !== key) {
       const check = await counterApi.belowCost(receivedAmount, bought);
       if (check.ok && check.data) {
         setWarned(key);
@@ -153,7 +189,7 @@ export function useCounter() {
       }
     }
     await run(
-      () => counterApi.sell(pay, receivedAmount, bought),
+      () => counterApi.sell(pay, receivedAmount, bought, { phone: member ? member.phone : "", name: memberName, points: pointsUsed }),
       sale => {
         setItems(current => current.map(item => ({ ...item, stock: item.stock - (cart[item.id] ?? 0) })));
         setSales(current => [...current, sale]);
@@ -236,6 +272,7 @@ export function useCounter() {
   return {
     status, reload: load, refresh, problem, dismissProblem: () => setProblem(""), busy,
     items, lines, total, pay, setPay, received, setReceived, adjustment, add, scan, setQuantity, completeSale, clearSale, note,
+    phone, setPhone, memberName, setMemberName, member, lookingUp, pointsText, setPoints, pointsMax, pointsUsed, pointsValid, payable, pointsToEarn,
     sales, salesToday, byPay, voidSale, receipt, closeReceipt: () => setReceipt(null), openReceipt: setReceipt,
     bottles, refillsToday, refillsAll, openBottle, addRefill, undoRefill, finishBottle,
     opening, setOpening, saveOpening, cashOuts, addCashOut, removeCashOut, cashOutTotal, expenses, expensesTotal, drawerExpensesTotal, addExpense, removeExpense, expectedCash,

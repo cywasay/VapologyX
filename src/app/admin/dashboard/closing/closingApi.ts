@@ -7,14 +7,15 @@ export type MonthInputs = {
   cash: number; bank: number; rentPaid: number; electricPaid: number; matchAmount: number | null;
   charityPercent?: number;
 };
-export type Online = { sales: number; goods: number; deliveryFees: number; cost: number; profit: number; count: number; waiting: number; waitingCount: number };
+export type Online = { sales: number; goods: number; deliveryFees: number; cost: number; profit: number; count: number; waiting: number; waitingCount: number; pointsUsed?: number };
+export type Points = { shopUsed: number; onlineUsed: number; shopEarned: number; onlineEarned: number; shopOut: number; onlineOut: number };
 export type MonthReport = {
   month: string;
   inputs: MonthInputs;
   firstMonth: boolean;
   sections: { hardware: Section; bottles: Section; coils: Section; cashAdjustment: { sales: number; cost: number; refills: number; taxes: number; bottlesOpened: number } };
   // shop, online and charityPercent are missing from months locked before 2026-11-17.
-  shop?: Section; online?: Online;
+  shop?: Section; online?: Online; points?: Points;
   salesTotal: number; profit: number; rent: number; electric: number; pay: number; charity: number; charityPercent?: number;
   directExpenses: number; writeOffs: number; shopExpense: number; netProfit: number;
   oldAmount: number; paidRestock: number; restockAmount: number; diff: number;

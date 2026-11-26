@@ -4,7 +4,7 @@ import { publicClient } from "@/utils/supabase/public";
 
 // The cart lives in this browser: it survives a reload and follows the visitor between tabs.
 // Only what's needed to show a line is kept. Prices and stock are re-checked against the shop whenever the cart or checkout opens.
-export type CartItem = Pick<Product, "id" | "slug" | "name" | "category" | "type" | "price" | "image_url" | "color" | "variants" | "stock">;
+export type CartItem = Pick<Product, "id" | "slug" | "name" | "category" | "type" | "price" | "image_url" | "color" | "variants" | "stock"> & { compare_price?: number | null };
 export type CartLine = { key: string; item: CartItem; variety: Variety | null; quantity: number };
 export type AddResult = "added" | "limit" | "sold-out";
 
@@ -30,7 +30,7 @@ function toVariety(value: unknown): Variety | null {
 
 // Keeps just the fields a cart line needs, whatever object it is given.
 function toItem(product: CartItem): CartItem {
-  return { id: product.id, slug: product.slug, name: product.name, category: product.category, type: product.type, price: product.price, image_url: product.image_url, color: product.color, variants: product.variants, stock: product.stock ?? null };
+  return { id: product.id, slug: product.slug, name: product.name, category: product.category, type: product.type, price: product.price, image_url: product.image_url, color: product.color, variants: product.variants, stock: product.stock ?? null, compare_price: product.compare_price ?? null };
 }
 
 // Saved carts come from the browser, so every line is checked before it is trusted.
@@ -50,6 +50,7 @@ function toLine(entry: unknown): CartLine | null {
     color: isText(item.color) ? item.color : "#e8f78b",
     variants: Array.isArray(item.variants) ? item.variants.flatMap(option => toVariety(option) ?? []) : [],
     stock: isNumber(item.stock) ? item.stock : null,
+    compare_price: isNumber(item.compare_price) ? item.compare_price : null,
   };
   const quantity = Number(raw.quantity);
   const limit = orderLimit(clean);
